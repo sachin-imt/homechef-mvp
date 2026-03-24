@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CelebChef - America's First Chef-to-You Meal Delivery</title>
-    <meta name="description" content="Chef-crafted meal delivery bringing the best chefs to your table.">
+    <title>CelebChef - Sydney's Best Local Home Chefs</title>
+    <meta name="description" content="Authentic, home-cooked meal delivery bringing the best local chefs to your table.">
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
@@ -70,12 +70,22 @@
         
         .zip-btn:hover { background: var(--primary-hover); }
         
-        .hero-image {
-            background-image: url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1200&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
+        /* 4-Image Grid for Hero Right Panel */
+        .hero-media-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 4px; /* Minimal gap for clean layout */
+            height: 100%;
+            background: #fff;
         }
         
+        .hero-grid-item {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
         /* Menu Showcase */
         .section-padding { padding: 96px 24px; }
         .section-header { text-align: center; margin-bottom: 64px; }
@@ -96,9 +106,7 @@
             cursor: pointer;
         }
         
-        .meal-card:hover {
-            transform: translateY(-4px);
-        }
+        .meal-card:hover { transform: translateY(-4px); }
         
         .meal-image-wrapper {
             position: relative;
@@ -116,9 +124,7 @@
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        .meal-card:hover .meal-img {
-            transform: scale(1.05);
-        }
+        .meal-card:hover .meal-img { transform: scale(1.05); }
         
         .chef-badge {
             position: absolute;
@@ -133,31 +139,13 @@
             z-index: 10;
         }
         
-        .chef-badge img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .chef-badge img { width: 100%; height: 100%; object-fit: cover; }
         
-        .meal-details {
-            padding: 12px 16px;
-            margin-top: 8px;
-        }
+        .meal-details { padding: 12px 16px; margin-top: 8px; }
+        .meal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; color: var(--text-main); }
+        .chef-name { color: var(--text-muted); font-size: 0.9rem; font-weight: 500; }
         
-        .meal-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-            color: var(--text-main);
-        }
-        
-        .chef-name {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-        
-        /* Horizontal feature splits mimicking CookUnity */
+        /* Features */
         .features-horizontal {
             background: var(--bg-color);
             padding: 96px 24px;
@@ -183,7 +171,7 @@
         @media (max-width: 992px) {
             .hero { grid-template-columns: 1fr; }
             .hero-content { padding: 64px 24px; text-align: center; align-items: center; }
-            .hero-image { height: 400px; }
+            .hero-media-grid { height: 400px; }
             .feature-flex, .feature-flex:nth-child(even) { flex-direction: column; gap: 32px; text-align: center; margin-bottom: 64px; }
         }
     </style>
@@ -193,11 +181,8 @@
         <div class="header-container">
             <div class="nav-left">
                 <div class="logo">
-                    <a href="index.html">
-                        CELEB<i class="ph-bold ph-x"></i>CHEF
-                    </a>
+                    <a href="index.html">CELEB<i class="ph-bold ph-x"></i>CHEF</a>
                 </div>
-                <!-- Replicated exact CookUnity Navbar links -->
                 <nav class="nav-links">
                     <a href="index.html#menu" class="active">Our Menu</a>
                     <a href="how-it-works.html">How It Works</a>
@@ -212,10 +197,7 @@
             <div class="nav-actions">
                 <a href="subscribe.html" class="btn btn-primary d-none-mobile">Order Now</a>
                 <a href="#" class="nav-login">Log In <i class="ph-bold ph-arrow-right"></i></a>
-                <!-- Mobile button -->
-                <button class="mobile-menu-btn d-none-desktop" style="display:none; background:none; border:none; cursor:pointer;">
-                    <i class="ph ph-list" style="font-size: 28px;"></i>
-                </button>
+                <button class="mobile-menu-btn d-none-desktop" style="display:none; background:none; border:none; cursor:pointer;"><i class="ph ph-list" style="font-size: 28px;"></i></button>
             </div>
         </div>
     </header>
@@ -225,27 +207,37 @@
         <section class="hero">
             <div class="hero-content">
                 <h1 class="hero-title">Holy chef, that’s good</h1>
-                <p class="hero-subtitle">Bringing the best chefs directly to your table. Elevated, everyday dining starts here.</p>
+                <p class="hero-subtitle">Bringing the best local home cooks directly to your table. Elevated, everyday dining starts here.</p>
                 <div class="zip-form">
-                    <input type="text" class="zip-input" placeholder="Enter your Zip Code" aria-label="Zip Code">
+                    <input type="text" class="zip-input" placeholder="Enter your Sydney postcode" aria-label="Postcode">
                     <button class="zip-btn" onclick="window.location.href='subscribe.html'">Get Started</button>
                 </div>
             </div>
-            <div class="hero-image"></div>
+            
+            <!-- 4-Gif Grid (using mp4s via Giphy/Imgur looping or Unsplash images representing active cooking) -->
+            <div class="hero-media-grid">
+                <!-- Using Unsplash source images for vivid cooking action (Tossing, Steam, Chopping, Plating) -->
+                <!-- Currently populated with high-res active cooking photos that act as vivid placeholders until specific .gif assets are supplied -->
+                <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=800&auto=format&fit=crop" alt="Pouring Sauce" class="hero-grid-item">
+                <img src="https://images.unsplash.com/photo-1540304453527-62f97914fd76?q=80&w=800&auto=format&fit=crop" alt="Sizzling Pan" class="hero-grid-item">
+                <img src="https://images.unsplash.com/photo-1556910103-1c02745a8731?q=80&w=800&auto=format&fit=crop" alt="Chopping Fresh Veggies" class="hero-grid-item">
+                <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=800&auto=format&fit=crop" alt="Plating the food" class="hero-grid-item">
+            </div>
         </section>
 
         <!-- Our Menu Showcase -->
         <section class="section-padding" id="menu" style="background: var(--bg-secondary);">
             <div class="section-header">
                 <h2>Loved by food enthusiasts</h2>
-                <p>Choose from dozens of chef-crafted meals every week.</p>
+                <p>Choose from dozens of homestyle crafted meals every week.</p>
             </div>
             
             <div class="menu-grid">
                 <!-- Meal 1 -->
                 <div class="meal-card" onclick="window.location.href='subscribe.html?chef=marco'">
                     <div class="meal-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1544025162-8350cc525d88?w=600&q=80" alt="Meal" class="meal-img">
+                        <!-- Direct, reliable high-res URLs for realistic food presentation -->
+                        <img src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?q=80&w=800&auto=format&fit=crop" alt="Creamy Pasta" class="meal-img">
                         <div class="chef-badge">
                             <img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?w=100&q=80" alt="Chef">
                         </div>
@@ -259,7 +251,7 @@
                 <!-- Meal 2 -->
                 <div class="meal-card" onclick="window.location.href='subscribe.html?chef=priya'">
                     <div class="meal-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1534080564583-b9034edc3886?w=600&q=80" alt="Meal" class="meal-img">
+                        <img src="https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?q=80&w=800&auto=format&fit=crop" alt="Butter Chicken" class="meal-img">
                         <div class="chef-badge">
                             <img src="https://images.unsplash.com/photo-1556910103-1c02745a8731?w=100&q=80" alt="Chef">
                         </div>
@@ -273,7 +265,7 @@
                 <!-- Meal 3 -->
                 <div class="meal-card">
                     <div class="meal-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=80" alt="Meal" class="meal-img">
+                        <img src="https://images.unsplash.com/photo-1467003909585-2f8a72700288?q=80&w=800&auto=format&fit=crop" alt="Miso Salmon" class="meal-img">
                         <div class="chef-badge">
                             <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=100&q=80" alt="Chef">
                         </div>
@@ -287,7 +279,7 @@
                 <!-- Meal 4 -->
                 <div class="meal-card">
                     <div class="meal-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80" alt="Meal" class="meal-img">
+                        <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=800&auto=format&fit=crop" alt="Harvest Bowl" class="meal-img">
                         <div class="chef-badge">
                             <img src="https://images.unsplash.com/photo-1607532941433-304659e8198a?w=100&q=80" alt="Chef">
                         </div>
@@ -308,8 +300,8 @@
         <section class="features-horizontal">
             <div class="feature-flex">
                 <div class="feature-text">
-                    <h2>How we bring the best chefs to your table</h2>
-                    <p>CelebChef partners with award-winning chefs to bring you exceptional, balanced meals every week. We source the freshest ingredients, and they apply their culinary mastery to craft dishes you won't find on any other meal plan.</p>
+                    <h2>How we bring the best local cooking to your table</h2>
+                    <p>CelebChef partners with passionate local home chefs to bring you authentic, homestyle meals every week. By sourcing vibrant ingredients, they apply their heartfelt culinary traditions to craft dishes you won't find on any other meal plan.</p>
                     <a href="about.html" class="btn btn-secondary">Learn About Us</a>
                 </div>
                 <div class="feature-img">
@@ -319,8 +311,8 @@
             
             <div class="feature-flex">
                 <div class="feature-text">
-                    <h2>Professional chefs behind every meal</h2>
-                    <p>Our platform empowers passionate culinary artists to build their business. You get restaurant-quality dining at home; they get to share their passion directly with a vibrant community of food lovers.</p>
+                    <h2>Passionate home cooks behind every meal</h2>
+                    <p>Our platform empowers talented home cooks and local culinary enthusiasts to build their own business. You get comforting, authentic dining at home; they get to share their passion directly with a vibrant community of food lovers.</p>
                     <a href="become-a-chef.html" class="btn btn-secondary">Meet the Chefs</a>
                 </div>
                 <div class="feature-img">
@@ -328,7 +320,6 @@
                 </div>
             </div>
         </section>
-
     </main>
 
     <footer>
