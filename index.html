@@ -8,15 +8,22 @@
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
+        .hero-wrapper {
+            background: var(--bg-secondary);
+            width: 100%;
+        }
+        
         .hero {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            height: 520px;
-            background: var(--bg-secondary);
+            grid-template-columns: 1.2fr 1fr;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 24px;
+            gap: 64px;
+            align-items: center;
         }
         
         .hero-content {
-            padding: 80px 10% 80px 15%;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -75,15 +82,19 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: 1fr 1fr;
-            gap: 4px; /* Minimal gap for clean layout */
-            height: 100%;
-            background: #fff;
+            gap: 16px; /* Classy gap */
+            width: 100%;
+            aspect-ratio: 1; /* Keeps it square */
+            max-width: 460px; /* Constrain size */
+            margin: 0 auto;
         }
         
         .hero-grid-item {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            border-radius: var(--radius-md);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
         }
 
         /* Menu Showcase */
@@ -169,9 +180,10 @@
         .feature-text p { font-size: 1.1rem; line-height: 1.6; margin-bottom: 32px; }
 
         @media (max-width: 992px) {
-            .hero { grid-template-columns: 1fr; }
-            .hero-content { padding: 64px 24px; text-align: center; align-items: center; }
-            .hero-media-grid { height: 400px; }
+            .hero { grid-template-columns: 1fr; padding: 48px 24px; gap: 48px; }
+            .hero-content { text-align: center; align-items: center; }
+            .hero-subtitle { max-width: 100%; }
+            .hero-media-grid { max-width: 360px; }
             .feature-flex, .feature-flex:nth-child(even) { flex-direction: column; gap: 32px; text-align: center; margin-bottom: 64px; }
         }
     </style>
@@ -204,22 +216,24 @@
 
     <main class="main-content">
         <!-- Hero Section -->
-        <section class="hero">
-            <div class="hero-content">
-                <h1 class="hero-title">Holy chef, that’s good</h1>
-                <p class="hero-subtitle">Bringing the best local home cooks directly to your table. Elevated, everyday dining starts here.</p>
-                <div class="zip-form">
-                    <input type="text" class="zip-input" placeholder="Enter your Sydney postcode" aria-label="Postcode">
-                    <button class="zip-btn" onclick="window.location.href='subscribe.html'">Get Started</button>
+        <section class="hero-wrapper">
+            <div class="hero">
+                <div class="hero-content">
+                    <h1 class="hero-title">Holy chef, that’s good</h1>
+                    <p class="hero-subtitle">Bringing the best local home cooks directly to your table. Elevated, everyday dining starts here.</p>
+                    <div class="zip-form">
+                        <input type="text" class="zip-input" placeholder="Enter your Sydney postcode" aria-label="Postcode">
+                        <button class="zip-btn" onclick="window.location.href='subscribe.html'">Get Started</button>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- 4-Image Grid -->
-            <div class="hero-media-grid">
-                <img src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=800&auto=format&fit=crop" alt="Cooking" class="hero-grid-item">
-                <img src="https://images.unsplash.com/photo-1556910103-1c02745a8731?q=80&w=800&auto=format&fit=crop" alt="Chopping" class="hero-grid-item">
-                <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=800&auto=format&fit=crop" alt="Plating" class="hero-grid-item">
-                <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop" alt="Serving" class="hero-grid-item">
+                
+                <!-- 4-Image Grid -->
+                <div class="hero-media-grid">
+                    <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80" alt="Cooking" class="hero-grid-item">
+                    <img src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400&q=80" alt="Salad" class="hero-grid-item">
+                    <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80" alt="Dish" class="hero-grid-item">
+                    <img src="https://images.unsplash.com/photo-1481070555726-e2fe834ce562?w=400&q=80" alt="Food" class="hero-grid-item">
+                </div>
             </div>
         </section>
 
