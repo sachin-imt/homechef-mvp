@@ -3,21 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Become a Chef - HomeChef Sydney</title>
+    <title>Become a Chef - CelebChef</title>
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        .page-header {
-            text-align: center;
-            margin-bottom: 64px;
-        }
-        .form-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
+        .page-header { text-align: center; margin-bottom: 64px; }
+        .form-container { max-width: 800px; margin: 0 auto; }
         .success-message {
             display: none;
-            background: rgba(76, 175, 80, 0.1);
+            background: rgba(58, 129, 61, 0.1);
             border-left: 4px solid var(--success);
             padding: 24px;
             border-radius: var(--radius-md);
@@ -31,23 +25,24 @@
             margin-bottom: 48px;
         }
         .perk-card {
-            background: var(--bg-white);
+            background: var(--bg-color);
             padding: 24px 16px;
             border-radius: var(--radius-md);
             text-align: center;
-            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
         }
         .perk-card h4 { margin: 12px 0 4px; font-size: 1rem; }
-        .perk-card p { font-size: 0.85rem; margin: 0; }
+        .perk-card p { font-size: 0.85rem; margin: 0; color: var(--text-muted); }
         .earnings-highlight {
-            background: rgba(226, 125, 96, 0.1);
-            color: var(--primary);
+            background: rgba(250, 202, 80, 0.15);
+            color: var(--text-main);
             padding: 16px 24px;
             border-radius: var(--radius-md);
             display: inline-block;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 1.1rem;
             margin-bottom: 24px;
+            border: 1px solid var(--primary);
         }
         @media (max-width: 768px) {
             .perks-grid { grid-template-columns: 1fr 1fr; }
@@ -57,27 +52,33 @@
 <body>
     <header class="header">
         <div class="header-container">
-            <div class="logo">
-                <a href="index.html">
-                    <i class="ph-fill ph-cooking-pot"></i>
-                    HomeChef Sydney
-                </a>
+            <div class="nav-left">
+                <div class="logo">
+                    <a href="index.html">CELEB<i class="ph-bold ph-x"></i>CHEF</a>
+                </div>
+                <nav class="nav-links">
+                    <a href="index.html#menu">Our Menu</a>
+                    <a href="how-it-works.html">How It Works</a>
+                    <a href="about.html">Why CelebChef</a>
+                    <a href="become-a-chef.html" class="active">Become a Chef</a>
+                    <a href="#">FAQ</a>
+                    <a href="#">CelebChef for Business</a>
+                    <a href="#">Gift Card</a>
+                </nav>
             </div>
-            <nav class="nav-links">
-                <a href="how-it-works.html">How It Works</a>
-                <a href="become-a-chef.html">Become a Chef</a>
-                <a href="about.html">About Us</a>
-            </nav>
-            <a href="index.html#browse-chefs" class="btn btn-secondary d-none-mobile">Find a Chef</a>
+            <div class="nav-actions">
+                <a href="#" class="nav-login">Log In <i class="ph-bold ph-arrow-right"></i></a>
+                <button class="mobile-menu-btn d-none-desktop" style="display:none; background:none; border:none; cursor:pointer;"><i class="ph ph-list" style="font-size: 28px;"></i></button>
+            </div>
         </div>
     </header>
 
     <main class="main-content container form-container">
         <div class="page-header">
-            <h1>Become a HomeChef Partner</h1>
+            <h1>Become a CelebChef Partner</h1>
             <p style="font-size: 1.2rem; max-width: 600px; margin: 0 auto 24px;">Turn your home cooking into income. Set your own menu. Set your own pace.</p>
             <div class="earnings-highlight">
-                <i class="ph-fill ph-money"></i> Current chefs earn $400-$900/week
+                <i class="ph-fill ph-money" style="color: var(--primary);"></i> Current chefs earn $400-$900/week
             </div>
 
             <div class="perks-grid">
@@ -106,7 +107,7 @@
 
         <div id="success-box" class="success-message">
             <h2><i class="ph-fill ph-check-circle"></i> Application Received!</h2>
-            <p>Thanks for applying to become a HomeChef partner.</p>
+            <p>Thanks for applying to become a CelebChef partner.</p>
             <p>We'll review your application and contact you within 48 hours.</p>
             <a href="index.html" class="btn btn-primary" style="margin-top: 16px;">Back to Home</a>
         </div>
@@ -148,7 +149,7 @@
 
             <fieldset>
                 <legend>3. Sample Menu</legend>
-                <p style="margin-bottom: 24px; font-size: 0.95rem;">What 5 dishes would you cook for a sample week?</p>
+                <p style="margin-bottom: 24px; font-size: 0.95rem; color: var(--text-muted);">What 5 dishes would you cook for a sample week?</p>
                 <div class="address-row">
                     <div class="form-group">
                         <label for="dish_1">Dish 1 (Main) *</label>
@@ -176,7 +177,7 @@
                 
                 <div class="form-group" style="margin-top: 16px;">
                     <label for="food_photos">Upload 3-5 photos of your cooking (Optional for now)</label>
-                    <input type="file" id="food_photos" name="photos" accept="image/png, image/jpeg" multiple style="background: transparent; border: 1px dashed var(--accent); padding: 24px;">
+                    <input type="file" id="food_photos" name="photos" accept="image/png, image/jpeg" multiple style="background: transparent; border: 1px dashed var(--border); padding: 24px;">
                     <small style="color: var(--text-muted); display: block; margin-top: 8px;">JPG or PNG, max 5MB each. Or email them to us later.</small>
                 </div>
             </fieldset>
@@ -227,14 +228,20 @@
     </main>
 
     <footer>
+        <div class="logo">
+            <a href="index.html" style="font-family: 'Impact', sans-serif; font-weight: 900; font-size: 1.6rem; text-transform: uppercase; color: var(--text-main); text-decoration: none; letter-spacing: -0.05em;">
+                CELEB<i class="ph-bold ph-x" style="color:var(--primary); margin:0 4px; font-size: 1.4rem; vertical-align: -2px;"></i>CHEF
+            </a>
+        </div>
         <nav>
-            <a href="how-it-works.html">How It Works</a> | 
-            <a href="become-a-chef.html">Become a Chef</a> | 
-            <a href="about.html">About Us</a>
+            <a href="index.html#menu">Our Menu</a>
+            <a href="how-it-works.html">How It Works</a>
+            <a href="about.html">Why CelebChef</a>
+            <a href="become-a-chef.html">Become a Chef</a>
+            <a href="#">FAQ</a>
+            <a href="#">CelebChef for Business</a>
         </nav>
-        <p>Contact: <a href="mailto:hello@homechefsydney.com.au" style="color:var(--accent);">hello@homechefsydney.com.au</a></p>
-        <p style="margin-bottom: 8px;">📍 Serving Newtown, Marrickville & Erskineville</p>
-        <p style="font-size: 0.85rem; color: #aaa;">© 2025 HomeChef Sydney</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top:24px;">© 2026 CelebChef. All rights reserved.</p>
     </footer>
 
     <script src="js/app.js"></script>

@@ -3,40 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subscribe - HomeChef Sydney</title>
+    <title>Subscribe - CelebChef</title>
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        .page-header {
-            text-align: center;
-            margin-bottom: 48px;
-        }
+        .page-header { text-align: center; margin-bottom: 48px; }
         .chef-summary {
-            background: #fff;
+            background: var(--bg-color);
             padding: 24px;
             border-radius: var(--radius-md);
-            border: 1px solid var(--accent);
+            border: 1px solid var(--primary);
             margin-bottom: 32px;
             display: flex;
             align-items: center;
             gap: 16px;
         }
-        .chef-summary img {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--accent);
-        }
+        .chef-summary img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
         .chef-summary-content h3 { margin: 0 0 4px 0; }
         .chef-summary-content p { margin: 0; font-size: 0.9rem; color: var(--text-muted); }
-        .form-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
+        .form-container { max-width: 800px; margin: 0 auto; }
         .success-message {
             display: none;
-            background: rgba(76, 175, 80, 0.1);
+            background: rgba(58, 129, 61, 0.1);
             border-left: 4px solid var(--success);
             padding: 24px;
             border-radius: var(--radius-md);
@@ -49,38 +37,43 @@
 <body>
     <header class="header">
         <div class="header-container">
-            <div class="logo">
-                <a href="index.html">
-                    <i class="ph-fill ph-cooking-pot"></i>
-                    HomeChef Sydney
-                </a>
+            <div class="nav-left">
+                <div class="logo">
+                    <a href="index.html">CELEB<i class="ph-bold ph-x"></i>CHEF</a>
+                </div>
+                <nav class="nav-links">
+                    <a href="index.html#menu">Our Menu</a>
+                    <a href="how-it-works.html">How It Works</a>
+                    <a href="about.html">Why CelebChef</a>
+                    <a href="become-a-chef.html">Become a Chef</a>
+                    <a href="#">FAQ</a>
+                    <a href="#">CelebChef for Business</a>
+                    <a href="#">Gift Card</a>
+                </nav>
             </div>
-            <nav class="nav-links">
-                <a href="how-it-works.html">How It Works</a>
-                <a href="become-a-chef.html">Become a Chef</a>
-                <a href="about.html">About Us</a>
-            </nav>
-            <a href="index.html#browse-chefs" class="btn btn-secondary d-none-mobile">Find a Chef</a>
+            <div class="nav-actions">
+                <a href="#" class="nav-login">Log In <i class="ph-bold ph-arrow-right"></i></a>
+                <button class="mobile-menu-btn d-none-desktop" style="display:none; background:none; border:none; cursor:pointer;"><i class="ph ph-list" style="font-size: 28px;"></i></button>
+            </div>
         </div>
     </header>
 
     <main class="main-content container form-container">
         <div class="page-header">
             <h1>Complete Your Subscription</h1>
-            <p>Fresh, home-cooked meals delivered to your door.</p>
+            <p>Fresh, chef-crafted meals delivered to your door.</p>
         </div>
 
         <div id="success-box" class="success-message">
             <h2><i class="ph-fill ph-check-circle"></i> Subscription Received!</h2>
             <p>We've sent payment instructions to your email.</p>
             <p>Your chef will contact you 24 hours before your first delivery.</p>
-            <p>Questions? <a href="mailto:hello@homechefsydney.com.au" style="color:var(--accent);">Contact Support</a></p>
+            <p>Questions? <a href="mailto:hello@celebchef.com.au" style="color:var(--text-main); font-weight:600;">Contact Support</a></p>
             <a href="index.html" class="btn btn-primary" style="margin-top: 16px;">Back to Home</a>
         </div>
 
         <form id="subscribe-form" class="main-form">
             <div class="chef-summary" id="dynamic-chef-summary">
-                <!-- Using generic photo as placeholder until JS catches the param -->
                 <img src="https://images.unsplash.com/photo-1556910103-1c02745a8731?w=150&q=80" alt="Chef Priya" id="summary-img">
                 <div class="chef-summary-content">
                     <h3 id="summary-name">You're subscribing to: Chef Priya</h3>
@@ -88,7 +81,6 @@
                 </div>
             </div>
 
-            <!-- Hidden field for integration -->
             <input type="hidden" id="chef_id" name="chef_id" value="priya">
 
             <fieldset>
@@ -115,7 +107,6 @@
                     <label for="street_address">Street Address *</label>
                     <input type="text" id="street_address" name="street_address" required minlength="5" placeholder="123 Example St">
                 </div>
-                
                 <div class="address-row">
                     <div class="form-group">
                         <label for="suburb">Suburb *</label>
@@ -135,7 +126,6 @@
                         <input type="text" id="state" name="state" value="NSW" readonly style="background: #e9ecef; color: #666; cursor: not-allowed;">
                     </div>
                 </div>
-                
                 <div class="form-group" style="margin-top: 16px;">
                     <label for="delivery_notes">Delivery Instructions (optional)</label>
                     <textarea id="delivery_notes" name="delivery_notes" maxlength="200" rows="3" placeholder="Gate code, apartment number, etc."></textarea>
@@ -146,16 +136,9 @@
                 <legend>Subscription Details</legend>
                 <label style="margin-bottom: 16px; font-weight: 600;">Start Week *</label>
                 <div class="radio-group" style="margin-bottom: 24px;">
-                    <label>
-                        <input type="radio" name="start_week" value="this_week" checked>
-                        This week (Apr 1-5)
-                    </label>
-                    <label>
-                        <input type="radio" name="start_week" value="next_week">
-                        Next week (Apr 8-12)
-                    </label>
+                    <label><input type="radio" name="start_week" value="this_week" checked> This week (Apr 1-5)</label>
+                    <label><input type="radio" name="start_week" value="next_week"> Next week (Apr 8-12)</label>
                 </div>
-                
                 <label for="dietary_restrictions" style="font-weight: 600;">Dietary Restrictions (optional)</label>
                 <textarea id="dietary_restrictions" name="dietary_restrictions" maxlength="300" rows="3" placeholder="Any allergies or dietary needs?"></textarea>
             </fieldset>
@@ -163,21 +146,14 @@
             <fieldset>
                 <legend>Payment Processing</legend>
                 <div class="radio-group">
-                    <label>
-                        <input type="radio" name="payment_method" value="bank_transfer" checked>
-                        Bank Transfer (Account details will be emailed to you)
-                    </label>
-                    <label style="color: var(--text-muted);">
-                        <input type="radio" name="payment_method" value="stripe" disabled>
-                        Pay with Card (Coming Soon via Stripe)
-                    </label>
+                    <label><input type="radio" name="payment_method" value="bank_transfer" checked> Bank Transfer (Account details will be emailed to you)</label>
                 </div>
             </fieldset>
 
-            <div class="form-group" style="margin-bottom: 32px; background: rgba(226, 125, 96, 0.05); padding: 16px; border-radius: var(--radius-sm);">
-                <label class="checkbox-label" style="display: flex; gap: 12px; font-weight: 500;">
-                    <input type="checkbox" name="terms_accepted" required style="width: 20px; height: 20px; accent-color: var(--primary);">
-                    I agree to weekly payments of $75 (via Bank Transfer) until I cancel.
+            <div class="form-group" style="margin-bottom: 32px; background: rgba(250, 202, 80, 0.15); padding: 16px; border-radius: var(--radius-sm);">
+                <label class="checkbox-label" style="display: flex; gap: 12px; font-weight: 600;">
+                    <input type="checkbox" name="terms_accepted" required style="width: 20px; height: 20px; accent-color: var(--text-main);">
+                    I agree to weekly payments via Bank Transfer until I cancel.
                 </label>
             </div>
 
@@ -187,14 +163,20 @@
     </main>
 
     <footer>
+        <div class="logo">
+            <a href="index.html" style="font-family: 'Impact', sans-serif; font-weight: 900; font-size: 1.6rem; text-transform: uppercase; color: var(--text-main); text-decoration: none; letter-spacing: -0.05em;">
+                CELEB<i class="ph-bold ph-x" style="color:var(--primary); margin:0 4px; font-size: 1.4rem; vertical-align: -2px;"></i>CHEF
+            </a>
+        </div>
         <nav>
-            <a href="how-it-works.html">How It Works</a> | 
-            <a href="become-a-chef.html">Become a Chef</a> | 
-            <a href="about.html">About Us</a>
+            <a href="index.html#menu">Our Menu</a>
+            <a href="how-it-works.html">How It Works</a>
+            <a href="about.html">Why CelebChef</a>
+            <a href="become-a-chef.html">Become a Chef</a>
+            <a href="#">FAQ</a>
+            <a href="#">CelebChef for Business</a>
         </nav>
-        <p>Contact: <a href="mailto:hello@homechefsydney.com.au" style="color:var(--accent);">hello@homechefsydney.com.au</a></p>
-        <p style="margin-bottom: 8px;">📍 Serving Newtown, Marrickville & Erskineville</p>
-        <p style="font-size: 0.85rem; color: #aaa;">© 2025 HomeChef Sydney</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top:24px;">© 2026 CelebChef. All rights reserved.</p>
     </footer>
 
     <script src="js/app.js"></script>

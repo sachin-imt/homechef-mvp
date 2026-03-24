@@ -3,285 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How It Works - HomeChef Sydney</title>
+    <title>How It Works - CelebChef</title>
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        .page-header { text-align: center; margin-bottom: 48px; }
+        .page-header { text-align: center; margin-bottom: 64px; }
         
-        .tabs { display: flex; justify-content: center; gap: 16px; margin-bottom: 48px; }
-        
-        .tab-btn { 
-            padding: 12px 32px; 
-            border: 2px solid var(--border); 
-            background: transparent; 
-            border-radius: var(--radius-full); 
-            font-weight: 600; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-            color: var(--text-main); 
-            font-size: 1rem;
+        .role-tabs {
             display: flex;
-            align-items: center;
-            gap: 8px;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 48px;
         }
         
-        .tab-btn:hover { border-color: rgba(226, 125, 96, 0.4); color: var(--primary); }
-        .tab-btn.active { border-color: var(--primary); background: rgba(226, 125, 96, 0.1); color: var(--primary); }
-        
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .steps-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
-            gap: 32px; 
-            margin-bottom: 80px; 
+        .tab-btn {
+            background: transparent;
+            border: 2px solid var(--border);
+            padding: 12px 32px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            color: var(--text-muted);
         }
         
-        .step-card { 
-            background: #fff; 
-            padding: 40px 32px 32px; 
-            border-radius: var(--radius-lg); 
-            box-shadow: var(--shadow-sm); 
-            position: relative; 
-            border: 1px solid rgba(204,204,204,0.3);
-            text-align: center;
+        .tab-btn.active {
+            border-color: var(--text-main);
+            background: rgba(250, 202, 80, 0.1);
+            color: var(--text-main);
         }
         
-        .step-number { 
-            width: 48px; 
-            height: 48px; 
-            background: var(--primary); 
-            color: #fff; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-weight: 700; 
-            font-size: 1.25rem; 
-            position: absolute; 
-            top: -24px; 
-            left: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 4px 10px rgba(226, 125, 96, 0.3); 
-        }
-        
-        .step-card h3 { margin-bottom: 12px; font-size: 1.25rem; }
-        .step-card p { margin-bottom: 8px; font-size: 0.95rem; }
-        
-        .faq-section { background: rgba(248, 245, 242, 0.5); padding: 64px 24px; border-radius: var(--radius-lg); }
-        .faq-section h2 { text-align: center; margin-bottom: 48px; }
-        
-        .faq-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
-            gap: 24px; 
-            max-width: 1000px;
+        .steps-container {
+            max-width: 800px;
             margin: 0 auto;
         }
         
-        .faq-item { 
-            background: #fff; 
-            padding: 32px; 
-            border-radius: var(--radius-md); 
-            border-left: 4px solid var(--accent); 
-            box-shadow: var(--shadow-sm); 
+        .step-item {
+            display: flex;
+            gap: 32px;
+            margin-bottom: 48px;
+            background: var(--bg-color);
+            padding: 32px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            align-items: flex-start;
         }
         
-        .faq-item h4 { margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px; font-size: 1.1rem; }
-        .faq-item h4 i { color: var(--primary); margin-top: 4px; }
-        .faq-item p { margin: 0; font-size: 0.95rem; }
+        .step-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(250, 202, 80, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: var(--primary);
+            font-size: 36px;
+        }
         
-        .cta-section { text-align: center; margin-top: 64px; }
+        .step-content h3 { margin-bottom: 12px; font-size: 1.5rem; }
+        .step-content p { margin: 0; font-size: 1.1rem; line-height: 1.6; }
+        
+        @media (max-width: 768px) {
+            .step-item { flex-direction: column; text-align: center; align-items: center; }
+        }
     </style>
 </head>
 <body>
     <header class="header">
         <div class="header-container">
-            <div class="logo">
-                <a href="index.html">
-                    <i class="ph-fill ph-cooking-pot"></i>
-                    HomeChef Sydney
-                </a>
+            <div class="nav-left">
+                <div class="logo">
+                    <a href="index.html">CELEB<i class="ph-bold ph-x"></i>CHEF</a>
+                </div>
+                <nav class="nav-links">
+                    <a href="index.html#menu">Our Menu</a>
+                    <a href="how-it-works.html" class="active">How It Works</a>
+                    <a href="about.html">Why CelebChef</a>
+                    <a href="become-a-chef.html">Become a Chef</a>
+                    <a href="#">FAQ</a>
+                    <a href="#">CelebChef for Business</a>
+                    <a href="#">Gift Card</a>
+                </nav>
             </div>
-            <nav class="nav-links">
-                <a href="how-it-works.html" style="color:var(--primary); font-weight:600;">How It Works</a>
-                <a href="become-a-chef.html">Become a Chef</a>
-                <a href="about.html">About Us</a>
-            </nav>
-            <a href="index.html#browse-chefs" class="btn btn-secondary d-none-mobile">Find a Chef</a>
+            <div class="nav-actions">
+                <a href="subscribe.html" class="btn btn-primary d-none-mobile">Order Now</a>
+                <a href="#" class="nav-login">Log In <i class="ph-bold ph-arrow-right"></i></a>
+                <button class="mobile-menu-btn d-none-desktop" style="display:none; background:none; border:none; cursor:pointer;"><i class="ph ph-list" style="font-size: 28px;"></i></button>
+            </div>
         </div>
     </header>
 
     <main class="main-content container">
         <div class="page-header">
-            <h1>How It Works</h1>
-            <p style="font-size: 1.2rem;">Choose your path to get started with HomeChef.</p>
+            <h1>How CelebChef Works</h1>
+            <p style="font-size: 1.2rem;">Choose your journey.</p>
         </div>
 
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('customers')">
-                <i class="ph-fill ph-fork-knife"></i> For Customers
-            </button>
-            <button class="tab-btn" onclick="switchTab('chefs')">
-                <i class="ph-fill ph-chef-hat"></i> For Chefs
-            </button>
+        <div class="role-tabs">
+            <button class="tab-btn active" onclick="switchTab('customer')">For Customers</button>
+            <button class="tab-btn" onclick="switchTab('chef')">For Chefs</button>
         </div>
 
-        <!-- Customer Tab -->
-        <div id="customers-tab" class="tab-content active">
-            <div class="steps-grid">
-                <div class="step-card">
-                    <div class="step-number">1</div>
-                    <h3>Browse Chefs</h3>
-                    <p>See this week's 5-dish menus from local home chefs in your area.</p>
-                    <p style="color:var(--text-muted);">Real people cooking in their own kitchens.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">2</div>
-                    <h3>Subscribe</h3>
-                    <p>Choose your chef for the week.</p>
-                    <p style="color:var(--text-muted);">$60-$80 for 5 delicious, hearty meals.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">3</div>
-                    <h3>Get Delivered</h3>
-                    <p>Meals arrive fresh at your door.</p>
-                    <p style="color:var(--text-muted);">Delivery runs on Mon/Wed/Fri or Tue/Thu/Sat.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">4</div>
-                    <h3>Enjoy & Repeat</h3>
-                    <p>Love your chef? Subscribe again.</p>
-                    <p style="color:var(--text-muted);">Want variety? Try someone new next week.</p>
+        <div id="customer-steps" class="steps-container">
+            <div class="step-item">
+                <div class="step-icon"><i class="ph-fill ph-magnifying-glass" style="color:var(--text-main);"></i></div>
+                <div class="step-content">
+                    <h3>1. Find Your Chef</h3>
+                    <p>Browse local professional culinary talent. From Michelin-trained specialists to authentic homestyle masters, find a chef whose menu matches your cravings and dietary needs.</p>
                 </div>
             </div>
-
-            <section class="faq-section">
-                <h2>Frequently Asked Questions</h2>
-                <div class="faq-grid">
-                    <div class="faq-item">
-                        <h4><i class="ph-fill ph-question"></i> Is this a subscription?</h4>
-                        <p>Yes, but it is week-by-week. You are never locked in, and you can cancel anytime before the new week begins.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h4><i class="ph-fill ph-question"></i> Can I choose specific dishes?</h4>
-                        <p>No, you get the chef's full 5-meal set curated for that week. This allows our chefs to focus on quality and reduce waste.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h4><i class="ph-fill ph-question"></i> What if I don't like the food?</h4>
-                        <p>We offer a First-Week Money-Back Guarantee. If you're not satisfied with your experience, we'll refund your first week.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h4><i class="ph-fill ph-question"></i> How is this different from apps?</h4>
-                        <p>This is real home cooking. You're supporting local cooks directly, eating healthier, less processed food than standard fast-food delivery.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h4><i class="ph-fill ph-question"></i> What areas do you deliver to?</h4>
-                        <p>Currently, we exclusively serve Newtown, Marrickville, and Erskineville. We will be expanding to all of Inner West Sydney soon.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h4><i class="ph-fill ph-question"></i> How do I pay?</h4>
-                        <p>Currently via a secure Bank Transfer. We email you the instructions upon subscribing. Credit card processing (Stripe) is coming soon.</p>
-                    </div>
+            <div class="step-item">
+                <div class="step-icon"><i class="ph-fill ph-calendar-check" style="color:var(--text-main);"></i></div>
+                <div class="step-content">
+                    <h3>2. Subscribe Weekly</h3>
+                    <p>Choose your starting week and subscribe. No lock-in contracts. You'll receive a curated menu of 5 restaurant-quality meals delivered every week.</p>
                 </div>
-            </section>
-            
-            <div class="cta-section">
-                <a href="index.html#browse-chefs" class="btn btn-primary" style="font-size: 1.1rem; padding: 16px 32px;">Browse This Week's Menus</a>
+            </div>
+            <div class="step-item">
+                <div class="step-icon"><i class="ph-fill ph-cooking-pot" style="color:var(--text-main);"></i></div>
+                <div class="step-content">
+                    <h3>3. Heat & Eat</h3>
+                    <p>Your chef prepares your meals fresh, never frozen. They arrive in eco-friendly containers ready to heat in 3 minutes or less. Enjoy elevated, everyday dining.</p>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 48px;">
+                <a href="index.html#menu" class="btn btn-primary">Browse Menus</a>
             </div>
         </div>
 
-        <!-- Chefs Tab -->
-        <div id="chefs-tab" class="tab-content">
-            <p style="text-align: center; margin-bottom: 48px; font-size: 1.1rem; color: var(--primary); font-weight: 500;">
-                Turn your passion for cooking into $400-$900/week extra income.
-            </p>
-            
-            <div class="steps-grid">
-                <div class="step-card">
-                    <div class="step-number">1</div>
-                    <h3>Apply</h3>
-                    <p>Fill out our simple application form.</p>
-                    <p style="color:var(--text-muted);">We review within 48 hours.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">2</div>
-                    <h3>Create Your Menu</h3>
-                    <p>Choose 5 dishes to cook each week.</p>
-                    <p style="color:var(--text-muted);">Set your own price (typically $60-$85).</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">3</div>
-                    <h3>We Find Customers</h3>
-                    <p>We handle all marketing and payments.</p>
-                    <p style="color:var(--text-muted);">You receive confirmed orders every Monday.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">4</div>
-                    <h3>Cook & Deliver</h3>
-                    <p>Cook fresh on the day of delivery.</p>
-                    <p style="color:var(--text-muted);">Deliver within 5km (or we arrange help).</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">5</div>
-                    <h3>Get Paid</h3>
-                    <p>Weekly payouts directly to your bank.</p>
-                    <p style="color:var(--text-muted);">Keep 80% of your menu price.</p>
+        <div id="chef-steps" class="steps-container" style="display: none;">
+            <div class="step-item">
+                <div class="step-icon"><i class="ph-fill ph-pencil-simple" style="color:var(--text-main);"></i></div>
+                <div class="step-content">
+                    <h3>1. Apply & Verify</h3>
+                    <p>Submit your application with your cuisine style and sample menus. Our team reviews your background to ensure CelebChef quality standards are met.</p>
                 </div>
             </div>
-
-            <section class="faq-section" style="background: rgba(65, 179, 163, 0.05);">
-                <h2>Partner Requirements</h2>
-                <div class="faq-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 800px;">
-                    <div class="faq-item" style="border-left-color: var(--primary);">
-                        <h4><i class="ph-fill ph-check-circle"></i> Love to cook</h4>
-                        <p>No commercial license is required to start testing the waters, just a passion for food and cleanliness.</p>
-                    </div>
-                    <div class="faq-item" style="border-left-color: var(--primary);">
-                        <h4><i class="ph-fill ph-check-circle"></i> Minimum Capacity</h4>
-                        <p>You must be able to cook at least 5-15 meal sets per week in your kitchen.</p>
-                    </div>
-                    <div class="faq-item" style="border-left-color: var(--primary);">
-                        <h4><i class="ph-fill ph-check-circle"></i> Local Resident</h4>
-                        <p>You must live in or immediately adjacent to our service area (Inner West Sydney).</p>
-                    </div>
-                    <div class="faq-item" style="border-left-color: var(--primary);">
-                        <h4><i class="ph-fill ph-check-circle"></i> Delivery Availability</h4>
-                        <p>Able to deliver food on Mon-Fri evenings (or coordinate directly with our delivery partners).</p>
-                    </div>
+            <div class="step-item">
+                <div class="step-icon"><i class="ph-fill ph-users" style="color:var(--text-main);"></i></div>
+                <div class="step-content">
+                    <h3>2. Build Your Audience</h3>
+                    <p>Set how many subscribers you want. We provide the marketing and platform to connect you with hungry locals looking for your exact culinary style.</p>
                 </div>
-            </section>
-            
-            <div class="cta-section">
-                <a href="become-a-chef.html" class="btn btn-primary" style="font-size: 1.1rem; padding: 16px 32px;">Apply to Become a Chef</a>
+            </div>
+            <div class="step-item">
+                <div class="step-icon"><i class="ph-fill ph-wallet" style="color:var(--text-main);"></i></div>
+                <div class="step-content">
+                    <h3>3. Cook & Earn</h3>
+                    <p>Cook from your own kitchen, on your own schedule. Deliver the meals and keep 80% of the revenue. It's your business, empowered by CelebChef.</p>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 48px;">
+                <a href="become-a-chef.html" class="btn btn-primary">Apply Now</a>
             </div>
         </div>
     </main>
 
     <footer>
+        <div class="logo">
+            <a href="index.html" style="font-family: 'Impact', sans-serif; font-weight: 900; font-size: 1.6rem; text-transform: uppercase; color: var(--text-main); text-decoration: none; letter-spacing: -0.05em;">
+                CELEB<i class="ph-bold ph-x" style="color:var(--primary); margin:0 4px; font-size: 1.4rem; vertical-align: -2px;"></i>CHEF
+            </a>
+        </div>
         <nav>
-            <a href="how-it-works.html">How It Works</a> | 
-            <a href="become-a-chef.html">Become a Chef</a> | 
-            <a href="about.html">About Us</a>
+            <a href="index.html#menu">Our Menu</a>
+            <a href="how-it-works.html">How It Works</a>
+            <a href="about.html">Why CelebChef</a>
+            <a href="become-a-chef.html">Become a Chef</a>
+            <a href="#">FAQ</a>
+            <a href="#">CelebChef for Business</a>
         </nav>
-        <p>Contact: <a href="mailto:hello@homechefsydney.com.au" style="color:var(--accent);">hello@homechefsydney.com.au</a></p>
-        <p style="margin-bottom: 8px;">📍 Serving Newtown, Marrickville & Erskineville</p>
-        <p style="font-size: 0.85rem; color: #aaa;">© 2025 HomeChef Sydney</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top:24px;">© 2026 CelebChef. All rights reserved.</p>
     </footer>
 
     <script src="js/app.js"></script>
     <script>
-        function switchTab(tabId) {
-            // Update buttons
+        function switchTab(role) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            document.querySelectorAll('.steps-container').forEach(el => el.style.display = 'none');
             
-            // Update content
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            document.getElementById(tabId + '-tab').classList.add('active');
+            if (role === 'customer') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('customer-steps').style.display = 'block';
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('chef-steps').style.display = 'block';
+            }
         }
     </script>
 </body>
