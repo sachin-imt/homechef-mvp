@@ -306,6 +306,7 @@ footer nav a:hover {
 @media (max-width: 1024px) {
   .nav-links { display: none !important; }
   .header-container { padding: 0 24px; }
+  .d-none-desktop { display: block !important; }
 }
 
 @media (max-width: 768px) {
