@@ -1,0 +1,2 @@
+Subscription_ID,Customer_Name,Customer_Email,Phone,Street_Address,Suburb,Postcode,State,Delivery_Notes,Start_Week,Dietary_Restrictions,Payment_Method,Chef_ID,Status
+"SUB-001","John Doe","john@example.com","0411223344","123 King St","Newtown","2042","NSW","Leave at door","this_week","None","bank_transfer","Chef Priya","Active"

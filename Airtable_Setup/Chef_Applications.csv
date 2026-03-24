@@ -1,0 +1,2 @@
+Application_ID,Full_Name,Email,Phone,Suburb,Cuisine_Type,Cooking_Background,Dish_1,Dish_2,Dish_3,Dish_4,Dish_5,Capacity,Can_Deliver,Delivery_Days,Price_Per_Week,Status,Date_Submitted
+"APP-001","Sarah Jenkins","sarah@example.com","0433221100","Erskineville","Thai","Cooked in Thailand for 5 years.","Pad Thai","Green Curry","Tom Yum Goong","Papaya Salad","Mango Sticky Rice","10-15","yes","mon,wed,fri","70","Pending","2024-03-24"

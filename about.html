@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - HomeChef Sydney</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        .about-hero { 
+            text-align: center; 
+            padding: 80px 24px; 
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .about-hero h1 { font-size: 3rem; margin-bottom: 24px; }
+        .about-hero .intro { font-size: 1.25rem; color: var(--text-muted); line-height: 1.6; }
+        
+        .split-section { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 48px; 
+            margin-bottom: 80px; 
+        }
+        
+        .problem-box { 
+            background: rgba(244, 67, 54, 0.03); 
+            padding: 48px; 
+            border-radius: var(--radius-lg); 
+            border: 1px solid rgba(244, 67, 54, 0.15); 
+        }
+        
+        .problem-box h2 { 
+            color: var(--error); 
+            margin-bottom: 24px; 
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .problem-list { list-style: none; padding: 0; }
+        .problem-list li { 
+            margin-bottom: 16px; 
+            font-size: 1.1rem; 
+            display: flex; 
+            align-items: flex-start; 
+            gap: 12px; 
+        }
+        .problem-list li i { color: var(--error); margin-top: 4px; font-size: 1.2rem; }
+        
+        .solution-box { 
+            background: rgba(76, 175, 80, 0.05); 
+            padding: 48px; 
+            border-radius: var(--radius-lg); 
+            border: 1px solid rgba(76, 175, 80, 0.2); 
+            box-shadow: var(--shadow-md);
+        }
+        
+        .solution-box h2 { 
+            color: var(--success); 
+            margin-bottom: 24px; 
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .solution-box p { font-size: 1.15rem; color: var(--text-main); font-weight: 500; margin-bottom: 16px; }
+        
+        .why-different {
+            background: #fff;
+            padding: 64px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 80px;
+            border-top: 6px solid var(--primary);
+        }
+        
+        .why-different h2 { text-align: center; margin-bottom: 48px; }
+        
+        .diff-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+        }
+        
+        .diff-item {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .diff-item i {
+            font-size: 32px;
+            color: var(--primary);
+            background: rgba(226, 125, 96, 0.1);
+            padding: 12px;
+            border-radius: var(--radius-md);
+            height: fit-content;
+        }
+        
+        .diff-item h4 { margin-bottom: 8px; font-size: 1.1rem; }
+        .diff-item p { margin: 0; font-size: 0.95rem; }
+        
+        .story-section {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 64px;
+        }
+        
+        .story-section i {
+            font-size: 48px;
+            color: var(--accent);
+            margin-bottom: 24px;
+        }
+        
+        .contact-card {
+            background: var(--text-main);
+            color: #fff;
+            padding: 48px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        
+        .contact-card h2 { color: #fff; margin-bottom: 16px; }
+        .contact-card a { color: var(--primary); font-size: 1.2rem; font-weight: 600; text-decoration: none; }
+        .contact-card a:hover { text-decoration: underline; }
+        
+        @media (max-width: 768px) { 
+            .split-section, .diff-grid { grid-template-columns: 1fr; gap: 24px; } 
+            .problem-box, .solution-box, .why-different { padding: 32px 24px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="index.html">
+                    <i class="ph-fill ph-cooking-pot"></i>
+                    HomeChef Sydney
+                </a>
+            </div>
+            <nav class="nav-links">
+                <a href="how-it-works.html">How It Works</a>
+                <a href="become-a-chef.html">Become a Chef</a>
+                <a href="about.html" style="color:var(--primary); font-weight:600;">About Us</a>
+            </nav>
+            <a href="index.html#browse-chefs" class="btn btn-secondary d-none-mobile">Find a Chef</a>
+        </div>
+    </header>
+
+    <main class="main-content container">
+        <div class="about-hero">
+            <h1>About HomeChef Sydney</h1>
+            <p class="intro">We connect busy people with talented home cooks in their neighborhood. Real food, grown locally, cooked authentically.</p>
+        </div>
+
+        <section class="split-section">
+            <div class="problem-box">
+                <h2><i class="ph-fill ph-warning-circle"></i> The Problem</h2>
+                <ul class="problem-list">
+                    <li><i class="ph-bold ph-x"></i> Too expensive to eat out at restaurants every single day.</li>
+                    <li><i class="ph-bold ph-x"></i> Too exhausted to cook nutritious meals after a long workday.</li>
+                    <li><i class="ph-bold ph-x"></i> Traditional food delivery apps are often unhealthy, highly processed, and create massive plastic waste.</li>
+                </ul>
+            </div>
+            <div class="solution-box">
+                <h2><i class="ph-fill ph-check-circle"></i> The Solution</h2>
+                <p>Subscribe to a local chef's home-cooked meals for the week.</p>
+                <p>Authentic recipes passed down through generations. Real ingredients. Fair prices that support local families rather than massive tech corporations.</p>
+                <a href="index.html#browse-chefs" class="btn btn-primary" style="margin-top:24px;">Browse Menus</a>
+            </div>
+        </section>
+
+        <section class="why-different">
+            <h2>Why We're Different</h2>
+            <div class="diff-grid">
+                <div class="diff-item">
+                    <i class="ph-fill ph-heart"></i>
+                    <div>
+                        <h4>Real Home Cooking</h4>
+                        <p>Not restaurant food or complex meal-kits you have to assemble yourself.</p>
+                    </div>
+                </div>
+                <div class="diff-item">
+                    <i class="ph-fill ph-hand-coins"></i>
+                    <div>
+                        <h4>Support Your Community</h4>
+                        <p>80% of your money goes directly to the talent in the kitchen—your local neighbours.</p>
+                    </div>
+                </div>
+                <div class="diff-item">
+                    <i class="ph-fill ph-arrows-clockwise"></i>
+                    <div>
+                        <h4>Weekly Variety</h4>
+                        <p>Bored of the same food? Try a new local chef every single week.</p>
+                    </div>
+                </div>
+                <div class="diff-item">
+                    <i class="ph-fill ph-lock-key-open"></i>
+                    <div>
+                        <h4>Total Flexibility</h4>
+                        <p>Cancel your subscription anytime. There are absolutely no lock-in contracts.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="story-section">
+            <i class="ph-fill ph-map-pin"></i>
+            <h2>Our Story</h2>
+            <p>Started in 2025 in the heart of the Inner West.</p>
+            <p>We saw thousands of incredible home recipes being kept within families, while neighbors resorted to expensive, unhealthy takeout. We built HomeChef to bridge that gap.</p>
+            <p style="font-weight:600; color:var(--text-main); margin-top:16px;">Currently serving: Newtown, Marrickville, and Erskineville.</p>
+        </section>
+
+        <section class="contact-card">
+            <h2>Get in Touch</h2>
+            <p style="color:rgba(255,255,255,0.8); margin-bottom: 24px;">Have questions? Want us to expand to your suburb next?</p>
+            <a href="mailto:hello@homechefsydney.com.au"><i class="ph-fill ph-envelope-simple" style="margin-right:8px; vertical-align:-3px;"></i> hello@homechefsydney.com.au</a>
+        </section>
+    </main>
+
+    <footer>
+        <nav>
+            <a href="how-it-works.html">How It Works</a> | 
+            <a href="become-a-chef.html">Become a Chef</a> | 
+            <a href="about.html">About Us</a>
+        </nav>
+        <p>Contact: <a href="mailto:hello@homechefsydney.com.au" style="color:var(--accent);">hello@homechefsydney.com.au</a></p>
+        <p style="margin-bottom: 8px;">📍 Serving Newtown, Marrickville & Erskineville</p>
+        <p style="font-size: 0.85rem; color: #aaa;">© 2025 HomeChef Sydney</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

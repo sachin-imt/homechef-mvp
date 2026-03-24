@@ -1,0 +1,3 @@
+Name,Email,Phone,Suburb,Cuisine_Type,Bio,Photo_URL,Rating,Review_Count,Status,Price_Per_Week,Delivery_Capacity
+"Chef Priya","priya@example.com","0412345678","Newtown","North Indian","My grandmother's recipes from Punjab. Everything made fresh.","https://images.unsplash.com/photo-1556910103-1c02745a8731?w=600&h=600&fit=crop","4.8","12","Active","75","15"
+"Chef Marco","marco@example.com","0498765432","Marrickville","Italian","Authentic handmade pasta and traditional sauces.","https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&h=600&fit=crop","4.9","8","Active","80","10"
