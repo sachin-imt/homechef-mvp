@@ -253,7 +253,7 @@ function ChefModal({ chef, onSave, onClose }) {
             <div className="form-group"><label style={lbl}>Rating</label>
               <input className="form-input" type="number" step="0.1" min="1" max="5" value={form.rating||''} onChange={e=>set('rating',parseFloat(e.target.value)||0)}/></div>
             <div className="form-group">
-              <label style={lbl}>CelebChef Commission %</label>
+              <label style={lbl}>Platform Commission %</label>
               <input className="form-input" type="number" min="0" max="100" step="1" value={form.commission_pct ?? 20} onChange={e=>set('commission_pct',parseInt(e.target.value)||0)}/>
               <div style={{ fontSize:'0.72rem', color:'#9CA3AF', marginTop:'3px' }}>Chef keeps {100-(form.commission_pct ?? 20)}%</div>
             </div>

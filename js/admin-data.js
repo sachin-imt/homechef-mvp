@@ -64,16 +64,16 @@ var defaultContent = {
   how_c3_title:     "3. Gather & Enjoy",
   how_c3_desc:      "Your chef prepares meals fresh daily. Delivered straight to your door in eco-friendly containers — sit down and savour the food with family or friends.",
   how_ch1_title:    "1. Apply & Verify",
-  how_ch1_desc:     "Submit your application with your cuisine style and sample menus. Our team reviews your background to ensure CelebChef standards are met.",
+  how_ch1_desc:     "Submit your application with your cuisine style and sample menus. Our team reviews your background to ensure Home Meals standards are met.",
   how_ch2_title:    "2. Build Your Audience",
   how_ch2_desc:     "Set how many subscribers you want. We provide the marketing and platform to connect you with hungry locals looking for your culinary style.",
   how_ch3_title:    "3. Cook & Earn",
   how_ch3_desc:     "Cook your weekly menu, deliver to subscribers, and get paid. Keep 80% of the subscription price. Current chefs earn $400–$900/week.",
-  become_headline:  "Become a CelebChef Partner",
+  become_headline:  "Become a Home Meals Partner",
   become_subtext:   "Turn your home cooking into income. Set your own menu. Set your own pace.",
   become_earnings:  "Current chefs earn $400–$900/week",
   footer_tagline:   "Authentic home-cooked meals from Sydney's best home chefs. Delivered weekly.",
-  contact_email:    "hello@celebchef.com.au",
+  contact_email:    "hello@homemeals.com.au",
 };
 
 // ── Seed data ──

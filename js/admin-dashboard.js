@@ -131,7 +131,7 @@ function DashboardPage({ chefs, subscribers }) {
       <div className="section-header">
         <div>
           <h1 className="section-title">Dashboard</h1>
-          <p className="section-subtitle">Overview of your CelebChef marketplace</p>
+          <p className="section-subtitle">Overview of your Home Meals marketplace</p>
         </div>
       </div>
 

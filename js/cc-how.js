@@ -12,7 +12,7 @@ function HowItWorksPage({ setPage }) {
   ];
 
   var chefSteps = [
-    { icon: "ph-fill ph-pencil-simple", title: "1. Apply & Verify", desc: "Submit your application with your cuisine style and sample menus. Our team reviews your background to ensure CelebChef home-cooking standards are met." },
+    { icon: "ph-fill ph-pencil-simple", title: "1. Apply & Verify", desc: "Submit your application with your cuisine style and sample menus. Our team reviews your background to ensure Home Meals home-cooking standards are met." },
     { icon: "ph-fill ph-users", title: "2. Build Your Audience", desc: "Set how many subscribers you want. We provide the marketing and platform to connect you with hungry locals looking for your exact culinary style." },
     { icon: "ph-fill ph-wallet", title: "3. Cook & Earn", desc: "Cook your weekly menu, deliver to subscribers, and get paid. Keep 80% of the subscription price. Current chefs earn $400–$900/week." },
   ];
@@ -22,7 +22,7 @@ function HowItWorksPage({ setPage }) {
   return (
     <div className="fade-in" style={{ maxWidth: "860px", margin: "0 auto", padding: "60px 24px 80px" }}>
       <div style={{ textAlign: "center", marginBottom: "48px" }}>
-        <h1 style={{ fontSize: "2.5rem", fontWeight: 900, color: "#111", marginBottom: "12px" }}>How CelebChef Works</h1>
+        <h1 style={{ fontSize: "2.5rem", fontWeight: 900, color: "#111", marginBottom: "12px" }}>How Home Meals Works</h1>
         <p style={{ color: "#5A5D66", fontSize: "1.1rem", margin: 0 }}>Choose your journey.</p>
       </div>
 
@@ -132,7 +132,7 @@ function BecomeAChefPage({ setPage }) {
           <i className="ph-fill ph-check-circle" style={{ fontSize: "40px", color: "#3A813D" }}></i>
         </div>
         <h1 style={{ fontSize: "2rem", fontWeight: 900, color: "#111", marginBottom: "12px" }}>Application Received!</h1>
-        <p style={{ color: "#5A5D66", fontSize: "1rem", marginBottom: "8px" }}>Thanks for applying to become a CelebChef partner.</p>
+        <p style={{ color: "#5A5D66", fontSize: "1rem", marginBottom: "8px" }}>Thanks for applying to become a Home Meals partner.</p>
         <p style={{ color: "#5A5D66", fontSize: "0.9rem", marginBottom: "32px" }}>We'll review your application and contact you within 48 hours at <strong style={{ color: "#111" }}>{form.email}</strong>.</p>
         <button className="btn btn-primary" style={{ fontSize: "1rem", padding: "14px 36px" }} onClick={() => { setPage({ name: "home" }); window.scrollTo(0, 0); }}>Back to Home</button>
       </div>
@@ -143,7 +143,7 @@ function BecomeAChefPage({ setPage }) {
     <div className="fade-in" style={{ maxWidth: "800px", margin: "0 auto", padding: "60px 24px 80px" }}>
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: "48px" }}>
-        <h1 style={{ fontSize: "2.2rem", fontWeight: 900, color: "#111", marginBottom: "12px" }}>Become a CelebChef Partner</h1>
+        <h1 style={{ fontSize: "2.2rem", fontWeight: 900, color: "#111", marginBottom: "12px" }}>Become a Home Meals Partner</h1>
         <p style={{ fontSize: "1.1rem", color: "#5A5D66", maxWidth: "520px", margin: "0 auto 20px" }}>Turn your home cooking into income. Set your own menu. Set your own pace.</p>
         <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(250,202,80,0.15)", border: "1px solid #FACA50", borderRadius: "8px", padding: "12px 24px", fontWeight: 700, fontSize: "1rem", color: "#111" }}>
           <i className="ph-fill ph-money" style={{ color: "#FACA50", fontSize: "1.2rem" }}></i>

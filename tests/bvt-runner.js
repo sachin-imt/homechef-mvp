@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ══════════════════════════════════════════════
-// CelebChef BVT Runner
+// Home Meals BVT Runner
 // Usage: node tests/bvt-runner.js
 // ══════════════════════════════════════════════
 const fs   = require('fs');
@@ -41,7 +41,7 @@ function fileExists(rel) {
 }
 
 // ──────────────────────────────────────────────
-console.log('\n🧪 CelebChef BVT Suite');
+console.log('\n🧪 Home Meals BVT Suite');
 console.log('='.repeat(50));
 console.log('Timestamp :', new Date().toISOString());
 console.log('Root      :', ROOT);
@@ -86,7 +86,7 @@ test('BVT-023', 'admin.html loads all 6 admin modules', () => {
     .forEach(f => assert(c.includes(`${f}.js`), `Missing: ${f}.js`));
 });
 
-test('BVT-024', 'app.html has CelebChef yellow branding', () => {
+test('BVT-024', 'app.html has Home Meals yellow branding', () => {
   fileHas('app.html', '#FACA50');
 });
 

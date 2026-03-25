@@ -171,7 +171,7 @@ function SettingsPage() {
     var blob = new Blob([JSON.stringify(snapshot, null, 2)], { type:'application/json' });
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `celebchef-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.download = `homemeals-backup-${new Date().toISOString().slice(0,10)}.json`;
     a.click();
     setMsg({ type:'success', text:'Backup downloaded. Save this file to your /backups folder.' });
     setTimeout(()=>setMsg(null), 4000);
@@ -280,7 +280,7 @@ function SettingsPage() {
         <div className="card">
           <h3 style={{ fontSize:'1rem', fontWeight:700, marginBottom:'16px' }}>Site Information</h3>
           {[
-            ['Platform', 'CelebChef Marketplace'],
+            ['Platform', 'Home Meals Marketplace'],
             ['Version',  '1.0.0 MVP'],
             ['Region',   'Sydney, NSW, Australia'],
             ['Currency', 'AUD ($)'],

@@ -15,7 +15,7 @@ function Nav({ page, setPage }) {
         <div className="cc-header-inner">
           <div className="cc-nav-left">
             <button className="cc-logo" onClick={() => { setPage({ name: "home" }); setMobileOpen(false); }}>
-              CELEB<i className="ph-bold ph-x"></i>CHEF
+              HOME<i className="ph-fill ph-bowl-food"></i>MEALS
             </button>
             <nav className="cc-nav-links">
               {navItems.map(item => (
@@ -77,7 +77,7 @@ function Footer({ setPage }) {
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: "32px", marginBottom: "40px" }}>
           <div>
             <div className="cc-logo" style={{ marginBottom: "12px" }}>
-              CELEB<i className="ph-bold ph-x"></i>CHEF
+              HOME<i className="ph-fill ph-bowl-food"></i>MEALS
             </div>
             <p style={{ color: "#aaa", fontSize: "0.9rem", maxWidth: "260px", margin: 0 }}>
               Authentic home-cooked meals from Sydney's best home chefs. Delivered weekly.
@@ -98,14 +98,14 @@ function Footer({ setPage }) {
             </div>
             <div>
               <p style={{ color: "white", fontWeight: 700, fontSize: "0.85rem", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Contact</p>
-              <div style={{ marginBottom: "8px" }}><a href="mailto:hello@celebchef.com.au">hello@celebchef.com.au</a></div>
+              <div style={{ marginBottom: "8px" }}><a href="mailto:hello@homemeals.com.au">hello@homemeals.com.au</a></div>
               <div style={{ marginBottom: "8px" }}><a href="#">Instagram</a></div>
               <div><a href="#">Facebook</a></div>
             </div>
           </div>
         </div>
         <div style={{ borderTop: "1px solid #333", paddingTop: "24px", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
-          <p style={{ color: "#666", fontSize: "0.82rem", margin: 0 }}>© 2026 CelebChef. All rights reserved. Sydney, Australia.</p>
+          <p style={{ color: "#666", fontSize: "0.82rem", margin: 0 }}>© 2026 Home Meals. All rights reserved. Sydney, Australia.</p>
           <p style={{ color: "#666", fontSize: "0.82rem", margin: 0 }}>ABN: 00 000 000 000 (placeholder)</p>
         </div>
       </div>

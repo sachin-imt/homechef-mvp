@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ══════════════════════════════════════════════════════════════
-// CelebChef Daily Backup Script
+// Home Meals Daily Backup Script
 //
 // Extracts source data from cc-data.js and any exported
 // localStorage snapshots, then writes date-stamped CSV files
@@ -13,7 +13,7 @@
 // For live data (localStorage), use the Admin Portal:
 //   Admin → Settings → Export All Data → download JSON
 //   Then place the JSON file in backups/ and run:
-//   node scripts/backup.js --restore backups/celebchef-backup-YYYY-MM-DD.json
+//   node scripts/backup.js --restore backups/homemeals-backup-YYYY-MM-DD.json
 // ══════════════════════════════════════════════════════════════
 
 const fs   = require('fs');
@@ -85,7 +85,7 @@ function parsePostcodes() {
 // ── Main ─────────────────────────────────────────────────────
 function runBackup(lsData) {
   if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR, { recursive: true });
-  console.log(`\n📦  CelebChef Backup — ${TODAY}`);
+  console.log(`\n📦  Home Meals Backup — ${TODAY}`);
   console.log('='.repeat(40));
   console.log(`Output: ${OUT_DIR}\n`);
 
@@ -192,7 +192,7 @@ if (args[0] === '--restore' && args[1]) {
 } else {
   // Check for exported JSON from admin portal
   const exportFiles = fs.readdirSync(BACKUP_DIR)
-    .filter(f => f.startsWith('celebchef-backup-') && f.endsWith('.json'))
+    .filter(f => f.startsWith('homemeals-backup-') && f.endsWith('.json'))
     .sort().reverse();
 
   if (exportFiles.length) {

@@ -1,4 +1,4 @@
-# CelebChef — Build Verification Test Suite
+# Home Meals — Build Verification Test Suite
 
 > **For automated agents:** Run `node tests/bvt-runner.js` from the project root.
 > **Report output:** `tests/bvt-results/bvt-<timestamp>.json`
@@ -52,7 +52,7 @@
 | BVT-021 | app.html loads all 8 JS modules | All `<script>` tags present | Critical |
 | BVT-022 | admin.html loads cc-portal.js | Chef portal code available at admin login | Critical |
 | BVT-023 | admin.html loads all 6 admin modules | All `<script>` tags present | Critical |
-| BVT-024 | CelebChef yellow branding (#FACA50) | Colour token in app.html | High |
+| BVT-024 | Home Meals yellow branding (#FACA50) | Colour token in app.html | High |
 
 ---
 

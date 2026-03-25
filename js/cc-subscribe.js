@@ -86,7 +86,7 @@ function SubscribePage({ chef, setPage }) {
           <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => { setPage({ name: "detail", chef }); window.scrollTo(0, 0); }}>Back to {chef?.chef_name}</button>
         </div>
         <p style={{ textAlign: "center", fontSize: "0.82rem", color: "#9CA3AF", marginTop: "20px" }}>
-          Questions? <a href="mailto:hello@celebchef.com.au" style={{ color: "#111", fontWeight: 600 }}>hello@celebchef.com.au</a>
+          Questions? <a href="mailto:hello@homemeals.com.au" style={{ color: "#111", fontWeight: 600 }}>hello@homemeals.com.au</a>
         </p>
       </div>
     );
