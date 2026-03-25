@@ -109,10 +109,10 @@ function AdminApp() {
   if (!authed) return <LoginGate onAuth={handleAuth}/>;
 
   var { DashboardPage, ChefsPage, SubscribersPage, ContentPage, SettingsPage } = window.ADM;
-  var { mockSubscribers } = window.ADM;
+  var subscribers = window.ADM.subscribers || [];
 
   var mainContent;
-  if      (page === 'dashboard')   mainContent = <DashboardPage   chefs={chefs} subscribers={mockSubscribers}/>;
+  if      (page === 'dashboard')   mainContent = <DashboardPage   chefs={chefs} subscribers={subscribers}/>;
   else if (page === 'chefs')       mainContent = <ChefsPage       chefs={chefs} setChefs={setChefs}/>;
   else if (page === 'subscribers') mainContent = <SubscribersPage chefs={chefs}/>;
   else if (page === 'content')     mainContent = <ContentPage     content={content} setContent={setContent}/>;

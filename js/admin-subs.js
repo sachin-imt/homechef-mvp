@@ -2,8 +2,7 @@
 window.ADM = window.ADM || {};
 
 function SubscribersPage({ chefs }) {
-  var { mockSubscribers } = window.ADM;
-  var [subs]        = React.useState(mockSubscribers);
+  var [subs]        = React.useState(window.ADM.subscribers || []);
   var [search, setSearch]   = React.useState('');
   var [filterChef, setFC]   = React.useState('all');
   var [filterWeek, setFW]   = React.useState('all');
