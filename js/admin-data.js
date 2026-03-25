@@ -1,6 +1,15 @@
 // ─── ADMIN DATA + LOCALSTORAGE PERSISTENCE ───
 window.ADM = window.ADM || {};
 
+// ── Subscriber status stages ──
+var SUBSCRIBER_STATUSES = [
+  { value:'Interested',         label:'Interested',          color:'#3B82F6', bg:'#DBEAFE', desc:'Signed up — call to discuss and request payment' },
+  { value:'Payment Made',       label:'Payment Made',        color:'#F59E0B', bg:'#FEF3C7', desc:'Payment received — confirm with chef that delivery is possible' },
+  { value:'Active Deliveries',  label:'Active Deliveries',   color:'#3A813D', bg:'#D4EDDA', desc:'Deliveries underway' },
+  { value:'Paused Deliveries',  label:'Paused Deliveries',   color:'#9CA3AF', bg:'#F4F4F4', desc:'Temporarily paused by subscriber' },
+  { value:'Deactivated',        label:'Deactivated',         color:'#D0342C', bg:'#FEE2E2', desc:'No longer active' },
+];
+
 // ── localStorage helpers ──
 function loadChefs() {
   try { var s = localStorage.getItem('cc_chefs'); return s ? JSON.parse(s) : null; } catch(e) { return null; }
@@ -19,6 +28,23 @@ function loadSubscribers() {
 }
 function saveSubscribers(subs) {
   try { localStorage.setItem('cc_subscribers', JSON.stringify(subs)); } catch(e) {}
+}
+function loadApplications() {
+  try { var s = localStorage.getItem('cc_chef_applications'); return s ? JSON.parse(s) : []; } catch(e) { return []; }
+}
+function saveApplications(apps) {
+  try { localStorage.setItem('cc_chef_applications', JSON.stringify(apps)); } catch(e) {}
+}
+function loadNotifications() {
+  try { var s = localStorage.getItem('cc_notifications'); return s ? JSON.parse(s) : []; } catch(e) { return []; }
+}
+function saveNotifications(n) {
+  try { localStorage.setItem('cc_notifications', JSON.stringify(n)); } catch(e) {}
+}
+function pushNotification(type, message, ref_id) {
+  var notifs = loadNotifications();
+  notifs.unshift({ id: Date.now(), type, message, created: new Date().toISOString().slice(0,10), read: false, ref_id: ref_id || null });
+  saveNotifications(notifs);
 }
 
 // ── Default site content ──
@@ -50,42 +76,41 @@ var defaultContent = {
   contact_email:    "hello@celebchef.com.au",
 };
 
-// ── Pending menu submissions ──
-var pendingMenus = [];
-
-// ── Seed from localStorage or cc-data defaults ──
-var adminChefs   = loadChefs() || (window.CC && window.CC.mockChefs ? JSON.parse(JSON.stringify(window.CC.mockChefs)) : []);
-var siteContent  = loadContent();
-// Subscriber schema:
-//   id, name, email, phone, chef_id, chef_name, suburb, postcode, dietary, created
-//   starting_week  — the first week they subscribed
-//   payments       — array of { week, status: 'Pending'|'Paid', confirmed: bool, confirmed_at: string|null }
-//
-// Two seed records — remove once real subscriptions come in
+// ── Seed data ──
+// Subscriber status stages: Interested → Payment Made → Active Deliveries → Paused Deliveries / Deactivated
 var seedSubscribers = [
   {
     id: 1, name: 'Sarah Johnson', email: 'sarah.j@gmail.com', phone: '0412 345 678',
     chef_id: 1, chef_name: 'Chef Priya', suburb: 'Newtown', postcode: '2042',
     dietary: '', created: '2026-03-25', starting_week: 'Mar 31–Apr 4',
+    status: 'Active Deliveries',
+    status_notes: 'Payment confirmed. Chef confirmed delivery.',
     payments: [
-      { week: 'Mar 31–Apr 4', status: 'Paid', confirmed: true, confirmed_at: '2026-03-25' },
+      { week: 'Mar 31–Apr 4', week_iso: '2026-03-31', status: 'Paid', confirmed: true, confirmed_at: '2026-03-25', note: '', added_by: 'system', added_at: '2026-03-25' },
     ],
   },
   {
     id: 2, name: 'Michael Chen', email: 'mchen@outlook.com', phone: '0423 456 789',
     chef_id: 2, chef_name: 'Chef Asa', suburb: 'Redfern', postcode: '2016',
     dietary: 'Gluten-free', created: '2026-03-25', starting_week: 'Mar 31–Apr 4',
-    payments: [
-      { week: 'Mar 31–Apr 4', status: 'Pending', confirmed: false, confirmed_at: null },
-    ],
+    status: 'Interested',
+    status_notes: '',
+    payments: [],
   },
 ];
-var stored = loadSubscribers();
-var subscribers = stored.length > 0 ? stored : seedSubscribers;
+
+var adminChefs    = loadChefs() || (window.CC && window.CC.mockChefs ? JSON.parse(JSON.stringify(window.CC.mockChefs)) : []);
+var siteContent   = loadContent();
+var stored        = loadSubscribers();
+var subscribers   = stored.length > 0 ? stored : seedSubscribers;
+var applications  = loadApplications();
+var notifications = loadNotifications();
 
 Object.assign(window.ADM, {
-  pendingMenus, defaultContent,
-  adminChefs, siteContent, subscribers,
+  SUBSCRIBER_STATUSES, defaultContent,
+  adminChefs, siteContent, subscribers, applications, notifications,
   loadChefs, saveChefs, loadContent, saveContent,
   loadSubscribers, saveSubscribers,
+  loadApplications, saveApplications,
+  loadNotifications, saveNotifications, pushNotification,
 });

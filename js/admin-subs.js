@@ -88,8 +88,17 @@ function AddPaymentForm({ sub, chefs, onAdd, onClose }) {
   );
 }
 
+function statusBadgeFor(status) {
+  var s = (window.ADM.SUBSCRIBER_STATUSES||[]).find(x=>x.value===status);
+  if (!s) return <span className="badge badge-gray">{status||'—'}</span>;
+  return <span className="badge" style={{ background:s.bg, color:s.color }}>{status}</span>;
+}
+
 function SubscriberDetail({ sub, chefs, onUpdate, onClose }) {
-  var [showAddForm, setShowAddForm] = React.useState(false);
+  var [showAddForm,  setShowAddForm]  = React.useState(false);
+  var [editingNote,  setEditingNote]  = React.useState(false);
+  var [noteText,     setNoteText]     = React.useState(sub.status_notes||'');
+  var [newStatus,    setNewStatus]    = React.useState(sub.status||'Interested');
 
   var chef = chefs.find(c => c.chef_id === sub.chef_id);
   var amount = chef ? chef.price_per_week : 0;
@@ -107,21 +116,58 @@ function SubscriberDetail({ sub, chefs, onUpdate, onClose }) {
     onUpdate({ ...sub, payments: [...sub.payments, entry] });
     setShowAddForm(false);
   };
+  var handleStatusSave = () => {
+    onUpdate({ ...sub, status: newStatus, status_notes: noteText });
+    setEditingNote(false);
+    // notify cook if subscriber withdrawn
+    if (newStatus === 'Deactivated' && sub.status !== 'Deactivated') {
+      window.ADM.pushNotification('subscriber_withdrawn', `${sub.name} has been deactivated — notify ${sub.chef_name}`, sub.id);
+    }
+  };
 
-  // Sort payments newest-first by week_iso, fallback to order
   var sorted = [...sub.payments].sort((a,b) => (b.week_iso||'') > (a.week_iso||'') ? 1 : -1);
+  var STATUSES = window.ADM.SUBSCRIBER_STATUSES || [];
 
   return (
     <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="modal" style={{ maxWidth:'520px' }}>
+      <div className="modal" style={{ maxWidth:'540px' }}>
         <div className="modal-header">
-          <div>
-            <h2 style={{ fontSize:'1rem', fontWeight:800, margin:0 }}>{sub.name}</h2>
-            <p style={{ fontSize:'0.78rem', color:'#9CA3AF', margin:0 }}>{sub.chef_name} · Started {sub.starting_week}</p>
+          <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+            <div>
+              <h2 style={{ fontSize:'1rem', fontWeight:800, margin:0 }}>{sub.name}</h2>
+              <p style={{ fontSize:'0.78rem', color:'#9CA3AF', margin:0 }}>{sub.chef_name} · Started {sub.starting_week}</p>
+            </div>
+            {statusBadgeFor(sub.status)}
           </div>
           <button className="btn-icon" onClick={onClose}><i className="ph-bold ph-x"/></button>
         </div>
         <div className="modal-body">
+
+          {/* Status change */}
+          <div style={{ background:'#F8F8F8', borderRadius:'10px', padding:'14px', marginBottom:'16px' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: editingNote?'12px':'0' }}>
+              <span style={{ fontSize:'0.82rem', fontWeight:700, color:'#111' }}>Subscriber Status</span>
+              {!editingNote && (
+                <button className="btn btn-outline btn-sm" onClick={()=>{ setEditingNote(true); setNewStatus(sub.status||'Interested'); setNoteText(sub.status_notes||''); }}>
+                  <i className="ph-bold ph-pencil"/> Change
+                </button>
+              )}
+            </div>
+            {editingNote ? (
+              <>
+                <select className="form-input" value={newStatus} onChange={e=>setNewStatus(e.target.value)} style={{ marginBottom:'8px' }}>
+                  {STATUSES.map(s=><option key={s.value} value={s.value}>{s.value} — {s.desc}</option>)}
+                </select>
+                <textarea className="form-input" rows={2} value={noteText} onChange={e=>setNoteText(e.target.value)} placeholder="Add a note (e.g. called subscriber, confirmed payment)..." style={{ marginBottom:'8px' }}/>
+                <div style={{ display:'flex', gap:'8px', justifyContent:'flex-end' }}>
+                  <button className="btn btn-outline btn-sm" onClick={()=>setEditingNote(false)}>Cancel</button>
+                  <button className="btn btn-primary btn-sm" onClick={handleStatusSave}><i className="ph-bold ph-check"/> Save Status</button>
+                </div>
+              </>
+            ) : (
+              sub.status_notes && <p style={{ fontSize:'0.8rem', color:'#5A5D66', margin:'8px 0 0', fontStyle:'italic' }}>"{sub.status_notes}"</p>
+            )}
+          </div>
 
           {/* Contact details */}
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px', marginBottom:'20px', paddingBottom:'16px', borderBottom:'1px solid #F4F4F4' }}>
@@ -352,18 +398,57 @@ function AddSubscriberModal({ chefs, onSave, onClose }) {
   );
 }
 
-function SubscribersPage({ chefs }) {
-  var [subs, setSubs]         = React.useState(() => window.ADM.subscribers || []);
-  var [search, setSearch]     = React.useState('');
-  var [filterChef, setFC]     = React.useState('all');
-  var [filterPay,  setFP]     = React.useState('all');
-  var [selected,   setSel]    = React.useState(null);
-  var [showAdd,    setShowAdd] = React.useState(false);
+var WORKFLOW_STEPS = [
+  { status:'Interested',        action:'Call subscriber to confirm interest and request payment', icon:'ph-fill ph-phone', next:'Payment Made' },
+  { status:'Payment Made',      action:'Confirm with chef they can take the delivery', icon:'ph-fill ph-chef-hat', next:'Active Deliveries' },
+  { status:'Active Deliveries', action:'Deliveries underway — monitor weekly payments', icon:'ph-fill ph-truck', next:null },
+  { status:'No payment after 1 week', action:'Call subscriber — if not interested, notify chef and deactivate', icon:'ph-fill ph-warning', next:'Deactivated', warn:true },
+];
+
+function WorkflowGuide({ onClose }) {
+  return (
+    <div style={{ background:'white', border:'1px solid #E5E5E5', borderRadius:'12px', padding:'20px', marginBottom:'20px' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px' }}>
+        <h3 style={{ fontSize:'0.9rem', fontWeight:800, margin:0 }}>Subscriber Workflow</h3>
+        <button className="btn-icon" onClick={onClose}><i className="ph-bold ph-x"/></button>
+      </div>
+      <div style={{ display:'flex', flexDirection:'column', gap:'0' }}>
+        {WORKFLOW_STEPS.map((step, i) => (
+          <div key={i} style={{ display:'flex', gap:'12px', alignItems:'flex-start' }}>
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
+              <div style={{ width:'32px', height:'32px', borderRadius:'50%', background: step.warn ? '#FEE2E2' : '#FFFBEB', border:`2px solid ${step.warn?'#FECACA':'#FACA50'}`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                <i className={step.icon} style={{ fontSize:'0.85rem', color: step.warn ? '#D0342C' : '#FACA50' }}/>
+              </div>
+              {i < WORKFLOW_STEPS.length-1 && <div style={{ width:'2px', height:'24px', background:'#E5E5E5' }}/>}
+            </div>
+            <div style={{ paddingBottom:'16px', paddingTop:'4px' }}>
+              <div style={{ fontWeight:700, fontSize:'0.82rem', color: step.warn ? '#D0342C' : '#111' }}>{step.status}</div>
+              <div style={{ fontSize:'0.8rem', color:'#5A5D66', marginTop:'2px' }}>{step.action}</div>
+              {step.next && <div style={{ fontSize:'0.75rem', color:'#9CA3AF', marginTop:'2px' }}>→ move to <strong>{step.next}</strong></div>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SubscribersPage({ chefs, onUpdate: notifyParent }) {
+  var [subs, setSubs]            = React.useState(() => window.ADM.subscribers || []);
+  var [search, setSearch]        = React.useState('');
+  var [filterChef, setFC]        = React.useState('all');
+  var [filterStatus, setFS]      = React.useState('all');
+  var [selected,   setSel]       = React.useState(null);
+  var [showAdd,    setShowAdd]   = React.useState(false);
+  var [showGuide,  setShowGuide] = React.useState(false);
+
+  var STATUSES = (window.ADM.SUBSCRIBER_STATUSES || []).map(s=>s.value);
 
   var persist = (updated) => {
     setSubs(updated);
     window.ADM.subscribers = updated;
     window.ADM.saveSubscribers(updated);
+    notifyParent && notifyParent();
   };
 
   var handleUpdate = (updatedSub) => {
@@ -374,15 +459,17 @@ function SubscribersPage({ chefs }) {
 
   var handleAddSubscriber = (newSub) => {
     var newId = Math.max(...subs.map(s=>s.id), 0) + 1;
-    var updated = [...subs, { ...newSub, id: newId }];
+    var sub = { ...newSub, id: newId, status: 'Interested', status_notes: '' };
+    var updated = [...subs, sub];
     persist(updated);
+    // push notification
+    window.ADM.pushNotification('new_subscriber', `New subscriber: ${newSub.name} → ${newSub.chef_name}`, newId);
     setShowAdd(false);
   };
 
   var filtered = subs.filter(s => {
-    if (filterChef !== 'all' && s.chef_id !== parseInt(filterChef)) return false;
-    if (filterPay === 'all_paid'    && !s.payments.every(p=>p.confirmed))   return false;
-    if (filterPay === 'has_pending' && !s.payments.some(p=>!p.confirmed))   return false;
+    if (filterChef  !== 'all' && s.chef_id !== parseInt(filterChef)) return false;
+    if (filterStatus !== 'all' && s.status !== filterStatus) return false;
     if (search) {
       var q = search.toLowerCase();
       return s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q) || s.suburb.toLowerCase().includes(q);
@@ -394,18 +481,28 @@ function SubscribersPage({ chefs }) {
     var chef = chefs.find(c => c.chef_id === s.chef_id);
     return total + (s.payments||[]).filter(p=>p.confirmed).length * (chef?.price_per_week||0);
   }, 0);
-  var pendingCount = subs.reduce((t,s) => t + (s.payments||[]).filter(p=>!p.confirmed).length, 0);
+  var pendingCount    = subs.reduce((t,s) => t + (s.payments||[]).filter(p=>!p.confirmed).length, 0);
+  var interestedCount = subs.filter(s=>s.status==='Interested').length;
 
   return (
     <div className="fade-in">
+      {showGuide && <WorkflowGuide onClose={()=>setShowGuide(false)}/>}
       <div className="section-header">
         <div>
           <h1 className="section-title">Subscribers</h1>
-          <p className="section-subtitle">{subs.length} subscriber{subs.length!==1?'s':''} · {pendingCount} payment{pendingCount!==1?'s':''} awaiting confirmation</p>
+          <p className="section-subtitle">
+            {subs.length} total
+            {interestedCount > 0 && <span style={{ marginLeft:'8px', background:'#DBEAFE', color:'#1D4ED8', borderRadius:'10px', fontSize:'0.72rem', padding:'1px 8px', fontWeight:700 }}>{interestedCount} need follow-up</span>}
+          </p>
         </div>
-        <button className="btn btn-primary" onClick={()=>setShowAdd(true)}>
-          <i className="ph-bold ph-user-plus"/> Add Subscriber
-        </button>
+        <div style={{ display:'flex', gap:'8px' }}>
+          <button className="btn btn-outline" onClick={()=>setShowGuide(g=>!g)}>
+            <i className="ph-bold ph-question"/> Workflow
+          </button>
+          <button className="btn btn-primary" onClick={()=>setShowAdd(true)}>
+            <i className="ph-bold ph-user-plus"/> Add Subscriber
+          </button>
+        </div>
         <button className="btn btn-outline" onClick={() => {
           var csv = ['ID,Name,Email,Phone,Chef,Suburb,Postcode,Dietary,Joined,Starting Week,Weeks Confirmed,Weeks Pending',
             ...subs.map(s => {
@@ -445,13 +542,12 @@ function SubscribersPage({ chefs }) {
           <option value="all">All Chefs</option>
           {chefs.map(c=><option key={c.chef_id} value={c.chef_id}>{c.chef_name}</option>)}
         </select>
-        <select className="form-input" value={filterPay} onChange={e=>setFP(e.target.value)} style={{ width:'180px' }}>
-          <option value="all">All Payment Statuses</option>
-          <option value="all_paid">All Weeks Confirmed</option>
-          <option value="has_pending">Has Pending Payment</option>
+        <select className="form-input" value={filterStatus} onChange={e=>setFS(e.target.value)} style={{ width:'180px' }}>
+          <option value="all">All Statuses</option>
+          {STATUSES.map(s=><option key={s} value={s}>{s}</option>)}
         </select>
-        {(search||filterChef!=='all'||filterPay!=='all') && (
-          <button className="btn btn-outline btn-sm" onClick={()=>{setSearch('');setFC('all');setFP('all');}}>
+        {(search||filterChef!=='all'||filterStatus!=='all') && (
+          <button className="btn btn-outline btn-sm" onClick={()=>{setSearch('');setFC('all');setFS('all');}}>
             <i className="ph-bold ph-x"/> Clear
           </button>
         )}
@@ -469,7 +565,7 @@ function SubscribersPage({ chefs }) {
             <thead>
               <tr>
                 <th>#</th><th>Name</th><th>Contact</th><th>Chef</th>
-                <th>Suburb</th><th>Dietary</th><th>Starting Week</th><th>Payments</th><th></th>
+                <th>Status</th><th>Dietary</th><th>Starting Week</th><th>Payments</th><th></th>
               </tr>
             </thead>
             <tbody>
@@ -484,11 +580,8 @@ function SubscribersPage({ chefs }) {
                       <div style={{ fontSize:'0.8rem' }}>{s.email}</div>
                       <div style={{ fontSize:'0.75rem', color:'#9CA3AF' }}>{s.phone}</div>
                     </td>
-                    <td><span className="badge badge-blue">{s.chef_name}</span></td>
-                    <td>
-                      <div style={{ fontSize:'0.85rem' }}>{s.suburb}</div>
-                      <div style={{ fontSize:'0.72rem', color:'#9CA3AF' }}>{s.postcode}</div>
-                    </td>
+                    <td><span className="badge badge-blue" style={{ fontSize:'0.72rem' }}>{s.chef_name}</span></td>
+                    <td>{statusBadgeFor(s.status)}</td>
                     <td style={{ fontSize:'0.8rem', color: s.dietary?'#111':'#CCC' }}>{s.dietary||'—'}</td>
                     <td style={{ fontSize:'0.82rem', whiteSpace:'nowrap', fontWeight:600 }}>{s.starting_week}</td>
                     <td>

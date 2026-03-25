@@ -99,7 +99,30 @@ function BecomeAChefPage({ setPage }) {
   function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => { setLoading(false); setSubmitted(true); window.scrollTo(0, 0); }, 1800);
+    setTimeout(() => {
+      // Save application to localStorage for admin portal review
+      try {
+        var apps = JSON.parse(localStorage.getItem('cc_chef_applications') || '[]');
+        var newApp = {
+          id: Date.now(),
+          full_name: form.full_name, email: form.email, phone: form.phone,
+          suburb: form.suburb, cuisine_type: form.cuisine_type,
+          cooking_background: form.cooking_background,
+          sample_dishes: [form.dish1,form.dish2,form.dish3,form.dish4,form.dish5].filter(Boolean),
+          weekly_capacity: form.weekly_capacity,
+          delivery_days: form.delivery_days,
+          submitted: new Date().toISOString().slice(0,10),
+          status: 'pending',
+        };
+        apps.push(newApp);
+        localStorage.setItem('cc_chef_applications', JSON.stringify(apps));
+        // Add notification for admin
+        var notifs = JSON.parse(localStorage.getItem('cc_notifications') || '[]');
+        notifs.unshift({ id: Date.now(), type:'chef_application', message:`New chef application from ${form.full_name} (${form.cuisine_type})`, created: new Date().toISOString().slice(0,10), read:false, ref_id: newApp.id });
+        localStorage.setItem('cc_notifications', JSON.stringify(notifs));
+      } catch(e) {}
+      setLoading(false); setSubmitted(true); window.scrollTo(0, 0);
+    }, 1800);
   }
 
   if (submitted) {
