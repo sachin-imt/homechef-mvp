@@ -11,47 +11,159 @@ function Badge({ count }) {
   );
 }
 
-function LoginGate({ onAuth }) {
-  var [pwd, setPwd]   = useState('');
-  var [err, setErr]   = useState('');
-  var [busy, setBusy] = useState(false);
+// ─────────────────────────────────────────────
+// Login gate — Admin OR Chef
+// ─────────────────────────────────────────────
+function LoginGate({ onAdminAuth, onChefAuth }) {
+  var [tab,      setTab]     = useState('admin');
+  var [pwd,      setPwd]     = useState('');
+  var [username, setUser]    = useState('');
+  var [chefPwd,  setChefPwd] = useState('');
+  var [showPwd,  setShowPwd] = useState(false);
+  var [err,      setErr]     = useState('');
+  var [busy,     setBusy]    = useState(false);
 
-  var handle = () => {
-    setBusy(true);
+  var handleAdminLogin = () => {
+    setBusy(true); setErr('');
     setTimeout(() => {
       var stored = localStorage.getItem('cc_admin_pwd') || 'admin123';
-      if (pwd === stored) { onAuth(); }
-      else { setErr('Incorrect password. Try admin123'); setBusy(false); }
+      if (pwd === stored) { onAdminAuth(); }
+      else { setErr('Incorrect password.'); }
+      setBusy(false);
     }, 400);
   };
 
+  var handleChefLogin = () => {
+    setBusy(true); setErr('');
+    setTimeout(() => {
+      try {
+        var accounts = JSON.parse(localStorage.getItem('cc_chef_accounts') || '[]');
+        var match = accounts.find(a =>
+          a.username === username.trim() &&
+          a.password === chefPwd &&
+          a.active !== false
+        );
+        if (match) {
+          var sess = { chef_id: match.chef_id, chef_name: match.chef_name, username: match.username };
+          sessionStorage.setItem('cc_chef_session', JSON.stringify(sess));
+          onChefAuth(sess);
+        } else {
+          setErr('Invalid username or password. Contact CelebChef for access.');
+        }
+      } catch(e) { setErr('Login error. Please try again.'); }
+      setBusy(false);
+    }, 500);
+  };
+
+  var lbl  = { display:'block', fontWeight:600, fontSize:'0.8rem', marginBottom:'5px' };
+  var inEr = err ? { border:'1.5px solid #D0342C' } : {};
+
   return (
     <div className="login-wrap">
-      <div className="login-card">
-        <div style={{ textAlign:'center', marginBottom:'28px' }}>
+      <div className="login-card" style={{ maxWidth:'400px' }}>
+        {/* Logo */}
+        <div style={{ textAlign:'center', marginBottom:'24px' }}>
           <div style={{ fontWeight:900, fontSize:'1.6rem', letterSpacing:'-0.05em', color:'#111', marginBottom:'6px' }}>
             CELEB<i className="ph-bold ph-x" style={{ color:'#FACA50', fontSize:'1.1rem', margin:'0 1px' }}/>CHEF
           </div>
-          <div style={{ fontSize:'0.8rem', fontWeight:700, background:'#FACA50', color:'#111', display:'inline-block', padding:'2px 10px', borderRadius:'20px' }}>ADMIN</div>
-          <p style={{ fontSize:'0.875rem', color:'#5A5D66', marginTop:'12px' }}>Sign in to the admin portal</p>
+          <p style={{ fontSize:'0.85rem', color:'#5A5D66' }}>Secure portal — authorised access only</p>
         </div>
-        <div className="form-group">
-          <label style={{ display:'block', fontWeight:600, fontSize:'0.8rem', marginBottom:'5px' }}>Password</label>
-          <input className="form-input" type="password" value={pwd}
-            onChange={e=>{setPwd(e.target.value);setErr('');}}
-            onKeyDown={e=>e.key==='Enter'&&handle()}
-            placeholder="Enter admin password" autoFocus/>
-          {err && <p style={{ color:'#D0342C', fontSize:'0.8rem', marginTop:'6px' }}>{err}</p>}
+
+        {/* Tabs */}
+        <div style={{ display:'flex', background:'#F4F4F4', borderRadius:'10px', padding:'4px', gap:'4px', marginBottom:'24px' }}>
+          {[['admin','Admin Portal'],['chef','Chef Portal']].map(([t,l]) => (
+            <button key={t} onClick={()=>{ setTab(t); setErr(''); }} style={{
+              flex:1, padding:'8px', border:'none', borderRadius:'8px', cursor:'pointer', fontFamily:'inherit',
+              fontWeight:700, fontSize:'0.82rem',
+              background: tab===t ? 'white' : 'transparent',
+              color:       tab===t ? '#111'  : '#9CA3AF',
+              boxShadow:   tab===t ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
+              transition:'all 0.15s',
+            }}>{l}</button>
+          ))}
         </div>
-        <button className="btn btn-primary" style={{ width:'100%' }} onClick={handle} disabled={busy||!pwd}>
-          {busy ? <><i className="ph-bold ph-spinner spin"/> Signing in…</> : 'Sign In →'}
-        </button>
-        <p style={{ fontSize:'0.75rem', color:'#9CA3AF', textAlign:'center', marginTop:'16px' }}>Default: admin123</p>
+
+        {tab === 'admin' ? (
+          <>
+            <div className="form-group">
+              <label style={lbl}>Admin Password</label>
+              <input className="form-input" type="password" value={pwd} style={inEr}
+                onChange={e=>{setPwd(e.target.value);setErr('');}}
+                onKeyDown={e=>e.key==='Enter'&&handleAdminLogin()}
+                placeholder="Enter admin password" autoFocus/>
+            </div>
+            {err && <p style={{ color:'#D0342C', fontSize:'0.8rem', margin:'-8px 0 12px' }}>{err}</p>}
+            <button className="btn btn-primary" style={{ width:'100%' }} onClick={handleAdminLogin} disabled={busy||!pwd}>
+              {busy ? <><i className="ph-bold ph-spinner spin"/> Signing in…</> : 'Sign In →'}
+            </button>
+            <p style={{ fontSize:'0.72rem', color:'#9CA3AF', textAlign:'center', marginTop:'12px' }}>Default: admin123</p>
+          </>
+        ) : (
+          <>
+            <div style={{ background:'#F0F9FF', border:'1px solid #BAE6FD', borderRadius:'8px', padding:'10px 14px', marginBottom:'16px', fontSize:'0.8rem', color:'#0369A1' }}>
+              <i className="ph-fill ph-info" style={{ marginRight:'6px' }}/>
+              Credentials are provided by CelebChef. You cannot self-register.
+            </div>
+            <div className="form-group">
+              <label style={lbl}>Username</label>
+              <input className="form-input" type="text" value={username}
+                onChange={e=>{setUser(e.target.value);setErr('');}}
+                onKeyDown={e=>e.key==='Enter'&&handleChefLogin()}
+                placeholder="Your username" autoFocus/>
+            </div>
+            <div className="form-group">
+              <label style={lbl}>Password</label>
+              <div style={{ position:'relative' }}>
+                <input className="form-input" type={showPwd?'text':'password'} value={chefPwd} style={{ ...inEr, paddingRight:'40px' }}
+                  onChange={e=>{setChefPwd(e.target.value);setErr('');}}
+                  onKeyDown={e=>e.key==='Enter'&&handleChefLogin()}
+                  placeholder="Your password"/>
+                <button type="button" onClick={()=>setShowPwd(s=>!s)}
+                  style={{ position:'absolute', right:'10px', top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'1rem' }}>
+                  <i className={`ph-bold ${showPwd?'ph-eye-slash':'ph-eye'}`}/>
+                </button>
+              </div>
+            </div>
+            {err && <p style={{ color:'#D0342C', fontSize:'0.8rem', margin:'-8px 0 12px' }}>{err}</p>}
+            <button className="btn btn-primary" style={{ width:'100%' }} onClick={handleChefLogin} disabled={busy||!username||!chefPwd}>
+              {busy ? <><i className="ph-bold ph-spinner spin"/> Signing in…</> : 'Sign In →'}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
 }
 
+// ─────────────────────────────────────────────
+// Chef view wrapper (shown after chef login)
+// ─────────────────────────────────────────────
+function ChefView({ session, onLogout }) {
+  return (
+    <div>
+      {/* Minimal top bar for chef */}
+      <div style={{ background:'#0F0F0F', padding:'12px 24px', display:'flex', alignItems:'center', justifyContent:'space-between', position:'sticky', top:0, zIndex:50 }}>
+        <div style={{ fontWeight:900, fontSize:'1.1rem', letterSpacing:'-0.05em', color:'white' }}>
+          CELEB<i className="ph-bold ph-x" style={{ color:'#FACA50', margin:'0 1px' }}/>CHEF
+          <span style={{ fontSize:'0.65rem', fontWeight:700, background:'#FACA50', color:'#111', padding:'2px 8px', borderRadius:'20px', marginLeft:'10px' }}>CHEF PORTAL</span>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
+          <span style={{ fontSize:'0.82rem', color:'#888' }}>Logged in as <strong style={{ color:'white' }}>{session.username}</strong></span>
+          <button className="btn btn-outline btn-sm" style={{ borderColor:'#444', color:'#888', fontSize:'0.78rem' }}
+            onClick={()=>{ sessionStorage.removeItem('cc_chef_session'); onLogout(); }}>
+            <i className="ph-bold ph-sign-out"/> Log out
+          </button>
+        </div>
+      </div>
+      {/* Render ChefPortalPage (from cc-portal.js loaded in admin.html) */}
+      <ChefPortalPage session={session}/>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Sidebar
+// ─────────────────────────────────────────────
 function Sidebar({ page, setPage, badges }) {
   var NAV = [
     { id:'dashboard',     label:'Dashboard',          icon:'ph-fill ph-squares-four',   section:'main'   },
@@ -98,21 +210,35 @@ function Sidebar({ page, setPage, badges }) {
   );
 }
 
+// ─────────────────────────────────────────────
+// Root App
+// ─────────────────────────────────────────────
 function AdminApp() {
-  var [authed,  setAuthed]  = useState(() => !!sessionStorage.getItem('cc_admin_auth'));
+  var [authed,      setAuthed]      = useState(() => !!sessionStorage.getItem('cc_admin_auth'));
+  var [chefSession, setChefSession] = useState(() => {
+    try { return JSON.parse(sessionStorage.getItem('cc_chef_session')); } catch(e) { return null; }
+  });
   var [page,    setPage]    = useState('dashboard');
   var [chefs,   setChefs]   = useState(window.ADM.adminChefs);
   var [content, setContent] = useState(window.ADM.siteContent);
-  // live-reload counters so badges update when data changes
-  var [tick, setTick] = useState(0);
+  var [tick,    setTick]    = useState(0);
   var refresh = () => setTick(t => t+1);
 
-  var handleAuth = () => { sessionStorage.setItem('cc_admin_auth','1'); setAuthed(true); };
+  var handleAdminAuth = () => { sessionStorage.setItem('cc_admin_auth','1'); setAuthed(true); };
 
   useEffect(() => { window.scrollTo(0,0); }, [page]);
 
-  if (!authed) return <LoginGate onAuth={handleAuth}/>;
+  // Not logged in at all
+  if (!authed && !chefSession) {
+    return <LoginGate onAdminAuth={handleAdminAuth} onChefAuth={setChefSession}/>;
+  }
 
+  // Chef is logged in → show chef portal only
+  if (chefSession) {
+    return <ChefView session={chefSession} onLogout={()=>setChefSession(null)}/>;
+  }
+
+  // Admin is logged in → full admin portal
   var { DashboardPage, ChefsPage, ApplicationsPage, MenuApprovalsPage, SubscribersPage, ContentPage, SettingsPage } = window.ADM;
   var subscribers  = window.ADM.subscribers || [];
   var applications = window.ADM.applications || [];

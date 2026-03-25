@@ -4,14 +4,15 @@ var { useState } = React;
 var { DAYS, DAY_LABELS, DISH_TYPES, CUISINE_OPTIONS } = window.CC;
 
 // ─── CHEF PORTAL ───
-function ChefPortalPage() {
+function ChefPortalPage({ session }) {
   var [profileTab, setProfileTab] = useState("profile");
   var [weekTab, setWeekTab] = useState("currentWeek");
   var [saved, setSaved] = useState(false);
   var [bioLen, setBioLen] = useState(0);
   var [postcodeInput, setPostcodeInput] = useState("");
   var [postcodes, setPostcodes] = useState([]);
-  var [profile, setProfile] = useState({ name: "", cuisine: "", price: "", bio: "" });
+  // Pre-fill name from session if provided
+  var [profile, setProfile] = useState({ name: session?.chef_name || "", cuisine: "", price: "", bio: "" });
 
   // Per-day dish entries
   var emptyMenu = () => DAYS.reduce((acc, d) => ({ ...acc, [d]: [{ dish_name: "", dish_type: "Main", dish_image: "" }] }), {});

@@ -8,7 +8,6 @@ function Nav({ page, setPage }) {
     { label: "Our Chefs", target: "home" },
     { label: "How It Works", target: "how" },
     { label: "Become a Chef", target: "become" },
-    { label: "Chef Portal", target: "portal" },
   ];
   return (
     <>
@@ -91,7 +90,6 @@ function Footer({ setPage }) {
                 { label: "Our Chefs", target: "home" },
                 { label: "How It Works", target: "how" },
                 { label: "Become a Chef", target: "become" },
-                { label: "Chef Portal", target: "portal" },
               ].map(item => (
                 <div key={item.target} style={{ marginBottom: "8px" }}>
                   <a href="#" onClick={e => { e.preventDefault(); setPage({ name: item.target }); window.scrollTo(0, 0); }}>{item.label}</a>

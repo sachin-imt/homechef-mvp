@@ -297,6 +297,106 @@ function ChefModal({ chef, onSave, onClose }) {
   );
 }
 
+// ─────────────────────────────────────────────
+// Chef Portal Access (credentials) modal
+// ─────────────────────────────────────────────
+function ChefAccessModal({ chef, onClose }) {
+  var existing = (() => {
+    try { return (JSON.parse(localStorage.getItem('cc_chef_accounts')||'[]')).find(a=>a.chef_id===chef.chef_id); } catch(e) { return null; }
+  })();
+  var [username, setUsername] = useState(existing?.username || '');
+  var [password, setPassword] = useState(existing?.password || '');
+  var [active,   setActive]   = useState(existing?.active !== false);
+  var [showPwd,  setShowPwd]  = useState(false);
+  var [saved,    setSaved]    = useState(false);
+
+  var persist = (accounts) => { try { localStorage.setItem('cc_chef_accounts', JSON.stringify(accounts)); } catch(e) {} };
+
+  var handleSave = () => {
+    if (!username.trim()) return alert('Username required');
+    if (!password.trim()) return alert('Password required');
+    var others = (() => { try { return (JSON.parse(localStorage.getItem('cc_chef_accounts')||'[]')).filter(a=>a.chef_id!==chef.chef_id); } catch(e) { return []; } })();
+    // Check username uniqueness
+    if (others.find(a => a.username === username.trim())) return alert('This username is already used by another chef. Choose a unique username.');
+    persist([...others, { chef_id: chef.chef_id, chef_name: chef.chef_name, username: username.trim(), password: password.trim(), active, created: existing?.created || new Date().toISOString().slice(0,10) }]);
+    setSaved(true);
+    setTimeout(onClose, 900);
+  };
+
+  var handleRevoke = () => {
+    if (!confirm(`Revoke portal access for ${chef.chef_name}?`)) return;
+    var others = (() => { try { return (JSON.parse(localStorage.getItem('cc_chef_accounts')||'[]')).filter(a=>a.chef_id!==chef.chef_id); } catch(e) { return []; } })();
+    persist(others);
+    onClose();
+  };
+
+  var lbl = { display:'block', fontWeight:600, fontSize:'0.8rem', marginBottom:'5px' };
+
+  return (
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal" style={{ maxWidth:'440px' }}>
+        <div className="modal-header">
+          <div>
+            <h2 style={{ fontSize:'1rem', fontWeight:800, margin:0 }}>Chef Portal Access</h2>
+            <p style={{ fontSize:'0.78rem', color:'#9CA3AF', margin:0 }}>{chef.chef_name}</p>
+          </div>
+          <button className="btn-icon" onClick={onClose}><i className="ph-bold ph-x"/></button>
+        </div>
+        <div className="modal-body">
+          {existing && (
+            <div style={{ background:'#D4EDDA', border:'1px solid #A8D5B5', borderRadius:'8px', padding:'10px 14px', marginBottom:'16px', fontSize:'0.82rem', color:'#3A813D' }}>
+              <i className="ph-fill ph-check-circle" style={{ marginRight:'6px' }}/>
+              Portal access is currently <strong>active</strong> · Account created {existing.created}
+            </div>
+          )}
+          {!existing && (
+            <div style={{ background:'#FFF7ED', border:'1px solid #FED7AA', borderRadius:'8px', padding:'10px 14px', marginBottom:'16px', fontSize:'0.82rem', color:'#92400E' }}>
+              <i className="ph-fill ph-warning" style={{ marginRight:'6px' }}/>
+              No portal access yet. Create credentials below and share them with the chef.
+            </div>
+          )}
+          <div className="form-group">
+            <label style={lbl}>Username</label>
+            <input className="form-input" value={username} onChange={e=>setUsername(e.target.value)} placeholder="e.g. chef_priya"/>
+          </div>
+          <div className="form-group">
+            <label style={lbl}>Password</label>
+            <div style={{ position:'relative' }}>
+              <input className="form-input" type={showPwd?'text':'password'} value={password}
+                onChange={e=>setPassword(e.target.value)} placeholder="Set a strong password"
+                style={{ paddingRight:'44px' }}/>
+              <button type="button" onClick={()=>setShowPwd(s=>!s)}
+                style={{ position:'absolute', right:'10px', top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', color:'#9CA3AF' }}>
+                <i className={`ph-bold ${showPwd?'ph-eye-slash':'ph-eye'}`}/>
+              </button>
+            </div>
+          </div>
+          <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 0' }}>
+            <input type="checkbox" id="acc-active" checked={active} onChange={e=>setActive(e.target.checked)} style={{ accentColor:'#111', width:'16px', height:'16px' }}/>
+            <label htmlFor="acc-active" style={{ fontSize:'0.875rem', fontWeight:500, cursor:'pointer' }}>Account active (chef can log in)</label>
+          </div>
+          <div style={{ background:'#F8F8F8', borderRadius:'8px', padding:'12px', fontSize:'0.8rem', color:'#5A5D66', marginTop:'4px' }}>
+            <strong>Share these credentials with the chef:</strong><br/>
+            Portal URL: <code style={{ background:'#E5E5E5', padding:'1px 6px', borderRadius:'4px' }}>admin.html</code><br/>
+            Select <strong>Chef Portal</strong> tab on the login screen.
+          </div>
+        </div>
+        <div className="modal-footer">
+          {existing && (
+            <button className="btn btn-danger" onClick={handleRevoke}>
+              <i className="ph-bold ph-lock-open"/> Revoke Access
+            </button>
+          )}
+          <button className="btn btn-outline" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={handleSave} disabled={saved}>
+            {saved ? <><i className="ph-fill ph-check-circle"/> Saved!</> : (existing ? 'Update Credentials' : 'Create Access')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DeleteConfirm({ chef, onConfirm, onCancel }) {
   return (
     <div className="modal-overlay">
@@ -316,9 +416,10 @@ function DeleteConfirm({ chef, onConfirm, onCancel }) {
 // Active Chefs Page
 // ─────────────────────────────────────────────
 function ChefsPage({ chefs, setChefs }) {
-  var [modal,  setModal]  = useState(null);
-  var [delChef, setDel]   = useState(null);
-  var [search, setSearch] = useState('');
+  var [modal,   setModal]   = useState(null);
+  var [delChef, setDel]     = useState(null);
+  var [access,  setAccess]  = useState(null); // chef whose access modal is open
+  var [search,  setSearch]  = useState('');
 
   var filtered = chefs.filter(c =>
     !search || c.chef_name.toLowerCase().includes(search.toLowerCase()) ||
@@ -392,6 +493,10 @@ function ChefsPage({ chefs, setChefs }) {
                   <td>
                     <div style={{ display:'flex', gap:'6px' }}>
                       <button className="btn-icon" title="Edit" onClick={()=>setModal({chef:{...c}})}><i className="ph-bold ph-pencil"/></button>
+                      <button className="btn-icon" title="Portal access" onClick={()=>setAccess(c)}
+                        style={{ color: (() => { try { return (JSON.parse(localStorage.getItem('cc_chef_accounts')||'[]')).find(a=>a.chef_id===c.chef_id) ? '#3A813D' : '#9CA3AF'; } catch(e) { return '#9CA3AF'; }})() }}>
+                        <i className="ph-bold ph-key"/>
+                      </button>
                       <button className="btn-icon" title="Toggle status" onClick={()=>{
                         var upd = chefs.map(ch=>ch.chef_id===c.chef_id?{...ch,status:(c.status||'Active')==='Active'?'Paused':'Active'}:ch);
                         setChefs(upd); window.ADM.saveChefs(upd);
@@ -406,8 +511,9 @@ function ChefsPage({ chefs, setChefs }) {
           </tbody>
         </table>
       </div>
-      {modal && <ChefModal chef={modal.chef} onSave={handleSave} onClose={()=>setModal(null)}/>}
-      {delChef && <DeleteConfirm chef={delChef} onConfirm={handleDelete} onCancel={()=>setDel(null)}/>}
+      {modal   && <ChefModal      chef={modal.chef} onSave={handleSave} onClose={()=>setModal(null)}/>}
+      {delChef && <DeleteConfirm  chef={delChef}    onConfirm={handleDelete} onCancel={()=>setDel(null)}/>}
+      {access  && <ChefAccessModal chef={access} onClose={()=>setAccess(null)}/>}
     </div>
   );
 }
