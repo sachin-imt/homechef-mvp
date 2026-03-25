@@ -228,7 +228,7 @@ function ChefsPage({ chefs, setChefs }) {
               </thead>
               <tbody>
                 {filtered.map(c => {
-                  var subCount = window.ADM.mockSubscribers.filter(s=>s.chef_id===c.chef_id).length;
+                  var subCount = (window.ADM.subscribers||[]).filter(s=>s.chef_id===c.chef_id).length;
                   return (
                     <tr key={c.chef_id}>
                       <td>
