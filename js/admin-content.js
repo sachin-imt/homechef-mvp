@@ -161,6 +161,48 @@ function SettingsPage() {
     setTimeout(()=>setMsg(null), 3000);
   };
 
+  // ── Export all localStorage data as JSON download ──
+  var handleExport = () => {
+    var KEYS = ['cc_chefs','cc_content','cc_subscribers','cc_chef_applications','cc_chef_accounts','cc_notifications','cc_pending_menus','cc_postcode_map'];
+    var snapshot = { export_date: new Date().toISOString(), version: '1.0' };
+    KEYS.forEach(k => {
+      try { var v = localStorage.getItem(k); if (v) snapshot[k] = JSON.parse(v); } catch(e) {}
+    });
+    var blob = new Blob([JSON.stringify(snapshot, null, 2)], { type:'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `celebchef-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    setMsg({ type:'success', text:'Backup downloaded. Save this file to your /backups folder.' });
+    setTimeout(()=>setMsg(null), 4000);
+  };
+
+  // ── Import from JSON backup ──
+  var handleImport = (e) => {
+    var file = e.target.files?.[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        var data = JSON.parse(ev.target.result);
+        var count = 0;
+        Object.entries(data).forEach(([k, v]) => {
+          if (k !== 'export_date' && k !== 'version') {
+            localStorage.setItem(k, JSON.stringify(v));
+            count++;
+          }
+        });
+        setMsg({ type:'success', text:`Restored ${count} data collections. Refresh the page to apply.` });
+        setTimeout(()=>setMsg(null), 5000);
+      } catch(err) {
+        setMsg({ type:'error', text:'Invalid backup file. Please use a file exported from this portal.' });
+        setTimeout(()=>setMsg(null), 4000);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   return (
     <div className="fade-in">
       <div className="section-header">
@@ -216,6 +258,22 @@ function SettingsPage() {
               </button>
             </div>
           ))}
+        </div>
+
+        {/* Backup & Restore */}
+        <div className="card" style={{ gridColumn:'1/-1' }}>
+          <h3 style={{ fontSize:'1rem', fontWeight:700, marginBottom:'4px' }}>Backup & Restore</h3>
+          <p style={{ fontSize:'0.82rem', color:'#5A5D66', marginBottom:'20px' }}>Export a full snapshot of all live data (chefs, subscribers, applications, accounts). Restore from any previous export. Run <code style={{ background:'#F4F4F4', padding:'1px 6px', borderRadius:'4px', fontSize:'0.78rem' }}>node scripts/backup.js</code> to generate CSV files automatically.</p>
+          <div style={{ display:'flex', gap:'12px', flexWrap:'wrap', alignItems:'center' }}>
+            <button className="btn btn-primary" onClick={handleExport}>
+              <i className="ph-bold ph-download-simple"/> Export All Data (JSON)
+            </button>
+            <label className="btn btn-outline" style={{ cursor:'pointer', margin:0 }}>
+              <i className="ph-bold ph-upload-simple"/> Import Backup
+              <input type="file" accept=".json" onChange={handleImport} style={{ display:'none' }}/>
+            </label>
+            <span style={{ fontSize:'0.78rem', color:'#9CA3AF' }}>· Exports include chefs, subscribers, applications, chef accounts (passwords excluded from CSV exports)</span>
+          </div>
         </div>
 
         {/* Site info */}

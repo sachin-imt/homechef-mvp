@@ -127,190 +127,234 @@ function ChefPortalPage({ session }) {
     setTimeout(() => setSubmitMsg(""), 4000);
   }
 
+  var initials = (profile.name || "?").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+  var card = { background:"white", borderRadius:"16px", border:"1px solid #EBEBEB", padding:"28px", marginBottom:"20px", boxShadow:"0 1px 4px rgba(0,0,0,0.04)" };
+  var sectionHead = { display:"flex", alignItems:"center", gap:"10px", marginBottom:"20px", paddingBottom:"14px", borderBottom:"1px solid #F0F0F0" };
+  var sectionIcon = { width:"32px", height:"32px", borderRadius:"8px", background:"#FFFBEB", border:"1px solid #FDE68A", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 };
+  var lbl = { display:"block", fontWeight:600, fontSize:"0.8rem", color:"#444", marginBottom:"6px" };
+  var row2 = { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"16px" };
+
   return (
-    <div style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 24px 80px" }}>
-      <div style={{ marginBottom: "32px" }}>
-        <h1 style={{ fontSize: "2rem", fontWeight: 900, color: "#111", marginBottom: "4px" }}>Chef Portal</h1>
-        <p style={{ color: "#5A5D66", margin: 0 }}>Manage your profile and weekly menus.</p>
-      </div>
+    <div style={{ background:"#F6F6F6", minHeight:"100vh", padding:"32px 24px 80px" }}>
+      <div style={{ maxWidth:"860px", margin:"0 auto" }}>
 
-      {/* Portal tabs */}
-      <div style={{ display: "flex", background: "#F4F4F4", borderRadius: "10px", padding: "4px", gap: "4px", marginBottom: "32px", width: "fit-content" }}>
-        {[{ key: "profile", label: "My Profile" }, { key: "menu", label: "Menu Submission" }].map(t => (
-          <button key={t.key} onClick={() => setProfileTab(t.key)} style={{
-            padding: "9px 20px", borderRadius: "8px", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: "0.88rem", fontWeight: 600, transition: "all 0.15s",
-            background: profileTab === t.key ? "white" : "transparent",
-            color: profileTab === t.key ? "#111" : "#5A5D66",
-            boxShadow: profileTab === t.key ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
-          }}>{t.label}</button>
-        ))}
-      </div>
-
-      {profileTab === "profile" && (
-        <div className="fade-in">
-          <fieldset>
-            <legend>Profile Details</legend>
-            <div className="addr-row">
-              <div className="form-group">
-                <label>Chef Name *</label>
-                <input className="form-input" type="text" placeholder="Chef Jane" value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} />
-              </div>
-              <div className="form-group">
-                <label>Cuisine Type *</label>
-                <select className="form-input" value={profile.cuisine} onChange={e => setProfile(p => ({ ...p, cuisine: e.target.value }))}>
-                  <option value="">Select cuisine</option>
-                  {CUISINE_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
+        {/* ── Profile hero banner ── */}
+        <div style={{ background:"linear-gradient(135deg,#111 0%,#2A2A2A 100%)", borderRadius:"20px", padding:"28px 32px", marginBottom:"24px", display:"flex", alignItems:"center", gap:"20px", flexWrap:"wrap" }}>
+          {/* Avatar circle */}
+          <div style={{ width:"64px", height:"64px", borderRadius:"50%", background:"#FACA50", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:900, fontSize:"1.3rem", color:"#111", flexShrink:0 }}>
+            {initials}
+          </div>
+          <div style={{ flex:1 }}>
+            <div style={{ fontWeight:900, fontSize:"1.4rem", color:"white", letterSpacing:"-0.02em" }}>{profile.name || "Your Name"}</div>
+            <div style={{ display:"flex", alignItems:"center", gap:"8px", marginTop:"4px" }}>
+              {profile.cuisine && <span style={{ background:"rgba(250,202,80,0.15)", color:"#FACA50", border:"1px solid rgba(250,202,80,0.3)", borderRadius:"20px", fontSize:"0.75rem", fontWeight:700, padding:"2px 10px" }}>{profile.cuisine}</span>}
+              {profile.price && <span style={{ color:"#888", fontSize:"0.82rem" }}>${profile.price}/week</span>}
             </div>
-            <div className="form-group" style={{ maxWidth: "200px" }}>
-              <label>Price Per Week (AUD) *</label>
-              <input className="form-input" type="number" min="40" max="200" placeholder="75" value={profile.price} onChange={e => setProfile(p => ({ ...p, price: e.target.value }))} />
-            </div>
-            <div className="form-group">
-              <label>Bio <span style={{ fontWeight: 400, color: "#9CA3AF" }}>(max 200 chars)</span></label>
-              <textarea className="form-input" rows={4} maxLength={200} placeholder="Tell customers about your cooking background and style…" value={profile.bio}
-                onChange={e => { setProfile(p => ({ ...p, bio: e.target.value })); setBioLen(e.target.value.length); }} />
-              <div className="char-count">{bioLen}/200</div>
-            </div>
-          </fieldset>
-
-          <fieldset>
-            <legend>Delivery Postcodes</legend>
-            <p style={{ margin: "0 0 16px", fontSize: "0.88rem", color: "#5A5D66" }}>Add the Sydney postcodes where you can deliver. These determine which suburbs appear in the subscriber dropdown.</p>
-            <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
-              <input
-                className="form-input"
-                type="text"
-                placeholder="e.g. 2042"
-                value={postcodeInput}
-                maxLength={4}
-                onChange={e => setPostcodeInput(e.target.value.replace(/\D/g, ""))}
-                onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addPostcode())}
-                style={{ maxWidth: "160px" }}
-              />
-              <button type="button" className="btn btn-outline btn-sm" onClick={addPostcode}>Add</button>
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-              {postcodes.length === 0 && <p style={{ color: "#9CA3AF", fontSize: "0.85rem", margin: 0 }}>No postcodes added yet.</p>}
-              {postcodes.map(pc => (
-                <span key={pc} className="tag">
-                  <i className="ph-fill ph-map-pin" style={{ color: "#FACA50", fontSize: "0.8rem" }}></i>
-                  {pc} {window.CC.POSTCODE_SUBURB_MAP[pc] ? `· ${window.CC.POSTCODE_SUBURB_MAP[pc]}` : ""}
-                  <button onClick={() => setPostcodes(p => p.filter(x => x !== pc))}>×</button>
-                </span>
-              ))}
-            </div>
-          </fieldset>
-
-          <button className="btn btn-primary" style={{ minWidth: "140px" }} onClick={handleSave}>
-            {saved ? <><i className="ph-fill ph-check-circle"></i> Saved!</> : "Save Profile"}
-          </button>
-        </div>
-      )}
-
-      {profileTab === "menu" && (
-        <div className="fade-in">
-          {/* Week tabs */}
-          <div style={{ display: "flex", background: "#F4F4F4", borderRadius: "10px", padding: "4px", gap: "4px", marginBottom: "24px", width: "fit-content" }}>
-            {[{ key: "currentWeek", label: "This Week" }, { key: "nextWeek", label: "Next Week" }].map(t => (
-              <button key={t.key} onClick={() => setWeekTab(t.key)} style={{
-                padding: "8px 18px", borderRadius: "8px", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: "0.88rem", fontWeight: 600, transition: "all 0.15s",
-                background: weekTab === t.key ? "white" : "transparent",
-                color: weekTab === t.key ? "#111" : "#5A5D66",
-                boxShadow: weekTab === t.key ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
-              }}>{t.label}</button>
+          </div>
+          {/* Tab switcher */}
+          <div style={{ display:"flex", background:"rgba(255,255,255,0.08)", borderRadius:"10px", padding:"3px", gap:"3px" }}>
+            {[{ key:"profile", label:"My Profile", icon:"ph-user" }, { key:"menu", label:"Menu", icon:"ph-fork-knife" }].map(t => (
+              <button key={t.key} onClick={() => setProfileTab(t.key)} style={{
+                padding:"8px 16px", borderRadius:"8px", border:"none", cursor:"pointer", fontFamily:"inherit",
+                fontSize:"0.82rem", fontWeight:700, transition:"all 0.15s", display:"flex", alignItems:"center", gap:"6px",
+                background: profileTab===t.key ? "#FACA50" : "transparent",
+                color:       profileTab===t.key ? "#111"    : "#888",
+              }}>
+                <i className={`ph-bold ${t.icon}`}/>{t.label}
+              </button>
             ))}
           </div>
-
-          {/* Day accordions */}
-          {DAYS.map(day => (
-            <div key={day} style={{ marginBottom: "12px", border: "1px solid #E5E5E5", borderRadius: "12px", overflow: "hidden" }}>
-              <button
-                onClick={() => setOpenDays(o => ({ ...o, [day]: !o[day] }))}
-                style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", background: openDays[day] ? "#111" : "white", border: "none", cursor: "pointer", fontFamily: "inherit" }}
-              >
-                <span style={{ fontWeight: 700, fontSize: "0.9rem", color: openDays[day] ? "#FACA50" : "#111", letterSpacing: "0.05em" }}>{DAY_LABELS[day]}</span>
-                <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span style={{ fontSize: "0.78rem", color: openDays[day] ? "#9CA3AF" : "#5A5D66" }}>{menus[weekTab][day].length} dish{menus[weekTab][day].length !== 1 ? "es" : ""}</span>
-                  <i className={`ph-bold ${openDays[day] ? "ph-caret-up" : "ph-caret-down"}`} style={{ color: openDays[day] ? "#FACA50" : "#9CA3AF" }}></i>
-                </span>
-              </button>
-              {openDays[day] && (
-                <div style={{ padding: "16px 20px", background: "#FAFAFA" }}>
-                  {menus[weekTab][day].map((dish, idx) => (
-                    <div key={idx} style={{ marginBottom: "14px", background: "white", border: "1px solid #E5E5E5", borderRadius: "10px", padding: "12px" }}>
-                      <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "8px" }}>
-                        {dish.dish_image ? (
-                          <img src={dish.dish_image} alt="dish" style={{ width:"44px", height:"44px", borderRadius:"8px", objectFit:"cover", flexShrink:0 }} onError={e=>e.target.style.display='none'}/>
-                        ) : (
-                          <div style={{ width:"44px", height:"44px", borderRadius:"8px", background:"#F4F4F4", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                            <i className="ph-bold ph-image" style={{ color:"#9CA3AF", fontSize:"1.2rem" }}></i>
-                          </div>
-                        )}
-                        <input
-                          className="form-input"
-                          type="text"
-                          placeholder={`Dish ${idx+1} name`}
-                          value={dish.dish_name}
-                          onChange={e => updateDish(day, idx, "dish_name", e.target.value)}
-                          style={{ flex: 2 }}
-                        />
-                        <select
-                          className="form-input"
-                          value={dish.dish_type}
-                          onChange={e => updateDish(day, idx, "dish_type", e.target.value)}
-                          style={{ flex: 1, minWidth: "100px" }}
-                        >
-                          {DISH_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                        </select>
-                        <button
-                          type="button"
-                          onClick={() => removeDish(day, idx)}
-                          style={{ background: "none", border: "1px solid #E5E5E5", borderRadius: "8px", cursor: "pointer", padding: "8px 10px", color: "#9CA3AF", fontSize: "1rem", lineHeight: 1, flexShrink:0 }}
-                          title="Remove dish"
-                        >×</button>
-                      </div>
-                      <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
-                        <i className="ph-bold ph-link" style={{ color:"#9CA3AF", fontSize:"0.9rem", flexShrink:0 }}></i>
-                        <input
-                          className="form-input"
-                          type="url"
-                          placeholder="Dish photo URL (paste from Google, Unsplash, etc.)"
-                          value={dish.dish_image || ""}
-                          onChange={e => updateDish(day, idx, "dish_image", e.target.value)}
-                          style={{ flex: 1, fontSize:"0.82rem" }}
-                        />
-                      </div>
-                      <div style={{ fontSize:"0.72rem", color:"#9CA3AF", marginTop:"4px", paddingLeft:"22px" }}>
-                        📐 Required: <strong>800 × 500 px</strong> · JPG or PNG · max <strong>1.5 MB</strong> · landscape format only
-                      </div>
-                    </div>
-                  ))}
-                  <button type="button" className="btn btn-outline btn-sm" onClick={() => addDish(day)} style={{ marginTop: "4px" }}>
-                    <i className="ph-bold ph-plus"></i> Add Dish
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
-
-          {submitMsg && (
-            <div style={{ background:"#D4EDDA", border:"1px solid #A8D5B5", borderRadius:"8px", padding:"10px 16px", marginTop:"16px", fontSize:"0.875rem", color:"#3A813D", display:"flex", alignItems:"center", gap:"8px" }}>
-              <i className="ph-fill ph-check-circle"></i> {submitMsg}
-            </div>
-          )}
-          <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
-            <button className="btn btn-outline" style={{ minWidth: "130px" }} onClick={handleSave}>
-              {saved ? <><i className="ph-fill ph-check-circle"></i> Draft Saved</> : "Save Draft"}
-            </button>
-            <button className="btn btn-primary" style={{ minWidth: "180px" }} onClick={handleSubmitForApproval}>
-              <i className="ph-bold ph-paper-plane-tilt"></i> Submit for Approval
-            </button>
-          </div>
-          <p style={{ fontSize:"0.78rem", color:"#9CA3AF", marginTop:"10px" }}>Submitted menus go to admin for review before going live. Chefs cannot repeat dishes from the previous week.</p>
         </div>
-      )}
+
+        {/* ── PROFILE TAB ── */}
+        {profileTab === "profile" && (
+          <div className="fade-in">
+
+            {/* Profile Details card */}
+            <div style={card}>
+              <div style={sectionHead}>
+                <div style={sectionIcon}><i className="ph-fill ph-user" style={{ color:"#FACA50" }}/></div>
+                <div>
+                  <div style={{ fontWeight:800, fontSize:"0.95rem", color:"#111" }}>Profile Details</div>
+                  <div style={{ fontSize:"0.78rem", color:"#9CA3AF" }}>This info appears on your public chef card</div>
+                </div>
+              </div>
+              <div style={row2}>
+                <div className="form-group">
+                  <label style={lbl}>Chef Name *</label>
+                  <input className="form-input" type="text" placeholder="Chef Jane" value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} />
+                </div>
+                <div className="form-group">
+                  <label style={lbl}>Cuisine Type *</label>
+                  <select className="form-input" value={profile.cuisine} onChange={e => setProfile(p => ({ ...p, cuisine: e.target.value }))}>
+                    <option value="">Select cuisine…</option>
+                    {CUISINE_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={{ maxWidth:"200px" }} className="form-group">
+                <label style={lbl}>Price Per Week (AUD) *</label>
+                <div style={{ position:"relative" }}>
+                  <span style={{ position:"absolute", left:"12px", top:"50%", transform:"translateY(-50%)", color:"#9CA3AF", fontWeight:600 }}>$</span>
+                  <input className="form-input" type="number" min="40" max="200" placeholder="75" value={profile.price}
+                    onChange={e => setProfile(p => ({ ...p, price: e.target.value }))} style={{ paddingLeft:"28px" }}/>
+                </div>
+              </div>
+              <div className="form-group">
+                <label style={lbl}>Bio <span style={{ fontWeight:400, color:"#9CA3AF" }}>(max 200 chars)</span></label>
+                <textarea className="form-input" rows={3} maxLength={200}
+                  placeholder="Tell customers about your cooking background and style…"
+                  value={profile.bio}
+                  onChange={e => { setProfile(p => ({ ...p, bio: e.target.value })); setBioLen(e.target.value.length); }}/>
+                <div style={{ fontSize:"0.75rem", color: bioLen>180?"#D0342C":"#9CA3AF", textAlign:"right", marginTop:"4px" }}>{bioLen}/200</div>
+              </div>
+            </div>
+
+            {/* Delivery Postcodes card */}
+            <div style={card}>
+              <div style={sectionHead}>
+                <div style={sectionIcon}><i className="ph-fill ph-map-pin" style={{ color:"#FACA50" }}/></div>
+                <div>
+                  <div style={{ fontWeight:800, fontSize:"0.95rem", color:"#111" }}>Delivery Postcodes</div>
+                  <div style={{ fontSize:"0.78rem", color:"#9CA3AF" }}>Determines which suburbs appear in the subscriber dropdown</div>
+                </div>
+              </div>
+              <div style={{ display:"flex", gap:"8px", marginBottom:"16px" }}>
+                <input className="form-input" type="text" placeholder="e.g. 2042" value={postcodeInput} maxLength={4}
+                  onChange={e => setPostcodeInput(e.target.value.replace(/\D/g,""))}
+                  onKeyDown={e => e.key==="Enter" && (e.preventDefault(), addPostcode())}
+                  style={{ maxWidth:"140px" }}/>
+                <button type="button" className="btn btn-outline btn-sm" onClick={addPostcode}><i className="ph-bold ph-plus"/> Add</button>
+              </div>
+              <div style={{ display:"flex", flexWrap:"wrap", gap:"8px" }}>
+                {postcodes.length===0 && <p style={{ color:"#C0C0C0", fontSize:"0.85rem", margin:0, fontStyle:"italic" }}>No postcodes added yet</p>}
+                {postcodes.map(pc => (
+                  <span key={pc} style={{ display:"inline-flex", alignItems:"center", gap:"6px", background:"#FFFBEB", border:"1px solid #FDE68A", borderRadius:"20px", padding:"5px 12px", fontSize:"0.82rem", fontWeight:600, color:"#111" }}>
+                    <i className="ph-fill ph-map-pin" style={{ color:"#FACA50", fontSize:"0.75rem" }}/>
+                    {pc}{window.CC.POSTCODE_SUBURB_MAP?.[pc] ? ` · ${window.CC.POSTCODE_SUBURB_MAP[pc]}` : ""}
+                    <button onClick={() => setPostcodes(p=>p.filter(x=>x!==pc))}
+                      style={{ background:"none", border:"none", cursor:"pointer", color:"#9CA3AF", padding:"0 2px", fontSize:"0.9rem", lineHeight:1 }}>×</button>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Save button */}
+            <div style={{ display:"flex", alignItems:"center", gap:"12px" }}>
+              <button className="btn btn-primary" style={{ minWidth:"150px", padding:"12px 28px", fontSize:"0.95rem" }} onClick={handleSave}>
+                {saved ? <><i className="ph-fill ph-check-circle"/> Saved!</> : <><i className="ph-bold ph-floppy-disk"/> Save Profile</>}
+              </button>
+              {saved && <span style={{ fontSize:"0.82rem", color:"#3A813D" }}>Changes will appear on the public site</span>}
+            </div>
+          </div>
+        )}
+
+        {/* ── MENU TAB ── */}
+        {profileTab === "menu" && (
+          <div className="fade-in">
+
+            {/* Week selector card */}
+            <div style={{ ...card, padding:"20px 28px", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:"12px" }}>
+              <div>
+                <div style={{ fontWeight:800, fontSize:"0.95rem", color:"#111" }}>Weekly Menu Submission</div>
+                <div style={{ fontSize:"0.78rem", color:"#9CA3AF", marginTop:"2px" }}>Fill in your dishes for each day, then submit for admin approval</div>
+              </div>
+              <div style={{ display:"flex", background:"#F4F4F4", borderRadius:"10px", padding:"3px", gap:"3px" }}>
+                {[{ key:"currentWeek", label:"This Week" }, { key:"nextWeek", label:"Next Week" }].map(t => (
+                  <button key={t.key} onClick={() => setWeekTab(t.key)} style={{
+                    padding:"8px 18px", borderRadius:"8px", border:"none", cursor:"pointer", fontFamily:"inherit",
+                    fontSize:"0.85rem", fontWeight:700, transition:"all 0.15s",
+                    background: weekTab===t.key ? "white" : "transparent",
+                    color:       weekTab===t.key ? "#111"  : "#9CA3AF",
+                    boxShadow:   weekTab===t.key ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
+                  }}>{t.label}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Day accordions */}
+            {DAYS.map((day, di) => {
+              var isOpen = openDays[day];
+              var dishCount = menus[weekTab][day].length;
+              var hasDishes = menus[weekTab][day].some(d=>d.dish_name);
+              return (
+                <div key={day} style={{ background:"white", border:`1px solid ${isOpen?"#111":"#EBEBEB"}`, borderRadius:"14px", marginBottom:"10px", overflow:"hidden", transition:"border-color 0.2s", boxShadow: isOpen?"0 2px 12px rgba(0,0,0,0.08)":"none" }}>
+                  <button onClick={() => setOpenDays(o=>({...o,[day]:!o[day]}))}
+                    style={{ width:"100%", display:"flex", alignItems:"center", gap:"14px", padding:"16px 22px", background: isOpen?"#111":"white", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                    <div style={{ width:"28px", height:"28px", borderRadius:"50%", background: isOpen?"#FACA50":"#F4F4F4", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                      <span style={{ fontWeight:800, fontSize:"0.75rem", color: isOpen?"#111":"#9CA3AF" }}>{di+1}</span>
+                    </div>
+                    <span style={{ fontWeight:700, fontSize:"0.92rem", color: isOpen?"#FACA50":"#111", flex:1, textAlign:"left", letterSpacing:"0.03em" }}>{DAY_LABELS[day]}</span>
+                    <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
+                      {hasDishes && !isOpen && <span style={{ background:"#D4EDDA", color:"#3A813D", borderRadius:"20px", fontSize:"0.7rem", padding:"2px 8px", fontWeight:700 }}>{dishCount} dishes</span>}
+                      <i className={`ph-bold ${isOpen?"ph-caret-up":"ph-caret-down"}`} style={{ color: isOpen?"#FACA50":"#C0C0C0", fontSize:"0.85rem" }}/>
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div style={{ padding:"20px 22px", background:"#FAFAFA" }}>
+                      {menus[weekTab][day].map((dish, idx) => (
+                        <div key={idx} style={{ background:"white", border:"1px solid #EBEBEB", borderRadius:"12px", padding:"16px", marginBottom:"12px", boxShadow:"0 1px 3px rgba(0,0,0,0.04)" }}>
+                          {/* Dish preview + name + type row */}
+                          <div style={{ display:"flex", gap:"12px", alignItems:"center", marginBottom:"12px" }}>
+                            {dish.dish_image ? (
+                              <img src={dish.dish_image} alt="dish" style={{ width:"52px", height:"52px", borderRadius:"10px", objectFit:"cover", flexShrink:0, border:"1px solid #EBEBEB" }} onError={e=>{e.target.style.display='none';}}/>
+                            ) : (
+                              <div style={{ width:"52px", height:"52px", borderRadius:"10px", background:"#F4F4F4", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, border:"1px dashed #D0D0D0" }}>
+                                <i className="ph-bold ph-image" style={{ color:"#C0C0C0", fontSize:"1.3rem" }}/>
+                              </div>
+                            )}
+                            <input className="form-input" type="text" placeholder={`Dish ${idx+1} name`} value={dish.dish_name}
+                              onChange={e => updateDish(day, idx, "dish_name", e.target.value)} style={{ flex:2, fontWeight:600 }}/>
+                            <select className="form-input" value={dish.dish_type}
+                              onChange={e => updateDish(day, idx, "dish_type", e.target.value)} style={{ flex:"0 0 110px" }}>
+                              {DISH_TYPES.map(t=><option key={t} value={t}>{t}</option>)}
+                            </select>
+                            <button type="button" onClick={() => removeDish(day, idx)}
+                              style={{ background:"none", border:"1px solid #EBEBEB", borderRadius:"8px", cursor:"pointer", padding:"8px 10px", color:"#C0C0C0", fontSize:"1rem", lineHeight:1, flexShrink:0 }}
+                              title="Remove dish">×</button>
+                          </div>
+                          {/* Photo URL row */}
+                          <div style={{ background:"#F8F8F8", borderRadius:"8px", padding:"10px 12px", display:"flex", alignItems:"center", gap:"8px" }}>
+                            <i className="ph-bold ph-image" style={{ color:"#C0C0C0", fontSize:"0.9rem", flexShrink:0 }}/>
+                            <input className="form-input" type="url" placeholder="Paste dish photo URL…"
+                              value={dish.dish_image||""} onChange={e => updateDish(day, idx, "dish_image", e.target.value)}
+                              style={{ flex:1, fontSize:"0.82rem", background:"transparent", border:"none", padding:"0", boxShadow:"none" }}/>
+                          </div>
+                          <div style={{ fontSize:"0.7rem", color:"#C0C0C0", marginTop:"6px", paddingLeft:"2px" }}>
+                            Required: <strong>800 × 500 px</strong> · JPG/PNG · max <strong>1.5 MB</strong> · landscape
+                          </div>
+                        </div>
+                      ))}
+                      <button type="button" onClick={() => addDish(day)}
+                        style={{ display:"flex", alignItems:"center", gap:"6px", padding:"10px 16px", border:"1.5px dashed #D0D0D0", borderRadius:"10px", background:"transparent", cursor:"pointer", color:"#9CA3AF", fontFamily:"inherit", fontSize:"0.85rem", fontWeight:600, width:"100%", justifyContent:"center", transition:"all 0.15s" }}
+                        onMouseEnter={e=>{e.currentTarget.style.borderColor="#FACA50";e.currentTarget.style.color="#111";}}
+                        onMouseLeave={e=>{e.currentTarget.style.borderColor="#D0D0D0";e.currentTarget.style.color="#9CA3AF";}}>
+                        <i className="ph-bold ph-plus"/> Add Dish
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {submitMsg && (
+              <div style={{ background:"#D4EDDA", border:"1px solid #A8D5B5", borderRadius:"10px", padding:"12px 18px", marginTop:"4px", fontSize:"0.875rem", color:"#3A813D", display:"flex", alignItems:"center", gap:"10px" }}>
+                <i className="ph-fill ph-check-circle" style={{ fontSize:"1.1rem" }}/> {submitMsg}
+              </div>
+            )}
+            <div style={{ display:"flex", gap:"12px", marginTop:"20px", flexWrap:"wrap" }}>
+              <button className="btn btn-outline" style={{ minWidth:"130px" }} onClick={handleSave}>
+                {saved ? <><i className="ph-fill ph-check-circle"/> Draft Saved</> : <><i className="ph-bold ph-floppy-disk"/> Save Draft</>}
+              </button>
+              <button className="btn btn-primary" style={{ minWidth:"200px", padding:"12px 24px" }} onClick={handleSubmitForApproval}>
+                <i className="ph-bold ph-paper-plane-tilt"/> Submit for Approval
+              </button>
+            </div>
+            <p style={{ fontSize:"0.75rem", color:"#C0C0C0", marginTop:"10px" }}>Menus go to admin for review before going live. Chefs cannot repeat the same dishes week over week.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
