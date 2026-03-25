@@ -31,9 +31,13 @@ function AddPaymentForm({ sub, chefs, onAdd, onClose }) {
   var existing = (sub.payments||[]).map(p=>p.week_iso||p.week);
   var available = weeks.filter(w => !existing.includes(w.value) && !existing.includes(w.label));
 
-  var [weekIso,  setWeekIso]  = React.useState(available[0]?.value || '');
-  var [status,   setStatus]   = React.useState('Pending');
-  var [note,     setNote]     = React.useState('');
+  var chef       = chefs.find(c => c.chef_id === sub.chef_id);
+  var defaultAmt = chef ? chef.price_per_week : 0;
+
+  var [weekIso, setWeekIso] = React.useState(available[0]?.value || '');
+  var [status,  setStatus]  = React.useState('Pending');
+  var [note,    setNote]    = React.useState('');
+  var [amount,  setAmount]  = React.useState(defaultAmt);
 
   if (!available.length) {
     return (
@@ -44,9 +48,10 @@ function AddPaymentForm({ sub, chefs, onAdd, onClose }) {
     );
   }
 
-  var chef = chefs.find(c => c.chef_id === sub.chef_id);
-  var amount = chef ? chef.price_per_week : 0;
   var selectedWeek = weeks.find(w => w.value === weekIso);
+  var commPct = chef?.commission_pct || 20;
+  var celebShare = Math.round((amount || 0) * commPct / 100);
+  var chefShare  = (amount || 0) - celebShare;
 
   return (
     <div style={{ background:'#F8FAFF', border:'1px solid #D1E4FF', borderRadius:'10px', padding:'16px', marginBottom:'8px' }}>
@@ -54,7 +59,7 @@ function AddPaymentForm({ sub, chefs, onAdd, onClose }) {
         <i className="ph-bold ph-plus-circle" style={{ marginRight:'6px', color:'#FACA50' }}/>
         Add Payment Record
       </div>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px', marginBottom:'10px' }}>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'10px', marginBottom:'10px' }}>
         <div>
           <label style={{ display:'block', fontSize:'0.75rem', fontWeight:600, color:'#5A5D66', marginBottom:'4px' }}>Week</label>
           <select className="form-input" value={weekIso} onChange={e=>setWeekIso(e.target.value)} style={{ fontSize:'0.82rem' }}>
@@ -62,27 +67,32 @@ function AddPaymentForm({ sub, chefs, onAdd, onClose }) {
           </select>
         </div>
         <div>
+          <label style={{ display:'block', fontSize:'0.75rem', fontWeight:600, color:'#5A5D66', marginBottom:'4px' }}>Amount Received ($)</label>
+          <input className="form-input" type="number" min="0" step="1" value={amount} onChange={e=>setAmount(parseFloat(e.target.value)||0)} style={{ fontSize:'0.82rem' }}/>
+        </div>
+        <div>
           <label style={{ display:'block', fontSize:'0.75rem', fontWeight:600, color:'#5A5D66', marginBottom:'4px' }}>Status</label>
           <select className="form-input" value={status} onChange={e=>setStatus(e.target.value)} style={{ fontSize:'0.82rem' }}>
-            <option value="Pending">Pending — payment not yet received</option>
-            <option value="Paid">Paid — confirm immediately</option>
+            <option value="Pending">Pending — not yet confirmed</option>
+            <option value="Paid">Paid — confirmed</option>
           </select>
         </div>
       </div>
+      {amount > 0 && (
+        <div style={{ display:'flex', gap:'16px', marginBottom:'10px', background:'#FFFBEB', borderRadius:'8px', padding:'8px 12px', fontSize:'0.78rem' }}>
+          <span>CelebChef ({commPct}%): <strong>${celebShare}</strong></span>
+          <span>Chef keeps: <strong>${chefShare}</strong></span>
+        </div>
+      )}
       <div style={{ marginBottom:'10px' }}>
         <label style={{ display:'block', fontSize:'0.75rem', fontWeight:600, color:'#5A5D66', marginBottom:'4px' }}>Note (optional)</label>
         <input className="form-input" value={note} onChange={e=>setNote(e.target.value)} placeholder="e.g. Bank transfer ref #123" style={{ fontSize:'0.82rem' }}/>
       </div>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-        <span style={{ fontSize:'0.78rem', color:'#9CA3AF' }}>
-          {selectedWeek?.label} · ${amount}
-        </span>
-        <div style={{ display:'flex', gap:'8px' }}>
-          <button className="btn btn-outline btn-sm" onClick={onClose}>Cancel</button>
-          <button className="btn btn-primary btn-sm" onClick={()=>onAdd({ week: selectedWeek?.label, week_iso: weekIso, status, confirmed: status==='Paid', confirmed_at: status==='Paid' ? new Date().toISOString().slice(0,10) : null, note, added_by: 'admin', added_at: new Date().toISOString().slice(0,10) })}>
-            <i className="ph-bold ph-check"/> Add
-          </button>
-        </div>
+      <div style={{ display:'flex', justifyContent:'flex-end', gap:'8px' }}>
+        <button className="btn btn-outline btn-sm" onClick={onClose}>Cancel</button>
+        <button className="btn btn-primary btn-sm" onClick={()=>onAdd({ week: selectedWeek?.label, week_iso: weekIso, status, amount, confirmed: status==='Paid', confirmed_at: status==='Paid' ? new Date().toISOString().slice(0,10) : null, note, added_by: 'admin', added_at: new Date().toISOString().slice(0,10) })}>
+          <i className="ph-bold ph-check"/> Add
+        </button>
       </div>
     </div>
   );

@@ -57,6 +57,7 @@ function Sidebar({ page, setPage, badges }) {
     { id:'dashboard',     label:'Dashboard',          icon:'ph-fill ph-squares-four',   section:'main'   },
     { id:'applications',  label:'Chef Applications',  icon:'ph-fill ph-user-check',      section:'main',  badgeKey:'applications' },
     { id:'chefs',         label:'Active Chefs',        icon:'ph-fill ph-chef-hat',        section:'main'   },
+    { id:'menus',         label:'Menu Approvals',      icon:'ph-fill ph-fork-knife',      section:'main',  badgeKey:'pendingMenus' },
     { id:'subscribers',   label:'Subscribers',         icon:'ph-fill ph-users-three',     section:'main',  badgeKey:'newSubscribers' },
     { id:'content',       label:'Content',             icon:'ph-fill ph-article',         section:'manage' },
     { id:'settings',      label:'Settings',            icon:'ph-fill ph-gear',            section:'manage' },
@@ -112,19 +113,22 @@ function AdminApp() {
 
   if (!authed) return <LoginGate onAuth={handleAuth}/>;
 
-  var { DashboardPage, ChefsPage, ApplicationsPage, SubscribersPage, ContentPage, SettingsPage } = window.ADM;
+  var { DashboardPage, ChefsPage, ApplicationsPage, MenuApprovalsPage, SubscribersPage, ContentPage, SettingsPage } = window.ADM;
   var subscribers  = window.ADM.subscribers || [];
   var applications = window.ADM.applications || [];
 
+  var pendingMenuCount = (() => { try { return (JSON.parse(localStorage.getItem('cc_pending_menus')||'[]')).filter(m=>m.status==='pending').length; } catch(e) { return 0; } })();
   var badges = {
     applications:   applications.filter(a => a.status === 'pending').length,
     newSubscribers: subscribers.filter(s => s.status === 'Interested').length,
+    pendingMenus:   pendingMenuCount,
   };
 
   var mainContent;
   if      (page === 'dashboard')    mainContent = <DashboardPage    chefs={chefs} subscribers={subscribers}/>;
   else if (page === 'applications') mainContent = <ApplicationsPage onUpdate={refresh}/>;
   else if (page === 'chefs')        mainContent = <ChefsPage        chefs={chefs} setChefs={setChefs}/>;
+  else if (page === 'menus')        mainContent = <MenuApprovalsPage/>;
   else if (page === 'subscribers')  mainContent = <SubscribersPage  chefs={chefs} onUpdate={refresh}/>;
   else if (page === 'content')      mainContent = <ContentPage      content={content} setContent={setContent}/>;
   else if (page === 'settings')     mainContent = <SettingsPage/>;

@@ -14,7 +14,7 @@ function ChefPortalPage() {
   var [profile, setProfile] = useState({ name: "", cuisine: "", price: "", bio: "" });
 
   // Per-day dish entries
-  var emptyMenu = () => DAYS.reduce((acc, d) => ({ ...acc, [d]: [{ dish_name: "", dish_type: "Main" }] }), {});
+  var emptyMenu = () => DAYS.reduce((acc, d) => ({ ...acc, [d]: [{ dish_name: "", dish_type: "Main", dish_image: "" }] }), {});
   var [menus, setMenus] = useState({ currentWeek: emptyMenu(), nextWeek: emptyMenu() });
   var [openDays, setOpenDays] = useState({ monday: true, tuesday: false, wednesday: false, thursday: false, friday: false });
 
@@ -29,7 +29,7 @@ function ChefPortalPage() {
   function addDish(day) {
     setMenus(m => ({
       ...m,
-      [weekTab]: { ...m[weekTab], [day]: [...m[weekTab][day], { dish_name: "", dish_type: "Main" }] }
+      [weekTab]: { ...m[weekTab], [day]: [...m[weekTab][day], { dish_name: "", dish_type: "Main", dish_image: "" }] }
     }));
   }
 
@@ -48,9 +48,31 @@ function ChefPortalPage() {
     });
   }
 
+  var [submitMsg, setSubmitMsg] = useState("");
   function handleSave() {
     setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    // Save draft locally
+    try { localStorage.setItem('cc_portal_draft', JSON.stringify(menus)); } catch(e) {}
+    setTimeout(() => setSaved(false), 2000);
+  }
+  function handleSubmitForApproval() {
+    var chefName = profile.name || "Chef";
+    var entry = {
+      id: Date.now(),
+      chef_id: null, chef_name: chefName, chef_cuisine: profile.cuisine,
+      week_key: weekTab,
+      week_label: weekTab === "currentWeek" ? "This Week" : "Next Week",
+      dishes_by_day: menus[weekTab],
+      submitted: new Date().toISOString().slice(0,10),
+      status: "pending",
+    };
+    try {
+      var pending = JSON.parse(localStorage.getItem('cc_pending_menus') || '[]');
+      pending.unshift(entry);
+      localStorage.setItem('cc_pending_menus', JSON.stringify(pending));
+    } catch(e) {}
+    setSubmitMsg("Menu submitted for admin approval!");
+    setTimeout(() => setSubmitMsg(""), 4000);
   }
 
   return (
@@ -165,29 +187,52 @@ function ChefPortalPage() {
               {openDays[day] && (
                 <div style={{ padding: "16px 20px", background: "#FAFAFA" }}>
                   {menus[weekTab][day].map((dish, idx) => (
-                    <div key={idx} style={{ display: "flex", gap: "10px", marginBottom: "10px", alignItems: "center" }}>
-                      <input
-                        className="form-input"
-                        type="text"
-                        placeholder={`Dish ${idx+1} name`}
-                        value={dish.dish_name}
-                        onChange={e => updateDish(day, idx, "dish_name", e.target.value)}
-                        style={{ flex: 2 }}
-                      />
-                      <select
-                        className="form-input"
-                        value={dish.dish_type}
-                        onChange={e => updateDish(day, idx, "dish_type", e.target.value)}
-                        style={{ flex: 1, minWidth: "100px" }}
-                      >
-                        {DISH_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                      </select>
-                      <button
-                        type="button"
-                        onClick={() => removeDish(day, idx)}
-                        style={{ background: "none", border: "1px solid #E5E5E5", borderRadius: "8px", cursor: "pointer", padding: "8px 10px", color: "#9CA3AF", fontSize: "1rem", lineHeight: 1 }}
-                        title="Remove dish"
-                      >×</button>
+                    <div key={idx} style={{ marginBottom: "14px", background: "white", border: "1px solid #E5E5E5", borderRadius: "10px", padding: "12px" }}>
+                      <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "8px" }}>
+                        {dish.dish_image ? (
+                          <img src={dish.dish_image} alt="dish" style={{ width:"44px", height:"44px", borderRadius:"8px", objectFit:"cover", flexShrink:0 }} onError={e=>e.target.style.display='none'}/>
+                        ) : (
+                          <div style={{ width:"44px", height:"44px", borderRadius:"8px", background:"#F4F4F4", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                            <i className="ph-bold ph-image" style={{ color:"#9CA3AF", fontSize:"1.2rem" }}></i>
+                          </div>
+                        )}
+                        <input
+                          className="form-input"
+                          type="text"
+                          placeholder={`Dish ${idx+1} name`}
+                          value={dish.dish_name}
+                          onChange={e => updateDish(day, idx, "dish_name", e.target.value)}
+                          style={{ flex: 2 }}
+                        />
+                        <select
+                          className="form-input"
+                          value={dish.dish_type}
+                          onChange={e => updateDish(day, idx, "dish_type", e.target.value)}
+                          style={{ flex: 1, minWidth: "100px" }}
+                        >
+                          {DISH_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => removeDish(day, idx)}
+                          style={{ background: "none", border: "1px solid #E5E5E5", borderRadius: "8px", cursor: "pointer", padding: "8px 10px", color: "#9CA3AF", fontSize: "1rem", lineHeight: 1, flexShrink:0 }}
+                          title="Remove dish"
+                        >×</button>
+                      </div>
+                      <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
+                        <i className="ph-bold ph-link" style={{ color:"#9CA3AF", fontSize:"0.9rem", flexShrink:0 }}></i>
+                        <input
+                          className="form-input"
+                          type="url"
+                          placeholder="Dish photo URL (paste from Google, Unsplash, etc.)"
+                          value={dish.dish_image || ""}
+                          onChange={e => updateDish(day, idx, "dish_image", e.target.value)}
+                          style={{ flex: 1, fontSize:"0.82rem" }}
+                        />
+                      </div>
+                      <div style={{ fontSize:"0.72rem", color:"#9CA3AF", marginTop:"4px", paddingLeft:"22px" }}>
+                        📐 Required: <strong>800 × 500 px</strong> · JPG or PNG · max <strong>1.5 MB</strong> · landscape format only
+                      </div>
                     </div>
                   ))}
                   <button type="button" className="btn btn-outline btn-sm" onClick={() => addDish(day)} style={{ marginTop: "4px" }}>
@@ -198,12 +243,20 @@ function ChefPortalPage() {
             </div>
           ))}
 
+          {submitMsg && (
+            <div style={{ background:"#D4EDDA", border:"1px solid #A8D5B5", borderRadius:"8px", padding:"10px 16px", marginTop:"16px", fontSize:"0.875rem", color:"#3A813D", display:"flex", alignItems:"center", gap:"8px" }}>
+              <i className="ph-fill ph-check-circle"></i> {submitMsg}
+            </div>
+          )}
           <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
-            <button className="btn btn-primary" style={{ minWidth: "130px" }} onClick={handleSave}>
-              {saved ? <><i className="ph-fill ph-check-circle"></i> Saved!</> : "Save Menu"}
+            <button className="btn btn-outline" style={{ minWidth: "130px" }} onClick={handleSave}>
+              {saved ? <><i className="ph-fill ph-check-circle"></i> Draft Saved</> : "Save Draft"}
             </button>
-            <button className="btn btn-outline" style={{ minWidth: "100px" }}>Preview</button>
+            <button className="btn btn-primary" style={{ minWidth: "180px" }} onClick={handleSubmitForApproval}>
+              <i className="ph-bold ph-paper-plane-tilt"></i> Submit for Approval
+            </button>
           </div>
+          <p style={{ fontSize:"0.78rem", color:"#9CA3AF", marginTop:"10px" }}>Submitted menus go to admin for review before going live. Chefs cannot repeat dishes from the previous week.</p>
         </div>
       )}
     </div>

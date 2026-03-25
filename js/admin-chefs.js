@@ -249,9 +249,14 @@ function ChefModal({ chef, onSave, onClose }) {
             <div className="form-group"><label style={lbl}>Price / Week ($)</label>
               <input className="form-input" type="number" value={form.price_per_week||''} onChange={e=>set('price_per_week',parseFloat(e.target.value)||0)} placeholder="150"/></div>
           </div>
-          <div style={row2}>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'16px' }}>
             <div className="form-group"><label style={lbl}>Rating</label>
               <input className="form-input" type="number" step="0.1" min="1" max="5" value={form.rating||''} onChange={e=>set('rating',parseFloat(e.target.value)||0)}/></div>
+            <div className="form-group">
+              <label style={lbl}>CelebChef Commission %</label>
+              <input className="form-input" type="number" min="0" max="100" step="1" value={form.commission_pct ?? 20} onChange={e=>set('commission_pct',parseInt(e.target.value)||0)}/>
+              <div style={{ fontSize:'0.72rem', color:'#9CA3AF', marginTop:'3px' }}>Chef keeps {100-(form.commission_pct ?? 20)}%</div>
+            </div>
             <div className="form-group"><label style={lbl}>Status</label>
               <select className="form-input" value={form.status||'Active'} onChange={e=>set('status',e.target.value)}>
                 <option value="Active">Active</option><option value="Paused">Paused</option>
@@ -354,7 +359,7 @@ function ChefsPage({ chefs, setChefs }) {
       </div>
       <div className="card" style={{ padding:0, overflow:'hidden' }}>
         <table className="data-table">
-          <thead><tr><th>Chef</th><th>Cuisine</th><th>Price/Week</th><th>Rating</th><th>Subscribers</th><th>Postcodes</th><th>Status</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Chef</th><th>Cuisine</th><th>Price/Week</th><th>Commission</th><th>Rating</th><th>Subscribers</th><th>Postcodes</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody>
             {filtered.map(c => {
               var subCount = (window.ADM.subscribers||[]).filter(s=>s.chef_id===c.chef_id).length;
@@ -371,6 +376,10 @@ function ChefsPage({ chefs, setChefs }) {
                   </td>
                   <td><span className="badge badge-blue">{c.cuisine_type}</span></td>
                   <td style={{ fontWeight:700 }}>${c.price_per_week}</td>
+                  <td>
+                    <div style={{ fontSize:'0.78rem', fontWeight:600 }}>{c.commission_pct ?? 20}%</div>
+                    <div style={{ fontSize:'0.7rem', color:'#9CA3AF' }}>Chef {100-(c.commission_pct ?? 20)}%</div>
+                  </td>
                   <td>⭐ {c.rating}</td>
                   <td>{subCount}</td>
                   <td>
@@ -403,4 +412,206 @@ function ChefsPage({ chefs, setChefs }) {
   );
 }
 
-Object.assign(window.ADM, { ChefsPage, ApplicationsPage });
+// ─────────────────────────────────────────────
+// Menu Approvals Page
+// ─────────────────────────────────────────────
+var DAY_LABELS_MAP = { monday:'Mon', tuesday:'Tue', wednesday:'Wed', thursday:'Thu', friday:'Fri' };
+
+function MenuApprovalsPage() {
+  var [menus, setMenus] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('cc_pending_menus') || '[]'); } catch(e) { return []; }
+  });
+  var [detail, setDetail] = useState(null);
+
+  var persist = (updated) => {
+    setMenus(updated);
+    try { localStorage.setItem('cc_pending_menus', JSON.stringify(updated)); } catch(e) {}
+  };
+
+  // Check if this submission repeats dishes from a different week for the same chef
+  var findRepeats = (submission) => {
+    var others = menus.filter(m => m.chef_id === submission.chef_id && m.id !== submission.id && m.status === 'approved');
+    var allOtherDishes = new Set();
+    others.forEach(m => {
+      Object.values(m.dishes_by_day||{}).forEach(dishes => {
+        (dishes||[]).forEach(d => { if(d.dish_name) allOtherDishes.add(d.dish_name.toLowerCase().trim()); });
+      });
+    });
+    var repeats = [];
+    Object.values(submission.dishes_by_day||{}).forEach(dishes => {
+      (dishes||[]).forEach(d => {
+        if (d.dish_name && allOtherDishes.has(d.dish_name.toLowerCase().trim())) repeats.push(d.dish_name);
+      });
+    });
+    return [...new Set(repeats)];
+  };
+
+  var handleApprove = (sub) => {
+    // Update chef's menu in cc_chefs
+    try {
+      var chefs = JSON.parse(localStorage.getItem('cc_chefs') || '[]') || (window.CC?.mockChefs || []);
+      var updated = chefs.map(c => {
+        if (c.chef_id !== sub.chef_id) return c;
+        return { ...c, [sub.week_key]: sub.dishes_by_day };
+      });
+      localStorage.setItem('cc_chefs', JSON.stringify(updated));
+      if (window.CC) window.CC.mockChefs = updated;
+      window.ADM.adminChefs = updated;
+    } catch(e) {}
+    persist(menus.map(m => m.id===sub.id ? { ...m, status:'approved', reviewed_at: new Date().toISOString().slice(0,10) } : m));
+    setDetail(null);
+  };
+
+  var handleReject = (sub, reason) => {
+    persist(menus.map(m => m.id===sub.id ? { ...m, status:'rejected', reviewed_at: new Date().toISOString().slice(0,10), reject_reason: reason } : m));
+    setDetail(null);
+  };
+
+  var pending  = menus.filter(m => m.status === 'pending');
+  var reviewed = menus.filter(m => m.status !== 'pending');
+
+  var statusBadge = s => ({
+    pending:  <span className="badge badge-yellow">Pending Review</span>,
+    approved: <span className="badge badge-green">Approved</span>,
+    rejected: <span className="badge badge-red">Rejected</span>,
+  }[s] || <span className="badge badge-gray">{s}</span>);
+
+  return (
+    <div className="fade-in">
+      <div className="section-header">
+        <div>
+          <h1 className="section-title">Menu Approvals</h1>
+          <p className="section-subtitle">{pending.length} pending · {reviewed.length} reviewed</p>
+        </div>
+      </div>
+
+      <div style={{ background:'#FFF7ED', border:'1px solid #FED7AA', borderRadius:'10px', padding:'14px 18px', marginBottom:'20px', fontSize:'0.85rem', color:'#92400E', display:'flex', gap:'10px' }}>
+        <i className="ph-fill ph-warning" style={{ fontSize:'1.1rem', flexShrink:0, marginTop:'1px' }}/>
+        <div>
+          <strong>Menu repeat rule:</strong> Chefs cannot submit the same dishes two consecutive weeks. Repeated dishes will be highlighted in red — reject and ask the chef to revise their menu.
+        </div>
+      </div>
+
+      {menus.length === 0 && (
+        <div className="card" style={{ textAlign:'center', padding:'48px', color:'#9CA3AF' }}>
+          <i className="ph-fill ph-calendar-blank" style={{ fontSize:'2.5rem', display:'block', marginBottom:'12px' }}/>
+          <p style={{ fontWeight:600, color:'#5A5D66' }}>No menu submissions yet</p>
+          <p style={{ fontSize:'0.85rem', marginTop:'4px' }}>Menus submitted by chefs via the Chef Portal will appear here for review.</p>
+        </div>
+      )}
+
+      {pending.length > 0 && (
+        <>
+          <h3 style={{ fontSize:'0.9rem', fontWeight:700, marginBottom:'12px' }}>Awaiting Review ({pending.length})</h3>
+          <div className="card" style={{ padding:0, overflow:'hidden', marginBottom:'24px' }}>
+            <table className="data-table">
+              <thead><tr><th>Chef</th><th>Week</th><th>Submitted</th><th>Dishes</th><th>Repeat?</th><th>Actions</th></tr></thead>
+              <tbody>
+                {pending.map(sub => {
+                  var totalDishes = Object.values(sub.dishes_by_day||{}).reduce((t,d)=>t+(d||[]).filter(x=>x.dish_name).length,0);
+                  var repeats = findRepeats(sub);
+                  return (
+                    <tr key={sub.id}>
+                      <td><div style={{ fontWeight:600 }}>{sub.chef_name}</div></td>
+                      <td style={{ fontSize:'0.82rem' }}>{sub.week_key==='currentWeek'?'This Week':'Next Week'}<br/><span style={{ color:'#9CA3AF', fontSize:'0.75rem' }}>{sub.week_label||''}</span></td>
+                      <td style={{ color:'#9CA3AF', fontSize:'0.82rem' }}>{sub.submitted}</td>
+                      <td><span className="badge badge-blue">{totalDishes} dishes</span></td>
+                      <td>
+                        {repeats.length > 0
+                          ? <span className="badge badge-red" title={repeats.join(', ')}>⚠ {repeats.length} repeat{repeats.length>1?'s':''}</span>
+                          : <span className="badge badge-green">✓ All new</span>}
+                      </td>
+                      <td>
+                        <div style={{ display:'flex', gap:'6px' }}>
+                          <button className="btn btn-outline btn-sm" onClick={()=>setDetail(sub)}><i className="ph-bold ph-eye"/> Review</button>
+                          {repeats.length === 0 && <button className="btn btn-success btn-sm" onClick={()=>handleApprove(sub)}><i className="ph-bold ph-check"/> Approve</button>}
+                          <button className="btn btn-danger btn-sm" onClick={()=>handleReject(sub,'Menu contains repeated dishes or other issue')}><i className="ph-bold ph-x"/> Reject</button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      {reviewed.length > 0 && (
+        <>
+          <h3 style={{ fontSize:'0.9rem', fontWeight:700, color:'#9CA3AF', marginBottom:'12px' }}>Reviewed ({reviewed.length})</h3>
+          <div className="card" style={{ padding:0, overflow:'hidden' }}>
+            <table className="data-table">
+              <thead><tr><th>Chef</th><th>Week</th><th>Status</th><th>Reviewed</th><th></th></tr></thead>
+              <tbody>
+                {reviewed.map(sub => (
+                  <tr key={sub.id}>
+                    <td style={{ fontWeight:600 }}>{sub.chef_name}</td>
+                    <td style={{ fontSize:'0.82rem' }}>{sub.week_key==='currentWeek'?'This Week':'Next Week'}</td>
+                    <td>{statusBadge(sub.status)}</td>
+                    <td style={{ color:'#9CA3AF', fontSize:'0.82rem' }}>{sub.reviewed_at||'—'}</td>
+                    <td><button className="btn btn-outline btn-sm" onClick={()=>setDetail(sub)}>View</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      {/* Detail modal */}
+      {detail && (
+        <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setDetail(null)}>
+          <div className="modal" style={{ maxWidth:'600px' }}>
+            <div className="modal-header">
+              <div>
+                <h2 style={{ fontSize:'1rem', fontWeight:800, margin:0 }}>{detail.chef_name} — {detail.week_key==='currentWeek'?'This Week':'Next Week'}</h2>
+                <p style={{ fontSize:'0.78rem', color:'#9CA3AF', margin:0 }}>Submitted {detail.submitted} · {detail.chef_cuisine}</p>
+              </div>
+              <button className="btn-icon" onClick={()=>setDetail(null)}><i className="ph-bold ph-x"/></button>
+            </div>
+            <div className="modal-body">
+              {(() => {
+                var repeats = new Set(findRepeats(detail).map(r=>r.toLowerCase().trim()));
+                return Object.entries(detail.dishes_by_day||{}).map(([day, dishes]) => {
+                  var named = (dishes||[]).filter(d=>d.dish_name);
+                  if (!named.length) return null;
+                  return (
+                    <div key={day} style={{ marginBottom:'16px' }}>
+                      <div style={{ fontWeight:700, fontSize:'0.82rem', color:'#5A5D66', marginBottom:'6px', textTransform:'uppercase', letterSpacing:'0.05em' }}>{DAY_LABELS_MAP[day]||day}</div>
+                      <div style={{ display:'flex', flexDirection:'column', gap:'4px' }}>
+                        {named.map((d,i) => {
+                          var isRepeat = repeats.has((d.dish_name||'').toLowerCase().trim());
+                          return (
+                            <div key={i} style={{ display:'flex', alignItems:'center', gap:'8px', padding:'6px 10px', background: isRepeat?'#FEF2F2':'#F8F8F8', borderRadius:'8px', border: isRepeat?'1px solid #FECACA':'none' }}>
+                              {d.dish_image && <img src={d.dish_image} style={{ width:'36px', height:'36px', objectFit:'cover', borderRadius:'6px' }} onError={e=>e.target.style.display='none'}/>}
+                              <span style={{ fontWeight:600, fontSize:'0.875rem', color: isRepeat?'#D0342C':'#111' }}>{d.dish_name}</span>
+                              <span className="badge badge-gray" style={{ fontSize:'0.68rem', marginLeft:'auto' }}>{d.dish_type}</span>
+                              {isRepeat && <span className="badge badge-red" style={{ fontSize:'0.68rem' }}>Repeat!</span>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+            {detail.status === 'pending' && (
+              <div className="modal-footer">
+                <button className="btn btn-danger" onClick={()=>handleReject(detail,'Menu contains repeated dishes')}>
+                  <i className="ph-bold ph-x"/> Reject
+                </button>
+                <button className="btn btn-primary" onClick={()=>handleApprove(detail)}>
+                  <i className="ph-bold ph-check"/> Approve Menu
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+Object.assign(window.ADM, { ChefsPage, ApplicationsPage, MenuApprovalsPage });
