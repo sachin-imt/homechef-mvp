@@ -8,16 +8,45 @@ function ChefPortalPage({ session }) {
   var [profileTab, setProfileTab] = useState("profile");
   var [weekTab, setWeekTab] = useState("currentWeek");
   var [saved, setSaved] = useState(false);
-  var [bioLen, setBioLen] = useState(0);
   var [postcodeInput, setPostcodeInput] = useState("");
-  var [postcodes, setPostcodes] = useState([]);
-  // Pre-fill name from session if provided
-  var [profile, setProfile] = useState({ name: session?.chef_name || "", cuisine: "", price: "", bio: "" });
 
-  // Per-day dish entries
+  // ── Load chef data from CC store on mount ──
   var emptyMenu = () => DAYS.reduce((acc, d) => ({ ...acc, [d]: [{ dish_name: "", dish_type: "Main", dish_image: "" }] }), {});
-  var [menus, setMenus] = useState({ currentWeek: emptyMenu(), nextWeek: emptyMenu() });
-  var [openDays, setOpenDays] = useState({ monday: true, tuesday: false, wednesday: false, thursday: false, friday: false });
+
+  function chefFromStore() {
+    // Prefer fresh copy from localStorage (admin edits land there)
+    try {
+      var saved = localStorage.getItem('cc_chefs');
+      var chefs = saved ? JSON.parse(saved) : (window.CC.mockChefs || []);
+      if (session && session.chef_id) return chefs.find(c => c.chef_id === session.chef_id) || null;
+    } catch(e) {}
+    return null;
+  }
+
+  function buildMenusFromChef(chef) {
+    var convert = (weekData) => {
+      var out = emptyMenu();
+      if (!weekData) return out;
+      DAYS.forEach(d => {
+        var dishes = weekData[d];
+        if (dishes && dishes.length) out[d] = dishes.map(dish => ({ dish_name: dish.dish_name || dish.name || "", dish_type: dish.dish_type || dish.type || "Main", dish_image: dish.dish_image || dish.image || "" }));
+      });
+      return out;
+    };
+    return { currentWeek: convert(chef.currentWeek), nextWeek: convert(chef.nextWeek) };
+  }
+
+  var initChef = chefFromStore();
+  var [profile,  setProfile]  = useState({
+    name:    initChef?.chef_name    || session?.chef_name || "",
+    cuisine: initChef?.cuisine_type || "",
+    price:   initChef?.price_per_week || "",
+    bio:     initChef?.bio          || "",
+  });
+  var [postcodes, setPostcodes] = useState(initChef?.delivery_postcodes || []);
+  var [bioLen,    setBioLen]    = useState((initChef?.bio || "").length);
+  var [menus,     setMenus]     = useState(() => initChef ? buildMenusFromChef(initChef) : { currentWeek: emptyMenu(), nextWeek: emptyMenu() });
+  var [openDays,  setOpenDays]  = useState({ monday: true, tuesday: false, wednesday: false, thursday: false, friday: false });
 
   function addPostcode() {
     var pc = postcodeInput.trim();
@@ -50,17 +79,39 @@ function ChefPortalPage({ session }) {
   }
 
   var [submitMsg, setSubmitMsg] = useState("");
+
   function handleSave() {
+    // Write profile + menus back to the chef record in localStorage
+    try {
+      var stored = localStorage.getItem('cc_chefs');
+      var chefs  = stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(window.CC.mockChefs || []));
+      var idx    = session?.chef_id ? chefs.findIndex(c => c.chef_id === session.chef_id) : -1;
+      if (idx >= 0) {
+        chefs[idx] = {
+          ...chefs[idx],
+          chef_name:         profile.name,
+          cuisine_type:      profile.cuisine,
+          price_per_week:    parseFloat(profile.price) || chefs[idx].price_per_week,
+          bio:               profile.bio,
+          delivery_postcodes: postcodes,
+          currentWeek:       menus.currentWeek,
+          nextWeek:          menus.nextWeek,
+        };
+        localStorage.setItem('cc_chefs', JSON.stringify(chefs));
+        if (window.CC) window.CC.mockChefs = chefs;
+      }
+    } catch(e) {}
     setSaved(true);
-    // Save draft locally
-    try { localStorage.setItem('cc_portal_draft', JSON.stringify(menus)); } catch(e) {}
     setTimeout(() => setSaved(false), 2000);
   }
+
   function handleSubmitForApproval() {
-    var chefName = profile.name || "Chef";
+    var chef = chefFromStore();
     var entry = {
       id: Date.now(),
-      chef_id: null, chef_name: chefName, chef_cuisine: profile.cuisine,
+      chef_id: session?.chef_id || null,
+      chef_name: profile.name || session?.chef_name || "Chef",
+      chef_cuisine: profile.cuisine,
       week_key: weekTab,
       week_label: weekTab === "currentWeek" ? "This Week" : "Next Week",
       dishes_by_day: menus[weekTab],
