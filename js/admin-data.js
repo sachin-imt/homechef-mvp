@@ -56,10 +56,29 @@ var pendingMenus = [];
 // ── Seed from localStorage or cc-data defaults ──
 var adminChefs   = loadChefs() || (window.CC && window.CC.mockChefs ? JSON.parse(JSON.stringify(window.CC.mockChefs)) : []);
 var siteContent  = loadContent();
+// Subscriber schema:
+//   id, name, email, phone, chef_id, chef_name, suburb, postcode, dietary, created
+//   starting_week  — the first week they subscribed
+//   payments       — array of { week, status: 'Pending'|'Paid', confirmed: bool, confirmed_at: string|null }
+//
 // Two seed records — remove once real subscriptions come in
 var seedSubscribers = [
-  { id:1, name:'Sarah Johnson',  email:'sarah.j@gmail.com',  phone:'0412 345 678', chef_id:1, chef_name:'Chef Priya',  suburb:'Newtown',      postcode:'2042', week:'Mar 31–Apr 4', payment:'Paid',    delivery:'Scheduled', created:'2026-03-25', dietary:'' },
-  { id:2, name:'Michael Chen',   email:'mchen@outlook.com',  phone:'0423 456 789', chef_id:2, chef_name:'Chef Asa',    suburb:'Redfern',       postcode:'2016', week:'Mar 31–Apr 4', payment:'Pending', delivery:'Scheduled', created:'2026-03-25', dietary:'Gluten-free' },
+  {
+    id: 1, name: 'Sarah Johnson', email: 'sarah.j@gmail.com', phone: '0412 345 678',
+    chef_id: 1, chef_name: 'Chef Priya', suburb: 'Newtown', postcode: '2042',
+    dietary: '', created: '2026-03-25', starting_week: 'Mar 31–Apr 4',
+    payments: [
+      { week: 'Mar 31–Apr 4', status: 'Paid', confirmed: true, confirmed_at: '2026-03-25' },
+    ],
+  },
+  {
+    id: 2, name: 'Michael Chen', email: 'mchen@outlook.com', phone: '0423 456 789',
+    chef_id: 2, chef_name: 'Chef Asa', suburb: 'Redfern', postcode: '2016',
+    dietary: 'Gluten-free', created: '2026-03-25', starting_week: 'Mar 31–Apr 4',
+    payments: [
+      { week: 'Mar 31–Apr 4', status: 'Pending', confirmed: false, confirmed_at: null },
+    ],
+  },
 ];
 var stored = loadSubscribers();
 var subscribers = stored.length > 0 ? stored : seedSubscribers;

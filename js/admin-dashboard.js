@@ -97,7 +97,18 @@ function EmptyState({ icon, text }) {
 function DashboardPage({ chefs, subscribers }) {
   var activeChefs = chefs.filter(c => (c.status || 'Active') === 'Active').length;
   var totalSubs   = subscribers.length;
-  var paidSubs    = subscribers.filter(s => s.payment === 'Paid').length;
+
+  // Payments: each subscriber has a payments[] array with { week, confirmed }
+  var confirmedPayments = subscribers.reduce((t, s) => t + (s.payments||[]).filter(p=>p.confirmed).length, 0);
+  var pendingPayments   = subscribers.reduce((t, s) => t + (s.payments||[]).filter(p=>!p.confirmed).length, 0);
+
+  var confirmedRevenue = subscribers.reduce((total, s) => {
+    var chef = chefs.find(c => c.chef_id === s.chef_id);
+    if (!chef) return total;
+    return total + (s.payments||[]).filter(p=>p.confirmed).length * chef.price_per_week;
+  }, 0);
+
+  var platformFee = Math.round(confirmedRevenue * 0.2);
 
   var chefSubCounts = chefs.map(c => ({
     label: c.chef_name.replace('Chef ', ''),
@@ -105,8 +116,8 @@ function DashboardPage({ chefs, subscribers }) {
   }));
 
   var paymentBreakdown = [
-    { label: 'Paid',    v: paidSubs },
-    { label: 'Pending', v: subscribers.filter(s => s.payment === 'Pending').length },
+    { label: 'Confirmed', v: confirmedPayments },
+    { label: 'Pending',   v: pendingPayments   },
   ];
 
   var recentActivity = subscribers.slice(-6).reverse().map(s => ({
@@ -127,12 +138,10 @@ function DashboardPage({ chefs, subscribers }) {
       {/* KPI cards */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'16px', marginBottom:'24px' }}>
         {[
-          { label:'Total Subscribers', value: totalSubs,    delta: totalSubs === 0 ? 'No subscribers yet' : `${paidSubs} paid`, cls:'neutral', icon:'ph-fill ph-users-three' },
-          { label:'Active Chefs',      value: activeChefs,  delta: `${chefs.length - activeChefs} paused`,                      cls:'neutral', icon:'ph-fill ph-chef-hat' },
-          { label:'Paid Revenue',      value: `$${subscribers.filter(s=>s.payment==='Paid').reduce((a,s)=>{ var c=chefs.find(c=>c.chef_id===s.chef_id); return a+(c?c.price_per_week:0); },0)}`,
-            delta: 'This week', cls:'neutral', icon:'ph-fill ph-currency-circle-dollar' },
-          { label:'Platform Fee (20%)',value: `$${Math.round(subscribers.filter(s=>s.payment==='Paid').reduce((a,s)=>{ var c=chefs.find(c=>c.chef_id===s.chef_id); return a+(c?c.price_per_week*0.2:0); },0))}`,
-            delta: 'Your cut', cls:'neutral', icon:'ph-fill ph-trend-up' },
+          { label:'Total Subscribers',  value: totalSubs,            delta: totalSubs === 0 ? 'No subscribers yet' : `${totalSubs} active`, cls:'neutral', icon:'ph-fill ph-users-three' },
+          { label:'Active Chefs',       value: activeChefs,          delta: `${chefs.length - activeChefs} paused`,      cls:'neutral', icon:'ph-fill ph-chef-hat' },
+          { label:'Confirmed Revenue',  value: `$${confirmedRevenue}`, delta: `${confirmedPayments} week payment${confirmedPayments!==1?'s':''} confirmed`, cls:'neutral', icon:'ph-fill ph-currency-circle-dollar' },
+          { label:'Platform Fee (20%)', value: `$${platformFee}`,    delta: pendingPayments > 0 ? `${pendingPayments} pending confirmation` : 'All payments confirmed', cls:'neutral', icon:'ph-fill ph-trend-up' },
         ].map(card => (
           <div key={card.label} className="stat-card">
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'8px' }}>
@@ -155,14 +164,14 @@ function DashboardPage({ chefs, subscribers }) {
         {/* Payment status */}
         <div className="card">
           <h3 style={{ fontSize:'0.95rem', fontWeight:700, margin:'0 0 16px' }}>Payment Status</h3>
-          {totalSubs > 0 ? (
+          {(confirmedPayments + pendingPayments) > 0 ? (
             <>
               {paymentBreakdown.map(p => (
-                <RatioBar key={p.label} label={p.label} value={p.v} total={totalSubs}
-                  color={p.label==='Paid'?'#3A813D':'#F59E0B'}/>
+                <RatioBar key={p.label} label={p.label} value={p.v} total={confirmedPayments + pendingPayments}
+                  color={p.label==='Confirmed'?'#3A813D':'#F59E0B'}/>
               ))}
               <div style={{ marginTop:'16px', display:'flex', justifyContent:'space-between', fontSize:'0.8rem', color:'#5A5D66', borderTop:'1px solid #F4F4F4', paddingTop:'12px' }}>
-                <span>Total subscribers</span><strong style={{ color:'#111' }}>{totalSubs}</strong>
+                <span>Total payment records</span><strong style={{ color:'#111' }}>{confirmedPayments + pendingPayments}</strong>
               </div>
             </>
           ) : (
