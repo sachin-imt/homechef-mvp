@@ -302,13 +302,13 @@ function ChefAccessModal({ chef, onClose }) {
   var [saved,     setSaved]     = useState(false);
 
   // Load existing account on mount
-  useState(function() {
+  React.useEffect(function() {
     window.ADM.loadChefAccounts().then(function(accounts) {
       var found = accounts.find(function(a) { return a.chef_id === chef.chef_id; }) || null;
       setExisting(found);
       if (found) { setUsername(found.username || ''); setPassword(found.password || ''); setActive(found.active !== false); }
     }).catch(function() {});
-  });
+  }, []);
 
   var handleSave = () => {
     if (!username.trim()) return alert('Username required');
@@ -316,8 +316,9 @@ function ChefAccessModal({ chef, onClose }) {
     window.ADM.upsertChefAccount({
       chef_id: chef.chef_id, chef_name: chef.chef_name,
       username: username.trim(), password: password.trim(),
-      active: active, created: existing?.created || new Date().toISOString().slice(0,10),
-    }).then(function() {
+      active: active,
+    }).then(function(result) {
+      if (result && result.error) { alert('Error saving credentials: ' + result.error); return; }
       setSaved(true);
       setTimeout(onClose, 900);
     }).catch(function(e) { alert('Error saving credentials: ' + e.message); });
