@@ -9,10 +9,36 @@ function SubscribePage({ chef, setPage }) {
     ? chef.delivery_postcodes.map(pc => ({ postcode: pc, suburb: postcodeMap[pc] || pc }))
     : [];
 
+  // ── Week options: Sunday cutoff + unavailable weeks ──
+  function getMonIso(weeksAhead) {
+    var d = new Date();
+    var daysToMon = d.getDay() === 0 ? 1 : (8 - d.getDay()) % 7 || 7;
+    d.setDate(d.getDate() + daysToMon + weeksAhead * 7);
+    d.setHours(0, 0, 0, 0);
+    return d.toISOString().slice(0, 10);
+  }
+  function fmtIso(iso) {
+    var mon = new Date(iso + 'T00:00:00');
+    var fri = new Date(mon); fri.setDate(mon.getDate() + 4);
+    var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return mon.getDate() + ' ' + M[mon.getMonth()] + ' – ' + fri.getDate() + ' ' + M[fri.getMonth()];
+  }
+  var isSunday = new Date().getDay() === 0;
+  var unavailableWeeks = chef?.menus?.unavailable_weeks || [];
+  var rawWeekOpts = isSunday ? [
+    { val: 'this_week', iso: getMonIso(1), label: chef?.menus?.nextWeek?.week_label || fmtIso(getMonIso(1)) },
+    { val: 'next_week', iso: getMonIso(2), label: fmtIso(getMonIso(2)) },
+  ] : [
+    { val: 'this_week', iso: getMonIso(0), label: chef?.menus?.currentWeek?.week_label || fmtIso(getMonIso(0)) },
+    { val: 'next_week', iso: getMonIso(1), label: chef?.menus?.nextWeek?.week_label || fmtIso(getMonIso(1)) },
+  ];
+  var weekOptions = rawWeekOpts.filter(function(o) { return !unavailableWeeks.includes(o.iso); });
+  var defaultWeek = weekOptions.length > 0 ? weekOptions[0].val : 'this_week';
+
   var [form, setForm] = useState({
     full_name: "", email: "", phone: "",
     street_address: "", suburb: "", postcode: "", state: "NSW", delivery_notes: "",
-    start_week: "this_week", dietary_restrictions: "",
+    start_week: defaultWeek, dietary_restrictions: "",
     payment_method: "bank_transfer", terms_accepted: false,
   });
   var [errors, setErrors] = useState({});
@@ -43,9 +69,8 @@ function SubscribePage({ chef, setPage }) {
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setErrors({});
     setLoading(true);
-    var weekLabel = form.start_week === 'this_week'
-      ? chef?.menus?.currentWeek?.week_label
-      : chef?.menus?.nextWeek?.week_label;
+    var selectedOpt = weekOptions.find(function(o) { return o.val === form.start_week; }) || weekOptions[0];
+    var weekLabel = selectedOpt ? selectedOpt.label : '';
     var newSub = {
       name: form.full_name.trim(),
       email: form.email.trim(),
@@ -80,10 +105,10 @@ function SubscribePage({ chef, setPage }) {
       });
   }
 
-  var weekLabels = chef ? {
-    this_week: chef.menus?.currentWeek?.week_label || '',
-    next_week: chef.menus?.nextWeek?.week_label || '',
-  } : {};
+  var weekLabels = {
+    this_week: rawWeekOpts.find(function(o) { return o.val === 'this_week'; })?.label || '',
+    next_week: rawWeekOpts.find(function(o) { return o.val === 'next_week'; })?.label || '',
+  };
 
   if (submitted) {
     return (
@@ -208,17 +233,21 @@ function SubscribePage({ chef, setPage }) {
           <legend>Subscription Details</legend>
           <div className="form-group">
             <label>Start Week *</label>
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "8px" }}>
-              {[
-                { val: "this_week", label: `This week (${weekLabels.this_week || "–"})` },
-                { val: "next_week", label: `Next week (${weekLabels.next_week || "–"})` },
-              ].map(opt => (
-                <label key={opt.val} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 16px", border: `2px solid ${form.start_week === opt.val ? "#FACA50" : "#E5E5E5"}`, borderRadius: "8px", cursor: "pointer", fontSize: "0.9rem", fontWeight: form.start_week === opt.val ? 700 : 400, background: form.start_week === opt.val ? "rgba(250,202,80,0.08)" : "white" }}>
-                  <input type="radio" name="start_week" value={opt.val} checked={form.start_week === opt.val} onChange={e => setForm(f => ({ ...f, start_week: e.target.value }))} style={{ accentColor: "#111" }} />
-                  {opt.label}
-                </label>
-              ))}
-            </div>
+            {weekOptions.length === 0 ? (
+              <p style={{ color: "#D0342C", fontSize: "0.88rem", margin: "8px 0 0", padding: "12px 16px", background: "#FFF0F0", borderRadius: "8px", border: "1px solid #FCA5A5" }}>
+                <i className="ph-fill ph-warning" style={{ marginRight: "6px" }}></i>
+                {chef?.chef_name} is not available for the upcoming weeks. Please check back later.
+              </p>
+            ) : (
+              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "8px" }}>
+                {weekOptions.map(opt => (
+                  <label key={opt.val} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 16px", border: `2px solid ${form.start_week === opt.val ? "#FACA50" : "#E5E5E5"}`, borderRadius: "8px", cursor: "pointer", fontSize: "0.9rem", fontWeight: form.start_week === opt.val ? 700 : 400, background: form.start_week === opt.val ? "rgba(250,202,80,0.08)" : "white" }}>
+                    <input type="radio" name="start_week" value={opt.val} checked={form.start_week === opt.val} onChange={e => setForm(f => ({ ...f, start_week: e.target.value }))} style={{ accentColor: "#111" }} />
+                    {opt.label}
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
           <F name="dietary_restrictions" label="Dietary Restrictions (optional)">
             <textarea className="form-input" rows={2} placeholder="Any allergies or dietary needs? e.g. nut-free, gluten-free"

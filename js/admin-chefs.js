@@ -411,12 +411,107 @@ function DeleteConfirm({ chef, onConfirm, onCancel }) {
 }
 
 // ─────────────────────────────────────────────
+// Unavailable Weeks Modal
+// ─────────────────────────────────────────────
+function UnavailableWeeksModal({ chef, onClose, onSave }) {
+  var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  function getMonIso(weeksAhead) {
+    var d = new Date();
+    var daysToMon = d.getDay() === 0 ? 1 : (8 - d.getDay()) % 7 || 7;
+    d.setDate(d.getDate() + daysToMon + weeksAhead * 7);
+    d.setHours(0, 0, 0, 0);
+    return d.toISOString().slice(0, 10);
+  }
+
+  function fmtIso(iso) {
+    var mon = new Date(iso + 'T00:00:00');
+    var fri = new Date(mon); fri.setDate(mon.getDate() + 4);
+    return mon.getDate() + ' ' + M[mon.getMonth()] + ' – ' + fri.getDate() + ' ' + M[fri.getMonth()];
+  }
+
+  var upcomingWeeks = [0, 1, 2, 3, 4].map(function(i) {
+    var iso = getMonIso(i);
+    return { iso: iso, label: fmtIso(iso) };
+  });
+
+  var existing = (chef.menus || {}).unavailable_weeks || [];
+  var [unavailable, setUnavailable] = useState(existing);
+  var [saving, setSaving] = useState(false);
+
+  var toggle = function(iso) {
+    setUnavailable(function(prev) {
+      return prev.includes(iso) ? prev.filter(function(d) { return d !== iso; }) : [...prev, iso];
+    });
+  };
+
+  var handleSave = function() {
+    setSaving(true);
+    var updatedMenus = Object.assign({}, chef.menus || {}, { unavailable_weeks: unavailable });
+    window.ADM.updateChef(Object.assign({}, chef, { menus: updatedMenus }))
+      .then(function(updated) {
+        setSaving(false);
+        onSave(updated);
+        onClose();
+      })
+      .catch(function(e) { alert('Error: ' + e.message); setSaving(false); });
+  };
+
+  return (
+    <div className="modal-overlay" onClick={function(e) { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal" style={{ maxWidth: '440px' }}>
+        <div className="modal-header">
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0 }}>
+            <i className="ph-bold ph-calendar-x" style={{ marginRight: '8px', color: '#D0342C' }}/>
+            Unavailable Weeks — {chef.chef_name}
+          </h2>
+          <button className="btn-icon" onClick={onClose}><i className="ph-bold ph-x"/></button>
+        </div>
+        <div className="modal-body">
+          <p style={{ fontSize: '0.85rem', color: '#5A5D66', margin: '0 0 16px' }}>
+            Toggle weeks when {chef.chef_name} cannot cook. Toggled-off weeks will not appear as subscription options for customers.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {upcomingWeeks.map(function(w) {
+              var off = unavailable.includes(w.iso);
+              return (
+                <label key={w.iso} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', border: '2px solid ' + (off ? '#FCA5A5' : '#E5E5E5'), borderRadius: '10px', cursor: 'pointer', background: off ? '#FFF5F5' : 'white', transition: 'all 0.15s' }}>
+                  <input type="checkbox" checked={off} onChange={function() { toggle(w.iso); }} style={{ accentColor: '#D0342C', width: '16px', height: '16px' }}/>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.9rem', color: off ? '#D0342C' : '#111' }}>{w.label}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#9CA3AF' }}>{w.iso}</div>
+                  </div>
+                  {off && <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#D0342C', background: '#FEE2E2', padding: '2px 8px', borderRadius: '20px' }}>UNAVAILABLE</span>}
+                </label>
+              );
+            })}
+          </div>
+          {unavailable.length > 0 && (
+            <p style={{ fontSize: '0.8rem', color: '#D0342C', margin: '12px 0 0', display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <i className="ph-fill ph-warning"/>
+              {unavailable.length} week{unavailable.length > 1 ? 's' : ''} marked unavailable — these won't show in the subscribe form.
+            </p>
+          )}
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-outline" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+            {saving ? <><i className="ph-bold ph-spinner spin"/> Saving…</> : 'Save'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // Active Chefs Page
 // ─────────────────────────────────────────────
 function ChefsPage({ chefs, setChefs }) {
   var [modal,   setModal]   = useState(null);
   var [delChef, setDel]     = useState(null);
   var [access,  setAccess]  = useState(null); // chef whose access modal is open
+  var [weeksModal, setWeeksModal] = useState(null); // chef for unavailable weeks modal
   var [search,  setSearch]  = useState('');
 
   var filtered = chefs.filter(c =>
@@ -505,6 +600,10 @@ function ChefsPage({ chefs, setChefs }) {
                         style={{ color: '#9CA3AF' }}>
                         <i className="ph-bold ph-key"/>
                       </button>
+                      <button className="btn-icon" title="Unavailable weeks" onClick={()=>setWeeksModal(c)}
+                        style={{ color: (c.menus?.unavailable_weeks?.length > 0) ? '#D0342C' : '#9CA3AF' }}>
+                        <i className="ph-bold ph-calendar-x"/>
+                      </button>
                       <button className="btn-icon" title="Toggle status" onClick={()=>{
                         var newStatus = (c.status||'Active')==='Active' ? 'Paused' : 'Active';
                         window.ADM.updateChef({ ...c, status: newStatus }).then(function(updated) {
@@ -521,9 +620,13 @@ function ChefsPage({ chefs, setChefs }) {
           </tbody>
         </table>
       </div>
-      {modal   && <ChefModal      chef={modal.chef} onSave={handleSave} onClose={()=>setModal(null)}/>}
-      {delChef && <DeleteConfirm  chef={delChef}    onConfirm={handleDelete} onCancel={()=>setDel(null)}/>}
-      {access  && <ChefAccessModal chef={access} onClose={()=>setAccess(null)}/>}
+      {modal      && <ChefModal           chef={modal.chef} onSave={handleSave} onClose={()=>setModal(null)}/>}
+      {delChef    && <DeleteConfirm        chef={delChef}   onConfirm={handleDelete} onCancel={()=>setDel(null)}/>}
+      {access     && <ChefAccessModal      chef={access}    onClose={()=>setAccess(null)}/>}
+      {weeksModal && <UnavailableWeeksModal chef={weeksModal} onClose={()=>setWeeksModal(null)}
+        onSave={function(updated) {
+          setChefs(function(prev) { return prev.map(function(ch) { return ch.chef_id===updated.chef_id ? updated : ch; }); });
+        }}/>}
     </div>
   );
 }

@@ -100,8 +100,10 @@ function ChefPortalPage({ session }) {
       price_per_week:     parseFloat(profile.price) || 0,
       bio:                profile.bio,
       delivery_postcodes: postcodes,
-      currentWeek:        menus.currentWeek,
-      nextWeek:           menus.nextWeek,
+      menus: {
+        currentWeek: menus.currentWeek,
+        nextWeek:    menus.nextWeek,
+      },
     };
     fetch('/api/chefs/' + session.chef_id, {
       method: 'PUT',
