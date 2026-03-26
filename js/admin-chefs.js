@@ -544,16 +544,16 @@ function ChefsPage({ chefs, setChefs }) {
 
   var newChef = { chef_name:'', cuisine_type:'', price_per_week:'', rating:4.8, bio:'', highlights:[], delivery_postcodes:[], status:'Active', food_image:'', avatar:'', currentWeek:{}, nextWeek:{} };
 
-  var statusBadge = s => s==='Active'
-    ? <span className="badge badge-green"><i className="ph-fill ph-circle" style={{fontSize:'0.5rem'}}/>{s}</span>
-    : <span className="badge badge-yellow">{s}</span>;
+  var statusBadge = s => (s||'active').toLowerCase()==='active'
+    ? <span className="badge badge-green"><i className="ph-fill ph-circle" style={{fontSize:'0.5rem'}}/>Active</span>
+    : <span className="badge badge-yellow">Paused</span>;
 
   return (
     <div className="fade-in">
       <div className="section-header">
         <div>
           <h1 className="section-title">Active Chefs</h1>
-          <p className="section-subtitle">{chefs.length} chefs · {chefs.filter(c=>(c.status||'Active')==='Active').length} active</p>
+          <p className="section-subtitle">{chefs.length} chefs · {chefs.filter(c=>(c.status||'active').toLowerCase()==='active').length} active</p>
         </div>
         <div style={{ display:'flex', gap:'10px' }}>
           <input className="search-input" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search chefs…"/>
@@ -593,7 +593,7 @@ function ChefsPage({ chefs, setChefs }) {
                       {(c.delivery_postcodes||[]).length > 3 && <span className="badge badge-gray">+{c.delivery_postcodes.length-3}</span>}
                     </div>
                   </td>
-                  <td>{statusBadge(c.status||'Active')}</td>
+                  <td>{statusBadge(c.status)}</td>
                   <td>
                     <div style={{ display:'flex', gap:'6px' }}>
                       <button className="btn-icon" title="Edit" onClick={()=>setModal({chef:{...c}})}><i className="ph-bold ph-pencil"/></button>
@@ -606,11 +606,11 @@ function ChefsPage({ chefs, setChefs }) {
                         <i className="ph-bold ph-calendar-x"/>
                       </button>
                       <button className="btn-icon" title="Toggle status" onClick={()=>{
-                        var newStatus = (c.status||'Active')==='Active' ? 'Paused' : 'Active';
+                        var newStatus = (c.status||'active').toLowerCase()==='active' ? 'active' : 'paused';
                         window.ADM.updateChef({ ...c, status: newStatus }).then(function(updated) {
                           setChefs(function(prev) { return prev.map(function(ch) { return ch.chef_id===c.chef_id ? updated : ch; }); });
                         });
-                      }}><i className={`ph-bold ${(c.status||'Active')==='Active'?'ph-pause':'ph-play'}`}/></button>
+                      }}><i className={`ph-bold ${(c.status||'active').toLowerCase()==='active'?'ph-pause':'ph-play'}`}/></button>
                       <button className="btn-icon" style={{ color:'#D0342C' }} onClick={()=>setDel(c)}><i className="ph-bold ph-trash"/></button>
                     </div>
                   </td>

@@ -349,7 +349,7 @@ function AddSubscriberModal({ chefs, onSave, onClose }) {
             <label style={lbl}>Chef</label>
             <select className="form-input" value={form.chef_id} onChange={e=>{ set('chef_id',e.target.value); set('suburb',''); set('postcode',''); }}>
               <option value="">Select chef…</option>
-              {chefs.filter(c=>(c.status||'Active')==='Active').map(c=><option key={c.chef_id} value={c.chef_id}>{c.chef_name} — {c.cuisine_type}</option>)}
+              {chefs.filter(c=>(c.status||'active').toLowerCase()==='active').map(c=><option key={c.chef_id} value={c.chef_id}>{c.chef_name} — {c.cuisine_type}</option>)}
             </select>
           </div>
           <div style={row2}>
