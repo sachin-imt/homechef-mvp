@@ -37,9 +37,22 @@ function DayCard({ day, dishes }) {
   );
 }
 
+function computeWeekLabel(weeksAhead) {
+  var d = new Date();
+  var day = d.getDay();
+  var daysToMon = day === 0 ? 1 : (8 - day) % 7 || 7;
+  var mon = new Date(d); mon.setDate(d.getDate() + daysToMon + weeksAhead * 7);
+  var fri = new Date(mon); fri.setDate(mon.getDate() + 4);
+  var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return mon.getDate() + ' ' + M[mon.getMonth()] + ' – ' + fri.getDate() + ' ' + M[fri.getMonth()];
+}
+
 function ChefDetailPage({ chef, setPage }) {
   var [activeWeek, setActiveWeek] = useState("currentWeek");
   var menu = (chef.menus && chef.menus[activeWeek]) || {};
+
+  var currentWeekLabel = (chef.menus && chef.menus.currentWeek && chef.menus.currentWeek.week_label) || computeWeekLabel(0);
+  var nextWeekLabel    = (chef.menus && chef.menus.nextWeek    && chef.menus.nextWeek.week_label)    || computeWeekLabel(1);
 
   var suburbs = chef.delivery_postcodes.map(pc => {
     var name = (window.CC.POSTCODE_SUBURB_MAP || {})[pc] || pc;
@@ -110,8 +123,8 @@ function ChefDetailPage({ chef, setPage }) {
           </div>
           <div style={{ display: "flex", background: "#F4F4F4", borderRadius: "10px", padding: "4px", gap: "4px" }}>
             {[
-              { key: "currentWeek", label: `This Week (${chef.menus?.currentWeek?.week_label || '–'})` },
-              { key: "nextWeek", label: `Next Week (${chef.menus?.nextWeek?.week_label || '–'})` },
+              { key: "currentWeek", label: `This Week (${currentWeekLabel})` },
+              { key: "nextWeek", label: `Next Week (${nextWeekLabel})` },
             ].map(w => (
               <button
                 key={w.key}
