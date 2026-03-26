@@ -4,5 +4,8 @@
   "private": true,
   "dependencies": {
     "@supabase/supabase-js": "^2.100.0"
+  },
+  "devDependencies": {
+    "dotenv": "^17.3.1"
   }
 }

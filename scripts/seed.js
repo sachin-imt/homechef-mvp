@@ -1,8 +1,9 @@
-// ONE-TIME seed endpoint — call POST /api/seed to populate the DB
-// with the default chefs and site content from cc-data.js defaults.
-// Idempotent: skips records that already exist.
-const db = require('./_db');
-const { handle } = require('./_helpers');
+// Run once: node scripts/seed.js
+// Seeds default chefs and site content into Supabase.
+require('dotenv').config({ path: '.env.local' });
+const { createClient } = require('@supabase/supabase-js');
+
+const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 const DEFAULT_CONTENT = {
   hero_badge:       "Sydney's Home-Cooked Meal Marketplace",
@@ -79,26 +80,24 @@ const SEED_CHEFS = [
   },
 ];
 
-module.exports = handle(async (req, res) => {
-  if (req.method !== 'POST') return res.status(405).end();
-
-  const results = {};
-
-  // Seed chefs (skip existing chef_ids)
+async function seed() {
+  console.log('Seeding chefs…');
   const { data: existingChefs } = await db.from('chefs').select('chef_id');
   const existingIds = (existingChefs || []).map(c => c.chef_id);
   const newChefs = SEED_CHEFS.filter(c => !existingIds.includes(c.chef_id));
   if (newChefs.length > 0) {
     const { error } = await db.from('chefs').insert(newChefs);
-    results.chefs = error ? `error: ${error.message}` : `inserted ${newChefs.length}`;
+    if (error) { console.error('Chefs error:', error.message); } else { console.log(`  ✓ Inserted ${newChefs.length} chefs`); }
   } else {
-    results.chefs = 'already seeded';
+    console.log('  ✓ Chefs already seeded');
   }
 
-  // Seed site content
+  console.log('Seeding site content…');
   const rows = Object.entries(DEFAULT_CONTENT).map(([key, value]) => ({ key, value: String(value) }));
   const { error: contentErr } = await db.from('site_content').upsert(rows, { onConflict: 'key', ignoreDuplicates: true });
-  results.content = contentErr ? `error: ${contentErr.message}` : `upserted ${rows.length} keys`;
+  if (contentErr) { console.error('Content error:', contentErr.message); } else { console.log(`  ✓ Upserted ${rows.length} content keys`); }
 
-  return res.json({ ok: true, results });
-});
+  console.log('Done.');
+}
+
+seed().catch(console.error);

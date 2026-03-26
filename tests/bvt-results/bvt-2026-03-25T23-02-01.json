@@ -1,0 +1,321 @@
+{
+  "timestamp": "2026-03-25T23:02:01.187Z",
+  "summary": {
+    "total": 62,
+    "passed": 62,
+    "failed": 0,
+    "pct": 100
+  },
+  "results": [
+    {
+      "id": "BVT-001",
+      "name": "app.html exists",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-002",
+      "name": "admin.html exists",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-003",
+      "name": "vercel.json exists",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-004",
+      "name": "js/cc-data.js exists",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-005",
+      "name": "js/cc-nav.js exists",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-006",
+      "name": "js/cc-home.js exists",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-007",
+      "name": "js/cc-detail.js exists",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-008",
+      "name": "js/cc-subscribe.js exists",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-009",
+      "name": "js/cc-how.js exists",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-010",
+      "name": "js/cc-portal.js exists",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-011",
+      "name": "js/cc-main.js exists",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-012",
+      "name": "js/admin-data.js exists",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-013",
+      "name": "js/admin-dashboard.js exists",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-014",
+      "name": "js/admin-chefs.js exists",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-015",
+      "name": "js/admin-subs.js exists",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-016",
+      "name": "js/admin-content.js exists",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-017",
+      "name": "js/admin-app.js exists",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-020",
+      "name": "vercel.json redirects / → /app.html",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-021",
+      "name": "app.html loads all 8 JS modules",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-022",
+      "name": "admin.html loads cc-portal.js (chef login)",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-023",
+      "name": "admin.html loads all 6 admin modules",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-024",
+      "name": "app.html has Home Meals yellow branding",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-030",
+      "name": "cc-data.js has window.CC + mockChefs",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-031",
+      "name": "cc-data.js has ≥4 chefs",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-032",
+      "name": "cc-data.js has all 4 cuisine types",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-033",
+      "name": "cc-data.js has POSTCODE_SUBURB_MAP with ≥10 postcodes",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-034",
+      "name": "cc-data.js chefs have currentWeek + nextWeek menus",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-035",
+      "name": "admin-data.js has all 5 subscriber status stages",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-036",
+      "name": "admin-data.js has all localStorage helpers",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-040",
+      "name": "cc-nav.js does NOT expose Chef Portal publicly",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-041",
+      "name": "cc-home.js has HomePage + ChefCard",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-042",
+      "name": "cc-home.js hero has dark background",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-043",
+      "name": "cc-detail.js has ChefDetailPage",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-044",
+      "name": "cc-subscribe.js has SubscribePage with AU phone validation and writes to cc_subscribers",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-045",
+      "name": "cc-how.js BecomeAChefPage saves to cc_chef_applications",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-050",
+      "name": "admin-app.js LoginGate has Admin + Chef tabs and uses chef account helper",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-051",
+      "name": "admin-app.js routes to all pages",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-052",
+      "name": "admin-app.js has Menu Approvals in nav + route",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-053",
+      "name": "admin-chefs.js has ApplicationsPage with approve/reject",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-054",
+      "name": "admin-chefs.js has ChefAccessModal and uses chef account helpers",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-055",
+      "name": "admin-subs.js has status workflow guide",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-056",
+      "name": "admin-subs.js can add subscribers manually",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-057",
+      "name": "admin-subs.js has status filter dropdown",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-058",
+      "name": "admin-dashboard.js has DashboardPage",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-060",
+      "name": "cc-portal.js loads chef data via chefFromStore",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-061",
+      "name": "cc-portal.js writes back on Save Profile",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-062",
+      "name": "cc-portal.js submits menus via CC pending-menu helpers",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-063",
+      "name": "cc-portal.js has dish image spec (800×500)",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-064",
+      "name": "cc-portal.js accepts session prop (auth integration)",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-070",
+      "name": "cc-how.js pushes notification on chef application submit",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-071",
+      "name": "admin-data.js has pushNotification helper",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-072",
+      "name": "admin-app.js shows badge counts on sidebar",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-080",
+      "name": "cc-data.js loads live chefs from cc_chefs localStorage",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-081",
+      "name": "cc-data.js loads site content from cc_content and exposes window.CC.siteContent",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-082",
+      "name": "cc-home.js uses window.CC.siteContent for hero content (not hardcoded)",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-083",
+      "name": "cc-how.js uses window.CC.siteContent for step content (not hardcoded)",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-084",
+      "name": "cc-nav.js Footer uses window.CC.siteContent for tagline and contact email",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-085",
+      "name": "cc-subscribe.js saves to cc_subscribers with required fields",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-086",
+      "name": "cc-portal.js uses window.CC helpers for pending menus (not raw localStorage)",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-087",
+      "name": "admin-chefs.js uses ADM helpers for chef accounts (no raw localStorage for cc_chef_accounts)",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-088",
+      "name": "admin-chefs.js uses ADM helpers for pending menus (no raw localStorage for cc_pending_menus)",
+      "status": "PASS"
+    },
+    {
+      "id": "BVT-089",
+      "name": "admin-app.js uses ADM helpers (no raw localStorage for cc_chef_accounts or cc_pending_menus)",
+      "status": "PASS"
+    }
+  ]
+}
