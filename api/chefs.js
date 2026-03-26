@@ -13,9 +13,16 @@ module.exports = handle(async (req, res) => {
   }
 
   if (req.method === 'POST') {
+    let body = { ...req.body };
+    // Auto-generate chef_id if not supplied
+    if (!body.chef_id) {
+      const { data: maxRow } = await db
+        .from('chefs').select('chef_id').order('chef_id', { ascending: false }).limit(1).single();
+      body.chef_id = (maxRow?.chef_id || 0) + 1;
+    }
     const { data, error } = await db
       .from('chefs')
-      .insert(req.body)
+      .insert(body)
       .select()
       .single();
     if (error) return res.status(500).json({ error: error.message });

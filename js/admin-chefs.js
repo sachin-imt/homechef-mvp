@@ -7,11 +7,12 @@ var CUISINE_OPTIONS = ['Indian','Mediterranean','Thai','Italian','Japanese','Chi
 // ─────────────────────────────────────────────
 // Chef Applications Page
 // ─────────────────────────────────────────────
-function ApplicationsPage({ applications: initialApps, onUpdate }) {
+function ApplicationsPage({ applications: initialApps, onUpdate, onClearBadge }) {
   var [apps, setApps]   = useState(initialApps || []);
   var [detail, setDet]  = useState(null);
   var [note,   setNote] = useState('');
 
+  React.useEffect(function() { onClearBadge && onClearBadge(); }, []);
   // Keep in sync if parent reloads
   React.useEffect(function() { setApps(initialApps || []); }, [initialApps]);
 
@@ -31,6 +32,10 @@ function ApplicationsPage({ applications: initialApps, onUpdate }) {
       menus: {},
     };
     window.ADM.addChef(newChef).then(function(createdChef) {
+      if (!createdChef || createdChef.error) {
+        alert('Error creating chef: ' + (createdChef?.error || 'Unknown error'));
+        throw new Error(createdChef?.error || 'Chef creation failed');
+      }
       return window.ADM.updateApplication({ ...app, status: 'approved', reviewed_at: new Date().toISOString().slice(0,10), note: note });
     }).then(function() {
       window.ADM.pushNotification('chef_approved', app.full_name + ' approved and added', app.id);
@@ -637,10 +642,11 @@ function ChefsPage({ chefs, setChefs }) {
 // ─────────────────────────────────────────────
 var DAY_LABELS_MAP = { monday:'Mon', tuesday:'Tue', wednesday:'Wed', thursday:'Thu', friday:'Fri' };
 
-function MenuApprovalsPage({ menus: initialMenus, onUpdate }) {
+function MenuApprovalsPage({ menus: initialMenus, onUpdate, onClearBadge }) {
   var [menus, setMenus] = useState(initialMenus || []);
   var [detail, setDetail] = useState(null);
 
+  React.useEffect(function() { onClearBadge && onClearBadge(); }, []);
   // Keep in sync if parent reloads
   React.useEffect(function() { setMenus(initialMenus || []); }, [initialMenus]);
 

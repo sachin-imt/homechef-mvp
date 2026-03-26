@@ -222,15 +222,13 @@ function AdminApp() {
   var [subscribers,  setSubscribers]  = useState([]);
   var [applications, setApplications] = useState([]);
   var [pendingMenus, setPendingMenus] = useState([]);
-  // Track when admin last viewed the subscribers page so we can show a "new since then" badge
-  var [subsBadgeSeen, setSubsBadgeSeen] = useState(function() {
-    return parseInt(sessionStorage.getItem('cc_subs_seen') || '0');
-  });
-  var clearSubsBadge = function() {
-    var now = Date.now();
-    sessionStorage.setItem('cc_subs_seen', now);
-    setSubsBadgeSeen(now);
-  };
+  // Track when admin last viewed each section — badges auto-clear on open
+  var [subsBadgeSeen,  setSubsBadgeSeen]  = useState(function() { return parseInt(sessionStorage.getItem('cc_subs_seen')  || '0'); });
+  var [appsBadgeSeen,  setAppsBadgeSeen]  = useState(function() { return parseInt(sessionStorage.getItem('cc_apps_seen')  || '0'); });
+  var [menusBadgeSeen, setMenusBadgeSeen] = useState(function() { return parseInt(sessionStorage.getItem('cc_menus_seen') || '0'); });
+  var clearSubsBadge  = function() { var n=Date.now(); sessionStorage.setItem('cc_subs_seen',n);  setSubsBadgeSeen(n);  };
+  var clearAppsBadge  = function() { var n=Date.now(); sessionStorage.setItem('cc_apps_seen',n);  setAppsBadgeSeen(n);  };
+  var clearMenusBadge = function() { var n=Date.now(); sessionStorage.setItem('cc_menus_seen',n); setMenusBadgeSeen(n); };
 
   var handleAdminAuth = () => { sessionStorage.setItem('cc_admin_auth','1'); setAuthed(true); };
 
@@ -309,22 +307,21 @@ function AdminApp() {
   // Admin is logged in → full admin portal
   var { DashboardPage, ChefsPage, ApplicationsPage, MenuApprovalsPage, SubscribersPage, ContentPage, SettingsPage } = window.ADM;
 
-  var pendingMenuCount = pendingMenus.filter(function(m) { return m.status === 'pending'; }).length;
-  // New-subscriber badge = subscribers added since admin last visited the Subscribers page
-  var newSubsCount = subscribers.filter(function(s) {
-    return new Date(s.created_at).getTime() > subsBadgeSeen;
-  }).length;
+  // Badges: count items added since admin last visited that section
+  var newSubsCount  = subscribers.filter(function(s)  { return new Date(s.created_at).getTime()  > subsBadgeSeen;  }).length;
+  var newAppsCount  = applications.filter(function(a)  { return new Date(a.created_at || a.submitted || 0).getTime() > appsBadgeSeen;  }).length;
+  var newMenusCount = pendingMenus.filter(function(m)  { return m.status === 'pending' && new Date(m.created_at || 0).getTime() > menusBadgeSeen; }).length;
   var badges = {
-    applications:   applications.filter(function(a) { return a.status === 'pending'; }).length,
+    applications:   newAppsCount,
     newSubscribers: newSubsCount,
-    pendingMenus:   pendingMenuCount,
+    pendingMenus:   newMenusCount,
   };
 
   var mainContent;
   if      (page === 'dashboard')    mainContent = <DashboardPage    chefs={chefs} subscribers={subscribers}/>;
-  else if (page === 'applications') mainContent = <ApplicationsPage applications={applications} onUpdate={refresh}/>;
+  else if (page === 'applications') mainContent = <ApplicationsPage applications={applications} onClearBadge={clearAppsBadge} onUpdate={refresh}/>;
   else if (page === 'chefs')        mainContent = <ChefsPage        chefs={chefs} setChefs={setChefs}/>;
-  else if (page === 'menus')        mainContent = <MenuApprovalsPage menus={pendingMenus} onUpdate={refresh}/>;
+  else if (page === 'menus')        mainContent = <MenuApprovalsPage menus={pendingMenus} onClearBadge={clearMenusBadge} onUpdate={refresh}/>;
   else if (page === 'subscribers')  mainContent = <SubscribersPage  chefs={chefs} subscribers={subscribers} onClearBadge={clearSubsBadge} onUpdate={function(updated) { setSubscribers(updated); window.ADM.subscribers = updated; }}/>;
   else if (page === 'content')      mainContent = <ContentPage      content={content} setContent={setContent}/>;
   else if (page === 'settings')     mainContent = <SettingsPage/>;

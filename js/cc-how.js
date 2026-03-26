@@ -190,7 +190,10 @@ function BecomeAChefPage({ setPage }) {
           <legend>2. Your Cooking</legend>
           <div className="form-group">
             <label>Cuisine Type *</label>
-            <input className="form-input" type="text" required placeholder="e.g. Italian, Thai, Middle Eastern" value={form.cuisine_type} onChange={e => setForm(f => ({ ...f, cuisine_type: e.target.value }))} />
+            <select className="form-input" required value={form.cuisine_type} onChange={e => setForm(f => ({ ...f, cuisine_type: e.target.value }))}>
+              <option value="">Select cuisine type…</option>
+              {(window.CC.CUISINE_OPTIONS || ['Indian','Mediterranean','Thai','Italian','Japanese','Chinese','Mexican','Vietnamese','Lebanese','Greek','Continental','Middle Eastern']).map(function(c) { return <option key={c} value={c}>{c}</option>; })}
+            </select>
           </div>
           <div className="form-group">
             <label>Cooking Background * <span style={{ fontWeight: 400, color: "#9CA3AF" }}>(max 200 chars)</span></label>
