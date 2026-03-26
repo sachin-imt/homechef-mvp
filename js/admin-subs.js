@@ -106,37 +106,50 @@ function statusBadgeFor(status) {
 
 function SubscriberDetail({ sub, chefs, onUpdate, onClose }) {
   var [showAddForm,  setShowAddForm]  = React.useState(false);
-  var [editingNote,  setEditingNote]  = React.useState(false);
   var [noteText,     setNoteText]     = React.useState(sub.status_notes||'');
   var [newStatus,    setNewStatus]    = React.useState(sub.status||'Interested');
+  var [saveError,    setSaveError]    = React.useState('');
+  var [payments,     setPayments]     = React.useState(sub.payments||[]);
 
   var chef = chefs.find(c => c.chef_id === sub.chef_id);
   var amount = chef ? chef.price_per_week : 0;
 
   var handleConfirm = (weekLabel) => {
-    onUpdate({ ...sub, payments: sub.payments.map(p => p.week===weekLabel ? { ...p, status:'Paid', confirmed:true, confirmed_at: new Date().toISOString().slice(0,10) } : p) });
+    var updated = payments.map(p => p.week===weekLabel ? { ...p, status:'Paid', confirmed:true, confirmed_at: new Date().toISOString().slice(0,10) } : p);
+    setPayments(updated);
   };
   var handleUnconfirm = (weekLabel) => {
-    onUpdate({ ...sub, payments: sub.payments.map(p => p.week===weekLabel ? { ...p, status:'Pending', confirmed:false, confirmed_at:null } : p) });
+    var updated = payments.map(p => p.week===weekLabel ? { ...p, status:'Pending', confirmed:false, confirmed_at:null } : p);
+    setPayments(updated);
   };
   var handleDelete = (weekLabel) => {
-    onUpdate({ ...sub, payments: sub.payments.filter(p => p.week !== weekLabel) });
+    setPayments(payments.filter(p => p.week !== weekLabel));
   };
   var handleAdd = (entry) => {
-    onUpdate({ ...sub, payments: [...sub.payments, entry] });
+    setPayments([...payments, entry]);
     setShowAddForm(false);
+    setSaveError('');
   };
-  var handleStatusSave = () => {
-    onUpdate({ ...sub, status: newStatus, status_notes: noteText });
-    setEditingNote(false);
-    // notify cook if subscriber withdrawn
+
+  var handleSave = () => {
+    // Require at least one payment entry when setting status to Payment Made
+    if (newStatus === 'Payment Made' && payments.length === 0) {
+      setSaveError('Please add at least one payment record before marking as "Payment Made".');
+      setShowAddForm(true);
+      return;
+    }
+    setSaveError('');
+    var updated = { ...sub, status: newStatus, status_notes: noteText, payments };
+    onUpdate(updated);
     if (newStatus === 'Deactivated' && sub.status !== 'Deactivated') {
       window.ADM.pushNotification('subscriber_withdrawn', `${sub.name} has been deactivated — notify ${sub.chef_name}`, sub.id);
     }
+    onClose();
   };
 
-  var sorted = [...sub.payments].sort((a,b) => (b.week_iso||'') > (a.week_iso||'') ? 1 : -1);
+  var sorted = [...payments].sort((a,b) => (b.week_iso||'') > (a.week_iso||'') ? 1 : -1);
   var STATUSES = window.ADM.SUBSCRIBER_STATUSES || [];
+  var statusChanged = newStatus !== sub.status;
 
   return (
     <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
@@ -153,30 +166,20 @@ function SubscriberDetail({ sub, chefs, onUpdate, onClose }) {
         </div>
         <div className="modal-body">
 
-          {/* Status change */}
+          {/* Status + Note — always visible */}
           <div style={{ background:'#F8F8F8', borderRadius:'10px', padding:'14px', marginBottom:'16px' }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: editingNote?'12px':'0' }}>
-              <span style={{ fontSize:'0.82rem', fontWeight:700, color:'#111' }}>Subscriber Status</span>
-              {!editingNote && (
-                <button className="btn btn-outline btn-sm" onClick={()=>{ setEditingNote(true); setNewStatus(sub.status||'Interested'); setNoteText(sub.status_notes||''); }}>
-                  <i className="ph-bold ph-pencil"/> Change
-                </button>
-              )}
-            </div>
-            {editingNote ? (
-              <>
-                <select className="form-input" value={newStatus} onChange={e=>setNewStatus(e.target.value)} style={{ marginBottom:'8px' }}>
-                  {STATUSES.map(s=><option key={s.value} value={s.value}>{s.value} — {s.desc}</option>)}
-                </select>
-                <textarea className="form-input" rows={2} value={noteText} onChange={e=>setNoteText(e.target.value)} placeholder="Add a note (e.g. called subscriber, confirmed payment)..." style={{ marginBottom:'8px' }}/>
-                <div style={{ display:'flex', gap:'8px', justifyContent:'flex-end' }}>
-                  <button className="btn btn-outline btn-sm" onClick={()=>setEditingNote(false)}>Cancel</button>
-                  <button className="btn btn-primary btn-sm" onClick={handleStatusSave}><i className="ph-bold ph-check"/> Save Status</button>
-                </div>
-              </>
-            ) : (
-              sub.status_notes && <p style={{ fontSize:'0.8rem', color:'#5A5D66', margin:'8px 0 0', fontStyle:'italic' }}>"{sub.status_notes}"</p>
+            <label style={{ display:'block', fontSize:'0.82rem', fontWeight:700, color:'#111', marginBottom:'8px' }}>Subscriber Status</label>
+            <select className="form-input" value={newStatus} onChange={e=>{ setNewStatus(e.target.value); setSaveError(''); }} style={{ marginBottom:'8px' }}>
+              {STATUSES.map(s=><option key={s.value} value={s.value}>{s.value} — {s.desc}</option>)}
+            </select>
+            {statusChanged && newStatus === 'Payment Made' && payments.length === 0 && (
+              <div style={{ fontSize:'0.78rem', color:'#D0342C', background:'#FFF0F0', border:'1px solid #FCA5A5', borderRadius:'6px', padding:'8px 10px', marginBottom:'8px' }}>
+                <i className="ph-bold ph-warning" style={{ marginRight:'5px' }}/>
+                A payment record is required before saving as "Payment Made". Add one below.
+              </div>
             )}
+            <textarea className="form-input" rows={2} value={noteText} onChange={e=>setNoteText(e.target.value)}
+              placeholder="Add a note (e.g. called subscriber, confirmed payment)..." />
           </div>
 
           {/* Contact details */}
@@ -201,7 +204,7 @@ function SubscriberDetail({ sub, chefs, onUpdate, onClose }) {
             <h4 style={{ fontSize:'0.875rem', fontWeight:700, color:'#111', margin:0 }}>
               Payment Log
               <span style={{ marginLeft:'8px', fontSize:'0.75rem', fontWeight:400, color:'#9CA3AF' }}>
-                {sub.payments.filter(p=>p.confirmed).length} confirmed · {sub.payments.filter(p=>!p.confirmed).length} pending
+                {payments.filter(p=>p.confirmed).length} confirmed · {payments.filter(p=>!p.confirmed).length} pending
               </span>
             </h4>
             {!showAddForm && (
@@ -212,7 +215,7 @@ function SubscriberDetail({ sub, chefs, onUpdate, onClose }) {
           </div>
 
           {/* Add payment form */}
-          {showAddForm && <AddPaymentForm sub={sub} chefs={chefs} onAdd={handleAdd} onClose={()=>setShowAddForm(false)}/>}
+          {showAddForm && <AddPaymentForm sub={{ ...sub, payments }} chefs={chefs} onAdd={handleAdd} onClose={()=>setShowAddForm(false)}/>}
 
           {/* Payment entries */}
           {sorted.length === 0 && !showAddForm && (
@@ -258,12 +261,19 @@ function SubscriberDetail({ sub, chefs, onUpdate, onClose }) {
               </div>
             </div>
           ))}
+
+          {saveError && (
+            <div style={{ fontSize:'0.82rem', color:'#D0342C', background:'#FFF0F0', border:'1px solid #FCA5A5', borderRadius:'6px', padding:'10px 12px', marginTop:'8px' }}>
+              <i className="ph-bold ph-warning" style={{ marginRight:'5px' }}/>{saveError}
+            </div>
+          )}
         </div>
         <div className="modal-footer">
           <div style={{ fontSize:'0.8rem', color:'#9CA3AF', marginRight:'auto' }}>
-            Total confirmed: <strong style={{ color:'#111' }}>${sub.payments.filter(p=>p.confirmed).reduce(function(t,p){ return t + (p.amount != null ? p.amount : amount); }, 0)}</strong>
+            Total confirmed: <strong style={{ color:'#111' }}>${payments.filter(p=>p.confirmed).reduce(function(t,p){ return t + (p.amount != null ? p.amount : amount); }, 0)}</strong>
           </div>
-          <button className="btn btn-outline" onClick={onClose}>Close</button>
+          <button className="btn btn-outline" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={handleSave}><i className="ph-bold ph-check"/> Save Changes</button>
         </div>
       </div>
     </div>
@@ -478,7 +488,7 @@ function SubscribersPage({ chefs, subscribers: initialSubs, onUpdate: notifyPare
       setSubs(updated);
       window.ADM.subscribers = updated;
       notifyParent && notifyParent(updated);
-      setSel(merged);
+      // modal closes itself after calling onUpdate — don't reopen via setSel
     }).catch(function(e) { alert('Error saving subscriber: ' + e.message); });
   };
 
