@@ -239,7 +239,7 @@ function SubscriberDetail({ sub, chefs, onUpdate, onClose }) {
                   )}
                 </div>
                 <div style={{ fontSize:'0.75rem', color:'#9CA3AF' }}>
-                  ${amount}
+                  ${p.amount != null ? p.amount : amount}
                   {p.confirmed && p.confirmed_at && ` · Confirmed ${p.confirmed_at}`}
                   {!p.confirmed && ' · Awaiting payment'}
                   {p.note && ` · ${p.note}`}
@@ -261,7 +261,7 @@ function SubscriberDetail({ sub, chefs, onUpdate, onClose }) {
         </div>
         <div className="modal-footer">
           <div style={{ fontSize:'0.8rem', color:'#9CA3AF', marginRight:'auto' }}>
-            Total confirmed: <strong style={{ color:'#111' }}>${sub.payments.filter(p=>p.confirmed).length * amount}</strong>
+            Total confirmed: <strong style={{ color:'#111' }}>${sub.payments.filter(p=>p.confirmed).reduce(function(t,p){ return t + (p.amount != null ? p.amount : amount); }, 0)}</strong>
           </div>
           <button className="btn btn-outline" onClick={onClose}>Close</button>
         </div>
