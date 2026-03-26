@@ -2,6 +2,19 @@
 window.CC = window.CC || {};
 var { useState, useEffect } = React;
 
+// Defined OUTSIDE SubscribePage so it is stable across re-renders.
+// If defined inside, every keystroke creates a new component type → React
+// unmounts/remounts the field → input loses focus.
+function SubField({ name, label, required, errors, children }) {
+  return (
+    <div className="form-group">
+      <label htmlFor={name}>{label}{required && " *"}</label>
+      {children}
+      {(errors||{})[name] && <p style={{ color: "#D0342C", fontSize: "0.78rem", margin: "4px 0 0" }}>{(errors||{})[name]}</p>}
+    </div>
+  );
+}
+
 function SubscribePage({ chef, setPage }) {
   // Derive suburbs dynamically from chef's delivery postcodes
   var postcodeMap = window.CC.POSTCODE_SUBURB_MAP || {};
@@ -151,14 +164,6 @@ function SubscribePage({ chef, setPage }) {
     );
   }
 
-  var F = ({ name, label, required, children }) => (
-    <div className="form-group">
-      <label htmlFor={name}>{label}{required && " *"}</label>
-      {children}
-      {errors[name] && <p style={{ color: "#D0342C", fontSize: "0.78rem", margin: "4px 0 0" }}>{errors[name]}</p>}
-    </div>
-  );
-
   return (
     <div className="fade-in" style={{ maxWidth: "800px", margin: "0 auto", padding: "40px 24px 80px" }}>
       <div style={{ textAlign: "center", marginBottom: "40px" }}>
@@ -183,49 +188,49 @@ function SubscribePage({ chef, setPage }) {
         {/* Your Details */}
         <fieldset>
           <legend>Your Details</legend>
-          <F name="full_name" label="Full Name" required>
+          <SubField errors={errors} name="full_name" label="Full Name" required>
             <input id="full_name" className="form-input" type="text" placeholder="e.g. Jane Smith" value={form.full_name}
               onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))} />
-          </F>
+          </SubField>
           <div className="addr-row">
-            <F name="email" label="Email" required>
+            <SubField errors={errors} name="email" label="Email" required>
               <input id="email" className="form-input" type="email" placeholder="jane@example.com" value={form.email}
                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
-            </F>
-            <F name="phone" label="Phone (for delivery)" required>
+            </SubField>
+            <SubField errors={errors} name="phone" label="Phone (for delivery)" required>
               <input id="phone" className="form-input" type="tel" placeholder="0412 345 678" value={form.phone}
                 onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
-            </F>
+            </SubField>
           </div>
         </fieldset>
 
         {/* Delivery Address */}
         <fieldset>
           <legend>Delivery Address</legend>
-          <F name="street_address" label="Street Address" required>
+          <SubField errors={errors} name="street_address" label="Street Address" required>
             <input id="street_address" className="form-input" type="text" placeholder="123 Example St" value={form.street_address}
               onChange={e => setForm(f => ({ ...f, street_address: e.target.value }))} />
-          </F>
+          </SubField>
           <div className="addr-row">
-            <F name="suburb" label="Suburb" required>
+            <SubField errors={errors} name="suburb" label="Suburb" required>
               <select id="suburb" className="form-input" value={form.suburb} onChange={handleSuburbChange}>
                 <option value="">Select suburb</option>
                 {suburbOptions.map(o => (
                   <option key={o.postcode} value={o.suburb}>{o.suburb}</option>
                 ))}
               </select>
-            </F>
-            <F name="postcode" label="Postcode">
+            </SubField>
+            <SubField errors={errors} name="postcode" label="Postcode">
               <input id="postcode" className="form-input" type="text" value={form.postcode} readOnly style={{ background: "#F4F4F4", color: "#5A5D66" }} />
-            </F>
-            <F name="state" label="State">
+            </SubField>
+            <SubField errors={errors} name="state" label="State">
               <input id="state" className="form-input" type="text" value="NSW" readOnly style={{ background: "#F4F4F4", color: "#5A5D66" }} />
-            </F>
+            </SubField>
           </div>
-          <F name="delivery_notes" label="Delivery Instructions (optional)">
+          <SubField errors={errors} name="delivery_notes" label="Delivery Instructions (optional)">
             <textarea id="delivery_notes" className="form-input" rows={3} placeholder="Gate code, apartment number, leave at door, etc."
               value={form.delivery_notes} onChange={e => setForm(f => ({ ...f, delivery_notes: e.target.value }))} />
-          </F>
+          </SubField>
         </fieldset>
 
         {/* Subscription Details */}
@@ -249,10 +254,10 @@ function SubscribePage({ chef, setPage }) {
               </div>
             )}
           </div>
-          <F name="dietary_restrictions" label="Dietary Restrictions (optional)">
+          <SubField errors={errors} name="dietary_restrictions" label="Dietary Restrictions (optional)">
             <textarea className="form-input" rows={2} placeholder="Any allergies or dietary needs? e.g. nut-free, gluten-free"
               value={form.dietary_restrictions} onChange={e => setForm(f => ({ ...f, dietary_restrictions: e.target.value }))} />
-          </F>
+          </SubField>
         </fieldset>
 
         {/* Payment */}

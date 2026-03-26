@@ -72,9 +72,10 @@ function addSubscriberAPI(sub) { return _apiPost('/api/subscribers', sub); }
 function deleteSubscriber(id)  { return _apiDelete('/api/subscribers/' + id, {}); }
 
 // ── Applications ──
-function loadApplications()      { return _apiGet('/api/applications'); }
-function saveApplications()      { /* no-op */ }
-function updateApplication(app)  { return _apiPut('/api/applications/' + app.id, app); }
+function loadApplications()        { return _apiGet('/api/applications'); }
+function saveApplications()        { /* no-op */ }
+function updateApplication(app)    { return _apiPut('/api/applications/' + app.id, app); }
+function deleteApplication(id)     { return _apiDelete('/api/applications/' + id, {}); }
 
 // ── Notifications ──
 function loadNotifications()   { return _apiGet('/api/notifications'); }
@@ -107,7 +108,7 @@ Object.assign(window.ADM, {
   loadChefs, saveChefs, updateChef, addChef, deleteChef,
   loadContent, saveContent,
   loadSubscribers, saveSubscribers, updateSubscriber, addSubscriberAPI, deleteSubscriber,
-  loadApplications, saveApplications, updateApplication,
+  loadApplications, saveApplications, updateApplication, deleteApplication,
   loadNotifications, saveNotifications, pushNotification, markNotificationRead, markAllNotificationsRead,
   loadPendingMenus, savePendingMenus, addMenu, updateMenu,
   loadChefAccounts, saveChefAccounts, upsertChefAccount, deleteChefAccount,

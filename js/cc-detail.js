@@ -65,7 +65,9 @@ function ChefDetailPage({ chef, setPage }) {
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px 24px 0" }}>
         <button
           onClick={() => setPage({ name: "home" })}
-          style={{ background: "none", border: "none", cursor: "pointer", color: "#5A5D66", fontFamily: "inherit", fontSize: "0.88rem", display: "flex", alignItems: "center", gap: "4px", padding: 0 }}
+          style={{ background: "white", border: "1.5px solid #E5E5E5", borderRadius: "8px", cursor: "pointer", color: "#111", fontFamily: "inherit", fontSize: "0.88rem", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "6px", padding: "8px 16px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = "#111"; e.currentTarget.style.background = "#F4F4F4"; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = "#E5E5E5"; e.currentTarget.style.background = "white"; }}
         >
           <i className="ph-bold ph-arrow-left"></i> Back to chefs
         </button>

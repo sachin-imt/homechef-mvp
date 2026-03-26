@@ -7,6 +7,7 @@ function ChefCard({ chef, onViewMenu }) {
   var dtc = DISH_TYPE_COLORS;
   return (
     <div style={{ background: "white", borderRadius: "16px", overflow: "hidden", border: "1px solid #E5E5E5", display: "flex", flexDirection: "column", transition: "box-shadow 0.2s, transform 0.2s", cursor: "pointer" }}
+      onClick={() => onViewMenu(chef)}
       onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.10)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
       onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "none"; }}
     >

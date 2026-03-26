@@ -36,7 +36,7 @@ function ApplicationsPage({ applications: initialApps, onUpdate, onClearBadge })
         alert('Error creating chef: ' + (createdChef?.error || 'Unknown error'));
         throw new Error(createdChef?.error || 'Chef creation failed');
       }
-      return window.ADM.updateApplication({ ...app, status: 'approved', reviewed_at: new Date().toISOString().slice(0,10), note: note });
+      return window.ADM.deleteApplication(app.id);
     }).then(function() {
       window.ADM.pushNotification('chef_approved', app.full_name + ' approved and added', app.id);
       onUpdate && onUpdate();
@@ -46,7 +46,7 @@ function ApplicationsPage({ applications: initialApps, onUpdate, onClearBadge })
 
   var handleReject = (app) => {
     if (!confirm(`Reject application from ${app.full_name}?`)) return;
-    window.ADM.updateApplication({ ...app, status: 'rejected', reviewed_at: new Date().toISOString().slice(0,10), note: note })
+    window.ADM.deleteApplication(app.id)
       .then(function() { onUpdate && onUpdate(); })
       .catch(function(e) { alert('Error: ' + e.message); });
     setDet(null);
@@ -266,7 +266,7 @@ function ChefModal({ chef, onSave, onClose }) {
             <div className="form-group"><label style={lbl}>Food Photo URL</label>
               <input className="form-input" value={form.food_image||''} onChange={e=>set('food_image',e.target.value)} placeholder="https://…"/></div>
             <div className="form-group"><label style={lbl}>Chef Avatar URL</label>
-              <input className="form-input" value={form.avatar||''} onChange={e=>set('avatar',e.target.value)} placeholder="https://…"/></div>
+              <input className="form-input" value={form.photo_url||''} onChange={e=>set('photo_url',e.target.value)} placeholder="https://…"/></div>
           </div>
           <div className="form-group"><label style={lbl}>Highlight Tags (comma-separated)</label>
             <input className="form-input" value={(form.highlights||[]).join(', ')} onChange={e=>set('highlights',e.target.value.split(',').map(s=>s.trim()).filter(Boolean))}/></div>
