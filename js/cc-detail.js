@@ -8,7 +8,7 @@ function DishItem({ dish }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 0", borderBottom: "1px solid #F4F4F4" }}>
       <img
-        src={dish.photo_url}
+        src={dish.photo_url || dish.dish_image || ""}
         alt={dish.dish_name}
         style={{ width: "52px", height: "52px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }}
         onError={e => { e.target.style.background = "#F4F4F4"; e.target.src = ""; }}
@@ -129,11 +129,12 @@ function ChefDetailPage({ chef, setPage }) {
 
         {/* Day cards horizontal scroll */}
         <div className="hide-scrollbar" style={{ display: "flex", gap: "16px", overflowX: "auto", paddingBottom: "8px" }}>
-          {DAYS.map(day => (
-            menu[day] && menu[day].length > 0 && (
-              <DayCard key={day} day={day} dishes={menu[day]} />
-            )
-          ))}
+          {DAYS.map(day => {
+            var dishes = (menu[day] || []).filter(d => d.dish_name && d.dish_name.trim());
+            return dishes.length > 0 && (
+              <DayCard key={day} day={day} dishes={dishes} />
+            );
+          })}
         </div>
 
         {/* Big subscribe CTA */}
