@@ -443,7 +443,7 @@ function WorkflowGuide({ onClose }) {
   );
 }
 
-function SubscribersPage({ chefs, subscribers: initialSubs, onUpdate: notifyParent }) {
+function SubscribersPage({ chefs, subscribers: initialSubs, onUpdate: notifyParent, onClearBadge }) {
   var [subs, setSubs]            = React.useState(initialSubs || []);
   var [search, setSearch]        = React.useState('');
   var [filterChef, setFC]        = React.useState('all');
@@ -451,9 +451,23 @@ function SubscribersPage({ chefs, subscribers: initialSubs, onUpdate: notifyPare
   var [selected,   setSel]       = React.useState(null);
   var [showAdd,    setShowAdd]   = React.useState(false);
   var [showGuide,  setShowGuide] = React.useState(false);
+  var [sortField,  setSortField] = React.useState('id');
+  var [sortDir,    setSortDir]   = React.useState('desc');
+
+  // Auto-clear the sidebar badge as soon as admin opens this page
+  React.useEffect(function() { onClearBadge && onClearBadge(); }, []);
 
   // Keep in sync if parent reloads
   React.useEffect(function() { setSubs(initialSubs || []); }, [initialSubs]);
+
+  var toggleSort = function(field) {
+    if (sortField === field) { setSortDir(function(d) { return d === 'asc' ? 'desc' : 'asc'; }); }
+    else { setSortField(field); setSortDir('asc'); }
+  };
+  var SortIcon = function({ field }) {
+    if (sortField !== field) return React.createElement('span', { style:{ color:'#CCC', marginLeft:'4px', fontSize:'0.65rem' } }, '⇅');
+    return React.createElement('span', { style:{ color:'#FACA50', marginLeft:'4px', fontSize:'0.65rem' } }, sortDir === 'asc' ? '▲' : '▼');
+  };
 
   var STATUSES = (window.ADM.SUBSCRIBER_STATUSES || []).map(function(s) { return s.value; });
 
@@ -489,6 +503,22 @@ function SubscribersPage({ chefs, subscribers: initialSubs, onUpdate: notifyPare
       return s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q) || s.suburb.toLowerCase().includes(q);
     }
     return true;
+  });
+
+  // Sort filtered results
+  var sorted = filtered.slice().sort(function(a, b) {
+    var av, bv;
+    if      (sortField === 'id')            { av = a.id;           bv = b.id; }
+    else if (sortField === 'name')          { av = (a.name||'').toLowerCase(); bv = (b.name||'').toLowerCase(); }
+    else if (sortField === 'chef')          { av = (a.chef_name||'').toLowerCase(); bv = (b.chef_name||'').toLowerCase(); }
+    else if (sortField === 'status')        { av = (a.status||'').toLowerCase(); bv = (b.status||'').toLowerCase(); }
+    else if (sortField === 'dietary')       { av = (a.dietary||'').toLowerCase(); bv = (b.dietary||'').toLowerCase(); }
+    else if (sortField === 'starting_week') { av = a.starting_week||''; bv = b.starting_week||''; }
+    else if (sortField === 'payments')      { av = (a.payments||[]).filter(function(p){return p.confirmed;}).length; bv = (b.payments||[]).filter(function(p){return p.confirmed;}).length; }
+    else                                    { av = a.id; bv = b.id; }
+    if (av < bv) return sortDir === 'asc' ? -1 : 1;
+    if (av > bv) return sortDir === 'asc' ?  1 : -1;
+    return 0;
   });
 
   var confirmedRevenue = subs.reduce((total, s) => {
@@ -578,16 +608,24 @@ function SubscribersPage({ chefs, subscribers: initialSubs, onUpdate: notifyPare
           <table className="data-table">
             <thead>
               <tr>
-                <th>#</th><th>Name</th><th>Contact</th><th>Chef</th>
-                <th>Status</th><th>Dietary</th><th>Starting Week</th><th>Payments</th><th></th>
+                <th style={{ cursor:'pointer', userSelect:'none' }} onClick={()=>toggleSort('id')}># <SortIcon field="id"/></th>
+                <th style={{ cursor:'pointer', userSelect:'none' }} onClick={()=>toggleSort('name')}>Name <SortIcon field="name"/></th>
+                <th>Contact</th>
+                <th style={{ cursor:'pointer', userSelect:'none' }} onClick={()=>toggleSort('chef')}>Chef <SortIcon field="chef"/></th>
+                <th style={{ cursor:'pointer', userSelect:'none' }} onClick={()=>toggleSort('status')}>Status <SortIcon field="status"/></th>
+                <th style={{ cursor:'pointer', userSelect:'none' }} onClick={()=>toggleSort('dietary')}>Dietary <SortIcon field="dietary"/></th>
+                <th style={{ cursor:'pointer', userSelect:'none' }} onClick={()=>toggleSort('starting_week')}>Starting Week <SortIcon field="starting_week"/></th>
+                <th style={{ cursor:'pointer', userSelect:'none' }} onClick={()=>toggleSort('payments')}>Payments <SortIcon field="payments"/></th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map(s => {
+              {sorted.map(s => {
                 var conf = s.payments.filter(p=>p.confirmed).length;
                 var pend = s.payments.filter(p=>!p.confirmed).length;
+                var isInterested = s.status === 'Interested';
                 return (
-                  <tr key={s.id} style={{ cursor:'pointer' }} onClick={()=>setSel(s)}>
+                  <tr key={s.id} style={{ cursor:'pointer', background: isInterested ? '#FFFDF0' : undefined }} onClick={()=>setSel(s)}>
                     <td style={{ color:'#9CA3AF', fontSize:'0.78rem' }}>{s.id}</td>
                     <td style={{ fontWeight:600 }}>{s.name}</td>
                     <td>
