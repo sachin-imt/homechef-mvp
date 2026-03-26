@@ -25,7 +25,11 @@ module.exports = handle(async (req, res) => {
   }
 
   if (req.method === 'POST') {
-    const { payments, ...subData } = req.body;
+    // Only pick known DB columns — strip frontend-only fields
+    const { name, email, phone, chef_id, chef_name, suburb, postcode,
+            dietary, status, status_notes, starting_week } = req.body;
+    const subData = { name, email, phone, chef_id, chef_name, suburb, postcode,
+                      dietary, status, status_notes, starting_week };
     const { data, error } = await db
       .from('subscribers')
       .insert({ ...subData, created_at: new Date().toISOString() })

@@ -471,13 +471,14 @@ function SubscribersPage({ chefs, subscribers: initialSubs, onUpdate: notifyPare
   var handleAddSubscriber = (newSub) => {
     var subData = { ...newSub, status: 'Interested', status_notes: '' };
     window.ADM.addSubscriberAPI(subData).then(function(created) {
+      if (!created || created.error) { alert('Error saving subscriber: ' + (created?.error || 'Unknown error')); return; }
       var updated = [...subs, created];
       setSubs(updated);
       window.ADM.subscribers = updated;
       notifyParent && notifyParent(updated);
       window.ADM.pushNotification('new_subscriber', 'New subscriber: ' + newSub.name + ' → ' + newSub.chef_name, created.id);
+      setShowAdd(false);
     }).catch(function(e) { alert('Error adding subscriber: ' + e.message); });
-    setShowAdd(false);
   };
 
   var filtered = subs.filter(s => {
