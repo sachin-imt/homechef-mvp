@@ -1,5 +1,6 @@
 const db = require('./_db');
 const { handle } = require('./_helpers');
+const { sendEmail, subscriberConfirmationEmail } = require('./_email');
 
 module.exports = handle(async (req, res) => {
   if (req.method === 'GET') {
@@ -43,6 +44,17 @@ module.exports = handle(async (req, res) => {
       message: `New subscriber: ${data.name} → ${data.chef_name}`,
       ref_id: String(data.id),
     });
+
+    // Send confirmation email to subscriber (fire-and-forget)
+    if (data.email) {
+      const { subject, html } = subscriberConfirmationEmail({
+        name: data.name,
+        chef_name: data.chef_name,
+        starting_week: data.starting_week,
+        amount: req.body.amount,
+      });
+      sendEmail({ to: data.email, subject, html }).catch(e => console.error('[email] subscriber confirm:', e));
+    }
 
     return res.status(201).json({ ...data, payments: [] });
   }

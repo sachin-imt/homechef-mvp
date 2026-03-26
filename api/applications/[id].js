@@ -1,5 +1,6 @@
 const db = require('../_db');
 const { handle } = require('../_helpers');
+const { sendEmail, chefRejectedEmail } = require('../_email');
 
 module.exports = handle(async (req, res) => {
   const { id } = req.query;
@@ -18,8 +19,16 @@ module.exports = handle(async (req, res) => {
   }
 
   if (req.method === 'DELETE') {
+    const { action, email, name } = req.body || {};
     const { error } = await db.from('chef_applications').delete().eq('id', id);
     if (error) return res.status(500).json({ error: error.message });
+
+    // Send rejection email if flagged
+    if (action === 'rejected' && email) {
+      const { subject, html } = chefRejectedEmail({ name: name || 'there' });
+      sendEmail({ to: email, subject, html }).catch(e => console.error('[email] chef rejected:', e));
+    }
+
     return res.json({ success: true });
   }
 

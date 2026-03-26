@@ -1,5 +1,6 @@
 const db = require('./_db');
 const { handle } = require('./_helpers');
+const { sendEmail, applicationReceivedEmail } = require('./_email');
 
 module.exports = handle(async (req, res) => {
   if (req.method === 'GET') {
@@ -25,6 +26,15 @@ module.exports = handle(async (req, res) => {
       message: `New chef application from ${data.full_name} (${data.cuisine_type})`,
       ref_id: String(data.id),
     });
+
+    // Send acknowledgment email to applicant (fire-and-forget)
+    if (data.email) {
+      const { subject, html } = applicationReceivedEmail({
+        name: data.full_name,
+        cuisine_type: data.cuisine_type,
+      });
+      sendEmail({ to: data.email, subject, html }).catch(e => console.error('[email] app received:', e));
+    }
 
     return res.status(201).json(data);
   }

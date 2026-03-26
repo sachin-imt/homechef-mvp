@@ -1,5 +1,6 @@
 const db = require('./_db');
 const { handle } = require('./_helpers');
+const { sendEmail, chefApprovedEmail } = require('./_email');
 
 module.exports = handle(async (req, res) => {
   if (req.method === 'GET') {
@@ -14,6 +15,12 @@ module.exports = handle(async (req, res) => {
 
   if (req.method === 'POST') {
     let body = { ...req.body };
+    // Pull out email metadata (not a DB column) before insert
+    const applicantEmail = body.applicant_email;
+    const applicantName  = body.applicant_name;
+    delete body.applicant_email;
+    delete body.applicant_name;
+
     // Auto-generate chef_id if not supplied
     if (!body.chef_id) {
       const { data: maxRow } = await db
@@ -26,6 +33,16 @@ module.exports = handle(async (req, res) => {
       .select()
       .single();
     if (error) return res.status(500).json({ error: error.message });
+
+    // Send approval email to chef applicant (fire-and-forget)
+    if (applicantEmail) {
+      const { subject, html } = chefApprovedEmail({
+        name: applicantName || data.chef_name,
+        chef_name: data.chef_name,
+      });
+      sendEmail({ to: applicantEmail, subject, html }).catch(e => console.error('[email] chef approved:', e));
+    }
+
     return res.status(201).json(data);
   }
 

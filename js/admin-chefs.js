@@ -30,6 +30,9 @@ function ApplicationsPage({ applications: initialApps, onUpdate, onClearBadge })
       status: 'active',
       food_image: '', photo_url: '',
       menus: {},
+      // Passed to API for approval email; stripped before DB insert
+      applicant_email: app.email,
+      applicant_name: app.full_name,
     };
     window.ADM.addChef(newChef).then(function(createdChef) {
       if (!createdChef || createdChef.error) {
@@ -46,7 +49,7 @@ function ApplicationsPage({ applications: initialApps, onUpdate, onClearBadge })
 
   var handleReject = (app) => {
     if (!confirm(`Reject application from ${app.full_name}?`)) return;
-    window.ADM.deleteApplication(app.id)
+    window.ADM.deleteApplication(app.id, { action: 'rejected', email: app.email, name: app.full_name })
       .then(function() { onUpdate && onUpdate(); })
       .catch(function(e) { alert('Error: ' + e.message); });
     setDet(null);

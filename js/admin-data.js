@@ -75,7 +75,7 @@ function deleteSubscriber(id)  { return _apiDelete('/api/subscribers/' + id, {})
 function loadApplications()        { return _apiGet('/api/applications'); }
 function saveApplications()        { /* no-op */ }
 function updateApplication(app)    { return _apiPut('/api/applications/' + app.id, app); }
-function deleteApplication(id)     { return _apiDelete('/api/applications/' + id, {}); }
+function deleteApplication(id, body) { return _apiDelete('/api/applications/' + id, body || {}); }
 
 // ── Notifications ──
 function loadNotifications()   { return _apiGet('/api/notifications'); }
