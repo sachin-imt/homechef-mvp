@@ -71,6 +71,7 @@ function Nav({ page, setPage }) {
 }
 
 function Footer({ setPage }) {
+  var sc = window.CC.siteContent || {};
   return (
     <footer className="cc-footer">
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
@@ -80,7 +81,7 @@ function Footer({ setPage }) {
               HOME<i className="ph-fill ph-bowl-food"></i>MEALS
             </div>
             <p style={{ color: "#aaa", fontSize: "0.9rem", maxWidth: "260px", margin: 0 }}>
-              Authentic home-cooked meals from Sydney's best home chefs. Delivered weekly.
+              {sc.footer_tagline}
             </p>
           </div>
           <div style={{ display: "flex", gap: "48px", flexWrap: "wrap" }}>
@@ -98,7 +99,7 @@ function Footer({ setPage }) {
             </div>
             <div>
               <p style={{ color: "white", fontWeight: 700, fontSize: "0.85rem", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Contact</p>
-              <div style={{ marginBottom: "8px" }}><a href="mailto:hello@homemeals.com.au">hello@homemeals.com.au</a></div>
+              <div style={{ marginBottom: "8px" }}><a href={"mailto:" + sc.contact_email}>{sc.contact_email}</a></div>
               <div style={{ marginBottom: "8px" }}><a href="#">Instagram</a></div>
               <div><a href="#">Facebook</a></div>
             </div>

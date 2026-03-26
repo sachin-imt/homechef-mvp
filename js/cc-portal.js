@@ -9,19 +9,9 @@ function ChefPortalPage({ session }) {
   var [weekTab, setWeekTab] = useState("currentWeek");
   var [saved, setSaved] = useState(false);
   var [postcodeInput, setPostcodeInput] = useState("");
+  var [loadingChef, setLoadingChef] = useState(true);
 
-  // ── Load chef data from CC store on mount ──
   var emptyMenu = () => DAYS.reduce((acc, d) => ({ ...acc, [d]: [{ dish_name: "", dish_type: "Main", dish_image: "" }] }), {});
-
-  function chefFromStore() {
-    // Prefer fresh copy from localStorage (admin edits land there)
-    try {
-      var saved = localStorage.getItem('cc_chefs');
-      var chefs = saved ? JSON.parse(saved) : (window.CC.mockChefs || []);
-      if (session && session.chef_id) return chefs.find(c => c.chef_id === session.chef_id) || null;
-    } catch(e) {}
-    return null;
-  }
 
   function buildMenusFromChef(chef) {
     var convert = (weekData) => {
@@ -33,20 +23,42 @@ function ChefPortalPage({ session }) {
       });
       return out;
     };
-    return { currentWeek: convert(chef.currentWeek), nextWeek: convert(chef.nextWeek) };
+    return { currentWeek: convert(chef.currentWeek || chef.menus?.currentWeek), nextWeek: convert(chef.nextWeek || chef.menus?.nextWeek) };
   }
 
-  var initChef = chefFromStore();
   var [profile,  setProfile]  = useState({
-    name:    initChef?.chef_name    || session?.chef_name || "",
-    cuisine: initChef?.cuisine_type || "",
-    price:   initChef?.price_per_week || "",
-    bio:     initChef?.bio          || "",
+    name:    session?.chef_name || "",
+    cuisine: "",
+    price:   "",
+    bio:     "",
   });
-  var [postcodes, setPostcodes] = useState(initChef?.delivery_postcodes || []);
-  var [bioLen,    setBioLen]    = useState((initChef?.bio || "").length);
-  var [menus,     setMenus]     = useState(() => initChef ? buildMenusFromChef(initChef) : { currentWeek: emptyMenu(), nextWeek: emptyMenu() });
+  var [postcodes, setPostcodes] = useState([]);
+  var [bioLen,    setBioLen]    = useState(0);
+  var [menus,     setMenus]     = useState({ currentWeek: emptyMenu(), nextWeek: emptyMenu() });
   var [openDays,  setOpenDays]  = useState({ monday: true, tuesday: false, wednesday: false, thursday: false, friday: false });
+
+  // Load chef data from API on mount
+  var { useEffect } = React;
+  useEffect(function() {
+    if (!session || !session.chef_id) { setLoadingChef(false); return; }
+    fetch('/api/chefs/' + session.chef_id)
+      .then(function(r) { return r.json(); })
+      .then(function(chef) {
+        if (chef && !chef.error) {
+          setProfile({
+            name:    chef.chef_name    || session.chef_name || "",
+            cuisine: chef.cuisine_type || "",
+            price:   chef.price_per_week || "",
+            bio:     chef.bio          || "",
+          });
+          setPostcodes(chef.delivery_postcodes || []);
+          setBioLen((chef.bio || "").length);
+          setMenus(buildMenusFromChef(chef));
+        }
+        setLoadingChef(false);
+      })
+      .catch(function() { setLoadingChef(false); });
+  }, [session && session.chef_id]);
 
   function addPostcode() {
     var pc = postcodeInput.trim();
@@ -81,50 +93,65 @@ function ChefPortalPage({ session }) {
   var [submitMsg, setSubmitMsg] = useState("");
 
   function handleSave() {
-    // Write profile + menus back to the chef record in localStorage
-    try {
-      var stored = localStorage.getItem('cc_chefs');
-      var chefs  = stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(window.CC.mockChefs || []));
-      var idx    = session?.chef_id ? chefs.findIndex(c => c.chef_id === session.chef_id) : -1;
-      if (idx >= 0) {
-        chefs[idx] = {
-          ...chefs[idx],
-          chef_name:         profile.name,
-          cuisine_type:      profile.cuisine,
-          price_per_week:    parseFloat(profile.price) || chefs[idx].price_per_week,
-          bio:               profile.bio,
-          delivery_postcodes: postcodes,
-          currentWeek:       menus.currentWeek,
-          nextWeek:          menus.nextWeek,
-        };
-        localStorage.setItem('cc_chefs', JSON.stringify(chefs));
-        if (window.CC) window.CC.mockChefs = chefs;
-      }
-    } catch(e) {}
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    if (!session || !session.chef_id) return;
+    var updates = {
+      chef_name:          profile.name,
+      cuisine_type:       profile.cuisine,
+      price_per_week:     parseFloat(profile.price) || 0,
+      bio:                profile.bio,
+      delivery_postcodes: postcodes,
+      currentWeek:        menus.currentWeek,
+      nextWeek:           menus.nextWeek,
+    };
+    fetch('/api/chefs/' + session.chef_id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    })
+      .then(function(r) { return r.json(); })
+      .then(function() {
+        setSaved(true);
+        setTimeout(function() { setSaved(false); }, 2000);
+      })
+      .catch(function() {
+        setSaved(true);
+        setTimeout(function() { setSaved(false); }, 2000);
+      });
   }
 
   function handleSubmitForApproval() {
-    var chef = chefFromStore();
     var entry = {
-      id: Date.now(),
       chef_id: session?.chef_id || null,
       chef_name: profile.name || session?.chef_name || "Chef",
       chef_cuisine: profile.cuisine,
       week_key: weekTab,
       week_label: weekTab === "currentWeek" ? "This Week" : "Next Week",
       dishes_by_day: menus[weekTab],
-      submitted: new Date().toISOString().slice(0,10),
       status: "pending",
     };
-    try {
-      var pending = JSON.parse(localStorage.getItem('cc_pending_menus') || '[]');
-      pending.unshift(entry);
-      localStorage.setItem('cc_pending_menus', JSON.stringify(pending));
-    } catch(e) {}
-    setSubmitMsg("Menu submitted for admin approval!");
-    setTimeout(() => setSubmitMsg(""), 4000);
+    fetch('/api/menus', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry),
+    })
+      .then(function(r) { return r.json(); })
+      .then(function() {
+        setSubmitMsg("Menu submitted for admin approval!");
+        setTimeout(function() { setSubmitMsg(""); }, 4000);
+      })
+      .catch(function() {
+        setSubmitMsg("Submission failed — please try again.");
+        setTimeout(function() { setSubmitMsg(""); }, 4000);
+      });
+  }
+
+  if (loadingChef) {
+    return (
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"center", minHeight:"60vh", flexDirection:"column", gap:"12px" }}>
+        <i className="ph-bold ph-spinner spin" style={{ fontSize:"1.8rem", color:"#FACA50" }}/>
+        <p style={{ color:"#5A5D66", fontSize:"0.88rem" }}>Loading your profile…</p>
+      </div>
+    );
   }
 
   var initials = (profile.name || "?").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);

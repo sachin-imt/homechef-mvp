@@ -443,8 +443,8 @@ function WorkflowGuide({ onClose }) {
   );
 }
 
-function SubscribersPage({ chefs, onUpdate: notifyParent }) {
-  var [subs, setSubs]            = React.useState(() => window.ADM.subscribers || []);
+function SubscribersPage({ chefs, subscribers: initialSubs, onUpdate: notifyParent }) {
+  var [subs, setSubs]            = React.useState(initialSubs || []);
   var [search, setSearch]        = React.useState('');
   var [filterChef, setFC]        = React.useState('all');
   var [filterStatus, setFS]      = React.useState('all');
@@ -452,28 +452,31 @@ function SubscribersPage({ chefs, onUpdate: notifyParent }) {
   var [showAdd,    setShowAdd]   = React.useState(false);
   var [showGuide,  setShowGuide] = React.useState(false);
 
-  var STATUSES = (window.ADM.SUBSCRIBER_STATUSES || []).map(s=>s.value);
+  // Keep in sync if parent reloads
+  React.useEffect(function() { setSubs(initialSubs || []); }, [initialSubs]);
 
-  var persist = (updated) => {
-    setSubs(updated);
-    window.ADM.subscribers = updated;
-    window.ADM.saveSubscribers(updated);
-    notifyParent && notifyParent();
-  };
+  var STATUSES = (window.ADM.SUBSCRIBER_STATUSES || []).map(function(s) { return s.value; });
 
   var handleUpdate = (updatedSub) => {
-    var updated = subs.map(s => s.id === updatedSub.id ? updatedSub : s);
-    persist(updated);
-    setSel(updatedSub);
+    window.ADM.updateSubscriber(updatedSub).then(function(saved) {
+      var merged = saved || updatedSub;
+      var updated = subs.map(function(s) { return s.id === merged.id ? merged : s; });
+      setSubs(updated);
+      window.ADM.subscribers = updated;
+      notifyParent && notifyParent(updated);
+      setSel(merged);
+    }).catch(function(e) { alert('Error saving subscriber: ' + e.message); });
   };
 
   var handleAddSubscriber = (newSub) => {
-    var newId = Math.max(...subs.map(s=>s.id), 0) + 1;
-    var sub = { ...newSub, id: newId, status: 'Interested', status_notes: '' };
-    var updated = [...subs, sub];
-    persist(updated);
-    // push notification
-    window.ADM.pushNotification('new_subscriber', `New subscriber: ${newSub.name} → ${newSub.chef_name}`, newId);
+    var subData = { ...newSub, status: 'Interested', status_notes: '' };
+    window.ADM.addSubscriberAPI(subData).then(function(created) {
+      var updated = [...subs, created];
+      setSubs(updated);
+      window.ADM.subscribers = updated;
+      notifyParent && notifyParent(updated);
+      window.ADM.pushNotification('new_subscriber', 'New subscriber: ' + newSub.name + ' → ' + newSub.chef_name, created.id);
+    }).catch(function(e) { alert('Error adding subscriber: ' + e.message); });
     setShowAdd(false);
   };
 

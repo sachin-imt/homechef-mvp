@@ -43,7 +43,41 @@ function SubscribePage({ chef, setPage }) {
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setErrors({});
     setLoading(true);
-    setTimeout(() => { setLoading(false); setSubmitted(true); window.scrollTo(0, 0); }, 1800);
+    var weekLabel = form.start_week === 'this_week'
+      ? chef?.menus?.currentWeek?.week_label
+      : chef?.menus?.nextWeek?.week_label;
+    var newSub = {
+      name: form.full_name.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+      chef_id: chef?.chef_id,
+      chef_name: chef?.chef_name,
+      suburb: form.suburb,
+      postcode: form.postcode,
+      street_address: form.street_address.trim(),
+      delivery_notes: form.delivery_notes.trim(),
+      dietary: form.dietary_restrictions.trim(),
+      starting_week: weekLabel || '',
+      status: 'Interested',
+      status_notes: '',
+      payments: [],
+    };
+    fetch('/api/subscribers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newSub),
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) throw new Error(data.error);
+        setLoading(false);
+        setSubmitted(true);
+        window.scrollTo(0, 0);
+      })
+      .catch(function(err) {
+        setErrors({ submit: 'Submission failed — please try again.' });
+        setLoading(false);
+      });
   }
 
   var weekLabels = chef ? {
@@ -215,6 +249,7 @@ function SubscribePage({ chef, setPage }) {
           {errors.terms_accepted && <p style={{ color: "#D0342C", fontSize: "0.78rem", margin: "6px 0 0" }}>{errors.terms_accepted}</p>}
         </div>
 
+        {errors.submit && <p style={{ color: "#D0342C", fontSize: "0.85rem", margin: "0 0 12px", textAlign: "center" }}>{errors.submit}</p>}
         <button type="submit" className="btn btn-primary" style={{ width: "100%", fontSize: "1rem", padding: "16px" }} disabled={loading}>
           {loading ? <><span className="spin">↻</span> Processing…</> : "Complete Subscription →"}
         </button>

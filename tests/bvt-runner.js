@@ -123,7 +123,9 @@ test('BVT-035', 'admin-data.js has all 5 subscriber status stages', () => {
 test('BVT-036', 'admin-data.js has all localStorage helpers', () => {
   fileHas('js/admin-data.js',
     'loadChefs', 'saveChefs', 'loadSubscribers', 'saveSubscribers',
-    'loadApplications', 'saveApplications', 'pushNotification');
+    'loadApplications', 'saveApplications', 'pushNotification',
+    'loadPendingMenus', 'savePendingMenus',
+    'loadChefAccounts', 'saveChefAccounts');
 });
 
 // ── S4: Public Site ──
@@ -147,8 +149,8 @@ test('BVT-043', 'cc-detail.js has ChefDetailPage', () => {
   fileHas('js/cc-detail.js', 'function ChefDetailPage');
 });
 
-test('BVT-044', 'cc-subscribe.js has SubscribePage with AU phone validation', () => {
-  fileHas('js/cc-subscribe.js', 'function SubscribePage', '04');
+test('BVT-044', 'cc-subscribe.js has SubscribePage with AU phone validation and writes to cc_subscribers', () => {
+  fileHas('js/cc-subscribe.js', 'function SubscribePage', '04', 'cc_subscribers', 'cc_notifications');
 });
 
 test('BVT-045', 'cc-how.js BecomeAChefPage saves to cc_chef_applications', () => {
@@ -158,8 +160,8 @@ test('BVT-045', 'cc-how.js BecomeAChefPage saves to cc_chef_applications', () =>
 // ── S5: Admin Portal ──
 console.log('\n🔒  S5: Admin Portal');
 
-test('BVT-050', 'admin-app.js LoginGate has Admin + Chef tabs', () => {
-  fileHas('js/admin-app.js', 'LoginGate', 'Admin Portal', 'Chef Portal', 'cc_chef_accounts');
+test('BVT-050', 'admin-app.js LoginGate has Admin + Chef tabs and uses chef account helper', () => {
+  fileHas('js/admin-app.js', 'LoginGate', 'Admin Portal', 'Chef Portal', 'loadChefAccounts');
 });
 
 test('BVT-051', 'admin-app.js routes to all pages', () => {
@@ -176,8 +178,8 @@ test('BVT-053', 'admin-chefs.js has ApplicationsPage with approve/reject', () =>
   fileHas('js/admin-chefs.js', 'function ApplicationsPage', 'handleApprove', 'handleReject');
 });
 
-test('BVT-054', 'admin-chefs.js has ChefAccessModal for credentials', () => {
-  fileHas('js/admin-chefs.js', 'function ChefAccessModal', 'cc_chef_accounts', 'username', 'password');
+test('BVT-054', 'admin-chefs.js has ChefAccessModal and uses chef account helpers', () => {
+  fileHas('js/admin-chefs.js', 'function ChefAccessModal', 'loadChefAccounts', 'saveChefAccounts', 'username', 'password');
 });
 
 test('BVT-055', 'admin-subs.js has status workflow guide', () => {
@@ -209,8 +211,8 @@ test('BVT-061', 'cc-portal.js writes back on Save Profile', () => {
     'Save Profile does not write to cc_chefs');
 });
 
-test('BVT-062', 'cc-portal.js submits menus to cc_pending_menus', () => {
-  fileHas('js/cc-portal.js', 'cc_pending_menus', 'handleSubmitForApproval');
+test('BVT-062', 'cc-portal.js submits menus via CC pending-menu helpers', () => {
+  fileHas('js/cc-portal.js', 'loadPendingMenus', 'savePendingMenus', 'handleSubmitForApproval');
 });
 
 test('BVT-063', 'cc-portal.js has dish image spec (800×500)', () => {
@@ -234,6 +236,85 @@ test('BVT-071', 'admin-data.js has pushNotification helper', () => {
 
 test('BVT-072', 'admin-app.js shows badge counts on sidebar', () => {
   fileHas('js/admin-app.js', 'badges', 'applications', 'newSubscribers', 'Badge');
+});
+
+// ── S8: Data Integration (frontend ↔ localStorage) ──
+console.log('\n🔌  S8: Data Integration');
+
+test('BVT-080', 'cc-data.js loads live chefs from cc_chefs localStorage', () => {
+  const c = read('js/cc-data.js');
+  assert(c.includes("localStorage.getItem('cc_chefs')") || c.includes('localStorage.getItem("cc_chefs")'),
+    'cc-data.js does not read cc_chefs from localStorage');
+  assert(c.includes('window.CC.mockChefs'), 'cc-data.js does not update window.CC.mockChefs with live data');
+});
+
+test('BVT-081', 'cc-data.js loads site content from cc_content and exposes window.CC.siteContent', () => {
+  const c = read('js/cc-data.js');
+  assert(c.includes("localStorage.getItem('cc_content')") || c.includes('localStorage.getItem("cc_content")'),
+    'cc-data.js does not read cc_content from localStorage');
+  assert(c.includes('window.CC.siteContent'), 'cc-data.js does not expose window.CC.siteContent');
+});
+
+test('BVT-082', 'cc-home.js uses window.CC.siteContent for hero content (not hardcoded)', () => {
+  const c = read('js/cc-home.js');
+  assert(c.includes('siteContent') || c.includes('sc.hero_'), 'cc-home.js does not use siteContent for hero');
+  assert(!c.includes("Sydney's Home-Cooked Meal Marketplace"), 'cc-home.js still has hardcoded hero badge text');
+  assert(!c.includes('"Authentic"') && !c.includes("'Authentic'"), 'cc-home.js still has hardcoded hero headline');
+});
+
+test('BVT-083', 'cc-how.js uses window.CC.siteContent for step content (not hardcoded)', () => {
+  const c = read('js/cc-how.js');
+  assert(c.includes('siteContent') || c.includes('sc.how_'), 'cc-how.js does not use siteContent for steps');
+  assert(!c.includes('"1. Find Your Chef"') && !c.includes("'1. Find Your Chef'"),
+    'cc-how.js still has hardcoded step title');
+});
+
+test('BVT-084', 'cc-nav.js Footer uses window.CC.siteContent for tagline and contact email', () => {
+  const c = read('js/cc-nav.js');
+  assert(c.includes('siteContent') || c.includes('sc.footer_'), 'cc-nav.js Footer does not use siteContent');
+  assert(!c.includes('"Authentic home-cooked meals from Sydney'), 'cc-nav.js still has hardcoded footer tagline');
+  assert(!c.includes('"hello@homemeals.com.au"'), 'cc-nav.js still has hardcoded contact email');
+});
+
+test('BVT-085', 'cc-subscribe.js saves to cc_subscribers with required fields', () => {
+  const c = read('js/cc-subscribe.js');
+  assert(c.includes("localStorage.setItem('cc_subscribers'") || c.includes('localStorage.setItem("cc_subscribers"'),
+    'cc-subscribe.js does not write to cc_subscribers');
+  assert(c.includes('chef_id') && c.includes('chef_name'), 'Saved subscriber missing chef_id/chef_name');
+  assert(c.includes("status: 'Interested'") || c.includes('status:"Interested"') || c.includes("status: \"Interested\""),
+    'Saved subscriber missing initial status');
+});
+
+test('BVT-086', 'cc-portal.js uses window.CC helpers for pending menus (not raw localStorage)', () => {
+  const c = read('js/cc-portal.js');
+  assert(c.includes('window.CC.loadPendingMenus') || c.includes('CC.loadPendingMenus'),
+    'cc-portal.js does not use CC.loadPendingMenus helper');
+  assert(c.includes('window.CC.savePendingMenus') || c.includes('CC.savePendingMenus'),
+    'cc-portal.js does not use CC.savePendingMenus helper');
+});
+
+test('BVT-087', 'admin-chefs.js uses ADM helpers for chef accounts (no raw localStorage for cc_chef_accounts)', () => {
+  const c = read('js/admin-chefs.js');
+  assert(!c.includes("localStorage.getItem('cc_chef_accounts')") && !c.includes('localStorage.getItem("cc_chef_accounts")'),
+    'admin-chefs.js still uses raw localStorage for cc_chef_accounts — use ADM helpers');
+  assert(!c.includes("localStorage.setItem('cc_chef_accounts')") && !c.includes('localStorage.setItem("cc_chef_accounts")'),
+    'admin-chefs.js still uses raw localStorage.setItem for cc_chef_accounts — use ADM helpers');
+});
+
+test('BVT-088', 'admin-chefs.js uses ADM helpers for pending menus (no raw localStorage for cc_pending_menus)', () => {
+  const c = read('js/admin-chefs.js');
+  assert(!c.includes("localStorage.getItem('cc_pending_menus')") && !c.includes('localStorage.getItem("cc_pending_menus")'),
+    'admin-chefs.js still uses raw localStorage for cc_pending_menus — use ADM helpers');
+  assert(!c.includes("localStorage.setItem('cc_pending_menus')") && !c.includes('localStorage.setItem("cc_pending_menus")'),
+    'admin-chefs.js still uses raw localStorage.setItem for cc_pending_menus — use ADM helpers');
+});
+
+test('BVT-089', 'admin-app.js uses ADM helpers (no raw localStorage for cc_chef_accounts or cc_pending_menus)', () => {
+  const c = read('js/admin-app.js');
+  assert(!c.includes("localStorage.getItem('cc_chef_accounts')") && !c.includes('localStorage.getItem("cc_chef_accounts")'),
+    'admin-app.js still uses raw localStorage for cc_chef_accounts');
+  assert(!c.includes("localStorage.getItem('cc_pending_menus')") && !c.includes('localStorage.getItem("cc_pending_menus")'),
+    'admin-app.js still uses raw localStorage for cc_pending_menus');
 });
 
 // ──────────────────────────────────────────────

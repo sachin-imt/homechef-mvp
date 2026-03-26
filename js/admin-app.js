@@ -25,34 +25,31 @@ function LoginGate({ onAdminAuth, onChefAuth }) {
 
   var handleAdminLogin = () => {
     setBusy(true); setErr('');
-    setTimeout(() => {
-      var stored = localStorage.getItem('cc_admin_pwd') || 'admin123';
-      if (pwd === stored) { onAdminAuth(); }
-      else { setErr('Incorrect password.'); }
-      setBusy(false);
-    }, 400);
+    fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'admin', password: pwd }) })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.ok) { onAdminAuth(); }
+        else { setErr(data.error || 'Incorrect password.'); }
+        setBusy(false);
+      })
+      .catch(function() { setErr('Login error. Please try again.'); setBusy(false); });
   };
 
   var handleChefLogin = () => {
     setBusy(true); setErr('');
-    setTimeout(() => {
-      try {
-        var accounts = JSON.parse(localStorage.getItem('cc_chef_accounts') || '[]');
-        var match = accounts.find(a =>
-          a.username === username.trim() &&
-          a.password === chefPwd &&
-          a.active !== false
-        );
-        if (match) {
-          var sess = { chef_id: match.chef_id, chef_name: match.chef_name, username: match.username };
+    fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'chef', username: username.trim(), chef_password: chefPwd }) })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.ok) {
+          var sess = { chef_id: data.chef_id, chef_name: data.chef_name, username: data.username };
           sessionStorage.setItem('cc_chef_session', JSON.stringify(sess));
           onChefAuth(sess);
         } else {
-          setErr('Invalid username or password. Contact Home Meals for access.');
+          setErr(data.error || 'Invalid username or password. Contact Home Meals for access.');
         }
-      } catch(e) { setErr('Login error. Please try again.'); }
-      setBusy(false);
-    }, 500);
+        setBusy(false);
+      })
+      .catch(function() { setErr('Login error. Please try again.'); setBusy(false); });
   };
 
   var lbl  = { display:'block', fontWeight:600, fontSize:'0.8rem', marginBottom:'5px' };
@@ -218,15 +215,67 @@ function AdminApp() {
   var [chefSession, setChefSession] = useState(() => {
     try { return JSON.parse(sessionStorage.getItem('cc_chef_session')); } catch(e) { return null; }
   });
-  var [page,    setPage]    = useState('dashboard');
-  var [chefs,   setChefs]   = useState(window.ADM.adminChefs);
-  var [content, setContent] = useState(window.ADM.siteContent);
-  var [tick,    setTick]    = useState(0);
-  var refresh = () => setTick(t => t+1);
+  var [page,         setPage]         = useState('dashboard');
+  var [loading,      setLoading]      = useState(false);
+  var [chefs,        setChefs]        = useState([]);
+  var [content,      setContent]      = useState(window.ADM.defaultContent);
+  var [subscribers,  setSubscribers]  = useState([]);
+  var [applications, setApplications] = useState([]);
+  var [pendingMenus, setPendingMenus] = useState([]);
 
   var handleAdminAuth = () => { sessionStorage.setItem('cc_admin_auth','1'); setAuthed(true); };
 
   useEffect(() => { window.scrollTo(0,0); }, [page]);
+
+  // Load all data when admin logs in
+  useEffect(function() {
+    if (!authed) return;
+    setLoading(true);
+    Promise.all([
+      window.ADM.loadChefs().catch(function() { return []; }),
+      window.ADM.loadContent().catch(function() { return window.ADM.defaultContent; }),
+      window.ADM.loadSubscribers().catch(function() { return []; }),
+      window.ADM.loadApplications().catch(function() { return []; }),
+      window.ADM.loadPendingMenus().catch(function() { return []; }),
+    ]).then(function(results) {
+      var chefList = results[0] || [];
+      var contentMap = results[1] || window.ADM.defaultContent;
+      var subList  = results[2] || [];
+      var appList  = results[3] || [];
+      var menuList = results[4] || [];
+      window.ADM.adminChefs    = chefList;
+      window.ADM.siteContent   = contentMap;
+      window.ADM.subscribers   = subList;
+      window.ADM.applications  = appList;
+      setChefs(chefList);
+      setContent(contentMap);
+      setSubscribers(subList);
+      setApplications(appList);
+      setPendingMenus(menuList);
+      setLoading(false);
+    }).catch(function() { setLoading(false); });
+  }, [authed]);
+
+  var refresh = function() {
+    Promise.all([
+      window.ADM.loadSubscribers().catch(function() { return []; }),
+      window.ADM.loadApplications().catch(function() { return []; }),
+      window.ADM.loadPendingMenus().catch(function() { return []; }),
+      window.ADM.loadChefs().catch(function() { return []; }),
+    ]).then(function(results) {
+      var subList  = results[0] || [];
+      var appList  = results[1] || [];
+      var menuList = results[2] || [];
+      var chefList = results[3] || [];
+      window.ADM.subscribers  = subList;
+      window.ADM.applications = appList;
+      window.ADM.adminChefs   = chefList;
+      setSubscribers(subList);
+      setApplications(appList);
+      setPendingMenus(menuList);
+      setChefs(chefList);
+    });
+  };
 
   // Not logged in at all
   if (!authed && !chefSession) {
@@ -238,24 +287,32 @@ function AdminApp() {
     return <ChefView session={chefSession} onLogout={()=>setChefSession(null)}/>;
   }
 
+  // Loading state
+  if (loading) {
+    return (
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh', flexDirection:'column', gap:'16px' }}>
+        <i className="ph-bold ph-spinner spin" style={{ fontSize:'2rem', color:'#FACA50' }}/>
+        <p style={{ color:'#5A5D66', fontSize:'0.9rem' }}>Loading admin data…</p>
+      </div>
+    );
+  }
+
   // Admin is logged in → full admin portal
   var { DashboardPage, ChefsPage, ApplicationsPage, MenuApprovalsPage, SubscribersPage, ContentPage, SettingsPage } = window.ADM;
-  var subscribers  = window.ADM.subscribers || [];
-  var applications = window.ADM.applications || [];
 
-  var pendingMenuCount = (() => { try { return (JSON.parse(localStorage.getItem('cc_pending_menus')||'[]')).filter(m=>m.status==='pending').length; } catch(e) { return 0; } })();
+  var pendingMenuCount = pendingMenus.filter(function(m) { return m.status === 'pending'; }).length;
   var badges = {
-    applications:   applications.filter(a => a.status === 'pending').length,
-    newSubscribers: subscribers.filter(s => s.status === 'Interested').length,
+    applications:   applications.filter(function(a) { return a.status === 'pending'; }).length,
+    newSubscribers: subscribers.filter(function(s) { return s.status === 'Interested'; }).length,
     pendingMenus:   pendingMenuCount,
   };
 
   var mainContent;
   if      (page === 'dashboard')    mainContent = <DashboardPage    chefs={chefs} subscribers={subscribers}/>;
-  else if (page === 'applications') mainContent = <ApplicationsPage onUpdate={refresh}/>;
+  else if (page === 'applications') mainContent = <ApplicationsPage applications={applications} onUpdate={refresh}/>;
   else if (page === 'chefs')        mainContent = <ChefsPage        chefs={chefs} setChefs={setChefs}/>;
-  else if (page === 'menus')        mainContent = <MenuApprovalsPage/>;
-  else if (page === 'subscribers')  mainContent = <SubscribersPage  chefs={chefs} onUpdate={refresh}/>;
+  else if (page === 'menus')        mainContent = <MenuApprovalsPage menus={pendingMenus} onUpdate={refresh}/>;
+  else if (page === 'subscribers')  mainContent = <SubscribersPage  chefs={chefs} subscribers={subscribers} onUpdate={function(updated) { setSubscribers(updated); window.ADM.subscribers = updated; }}/>;
   else if (page === 'content')      mainContent = <ContentPage      content={content} setContent={setContent}/>;
   else if (page === 'settings')     mainContent = <SettingsPage/>;
 

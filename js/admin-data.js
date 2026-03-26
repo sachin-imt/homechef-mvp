@@ -1,4 +1,4 @@
-// ─── ADMIN DATA + LOCALSTORAGE PERSISTENCE ───
+// ─── ADMIN DATA — API-BACKED ───
 window.ADM = window.ADM || {};
 
 // ── Subscriber status stages ──
@@ -10,44 +10,7 @@ var SUBSCRIBER_STATUSES = [
   { value:'Deactivated',        label:'Deactivated',         color:'#D0342C', bg:'#FEE2E2', desc:'No longer active' },
 ];
 
-// ── localStorage helpers ──
-function loadChefs() {
-  try { var s = localStorage.getItem('cc_chefs'); return s ? JSON.parse(s) : null; } catch(e) { return null; }
-}
-function saveChefs(chefs) {
-  try { localStorage.setItem('cc_chefs', JSON.stringify(chefs)); window.CC.mockChefs = chefs; } catch(e) {}
-}
-function loadContent() {
-  try { var s = localStorage.getItem('cc_content'); return s ? { ...defaultContent, ...JSON.parse(s) } : defaultContent; } catch(e) { return defaultContent; }
-}
-function saveContent(c) {
-  try { localStorage.setItem('cc_content', JSON.stringify(c)); window.CC.siteContent = c; } catch(e) {}
-}
-function loadSubscribers() {
-  try { var s = localStorage.getItem('cc_subscribers'); return s ? JSON.parse(s) : []; } catch(e) { return []; }
-}
-function saveSubscribers(subs) {
-  try { localStorage.setItem('cc_subscribers', JSON.stringify(subs)); } catch(e) {}
-}
-function loadApplications() {
-  try { var s = localStorage.getItem('cc_chef_applications'); return s ? JSON.parse(s) : []; } catch(e) { return []; }
-}
-function saveApplications(apps) {
-  try { localStorage.setItem('cc_chef_applications', JSON.stringify(apps)); } catch(e) {}
-}
-function loadNotifications() {
-  try { var s = localStorage.getItem('cc_notifications'); return s ? JSON.parse(s) : []; } catch(e) { return []; }
-}
-function saveNotifications(n) {
-  try { localStorage.setItem('cc_notifications', JSON.stringify(n)); } catch(e) {}
-}
-function pushNotification(type, message, ref_id) {
-  var notifs = loadNotifications();
-  notifs.unshift({ id: Date.now(), type, message, created: new Date().toISOString().slice(0,10), read: false, ref_id: ref_id || null });
-  saveNotifications(notifs);
-}
-
-// ── Default site content ──
+// ── Default site content (fallback if API unavailable) ──
 var defaultContent = {
   hero_badge:       "Sydney's Home-Cooked Meal Marketplace",
   hero_line1:       "Authentic",
@@ -76,41 +39,76 @@ var defaultContent = {
   contact_email:    "hello@homemeals.com.au",
 };
 
-// ── Seed data ──
-// Subscriber status stages: Interested → Payment Made → Active Deliveries → Paused Deliveries / Deactivated
-var seedSubscribers = [
-  {
-    id: 1, name: 'Sarah Johnson', email: 'sarah.j@gmail.com', phone: '0412 345 678',
-    chef_id: 1, chef_name: 'Chef Priya', suburb: 'Newtown', postcode: '2042',
-    dietary: '', created: '2026-03-25', starting_week: 'Mar 31–Apr 4',
-    status: 'Active Deliveries',
-    status_notes: 'Payment confirmed. Chef confirmed delivery.',
-    payments: [
-      { week: 'Mar 31–Apr 4', week_iso: '2026-03-31', status: 'Paid', confirmed: true, confirmed_at: '2026-03-25', note: '', added_by: 'system', added_at: '2026-03-25' },
-    ],
-  },
-  {
-    id: 2, name: 'Michael Chen', email: 'mchen@outlook.com', phone: '0423 456 789',
-    chef_id: 2, chef_name: 'Chef Asa', suburb: 'Redfern', postcode: '2016',
-    dietary: 'Gluten-free', created: '2026-03-25', starting_week: 'Mar 31–Apr 4',
-    status: 'Interested',
-    status_notes: '',
-    payments: [],
-  },
-];
+// ── HTTP helpers ──
+function _apiGet(path) {
+  return fetch(path).then(function(r) { return r.json(); });
+}
+function _apiPost(path, body) {
+  return fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function(r) { return r.json(); });
+}
+function _apiPut(path, body) {
+  return fetch(path, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function(r) { return r.json(); });
+}
+function _apiDelete(path, body) {
+  return fetch(path, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function(r) { return r.json(); });
+}
 
-var adminChefs    = loadChefs() || (window.CC && window.CC.mockChefs ? JSON.parse(JSON.stringify(window.CC.mockChefs)) : []);
-var siteContent   = loadContent();
-var stored        = loadSubscribers();
-var subscribers   = stored.length > 0 ? stored : seedSubscribers;
-var applications  = loadApplications();
-var notifications = loadNotifications();
+// ── Chefs ──
+function loadChefs()      { return _apiGet('/api/chefs'); }
+function saveChefs()      { /* no-op: saves go through updateChef */ }
+function updateChef(chef) { return _apiPut('/api/chefs/' + chef.chef_id, chef); }
+function addChef(chef)    { return _apiPost('/api/chefs', chef); }
+function deleteChef(chef_id) { return _apiDelete('/api/chefs/' + chef_id, {}); }
+
+// ── Content ──
+function loadContent()   { return _apiGet('/api/content'); }
+function saveContent(c)  { return _apiPut('/api/content', c); }
+
+// ── Subscribers ──
+function loadSubscribers()     { return _apiGet('/api/subscribers'); }
+function saveSubscribers()     { /* no-op */ }
+function updateSubscriber(sub) { return _apiPut('/api/subscribers/' + sub.id, sub); }
+function addSubscriberAPI(sub) { return _apiPost('/api/subscribers', sub); }
+function deleteSubscriber(id)  { return _apiDelete('/api/subscribers/' + id, {}); }
+
+// ── Applications ──
+function loadApplications()      { return _apiGet('/api/applications'); }
+function saveApplications()      { /* no-op */ }
+function updateApplication(app)  { return _apiPut('/api/applications/' + app.id, app); }
+
+// ── Notifications ──
+function loadNotifications()   { return _apiGet('/api/notifications'); }
+function saveNotifications()   { /* no-op */ }
+function pushNotification(type, message, ref_id) {
+  return _apiPost('/api/notifications', { type: type, message: message, ref_id: ref_id || null });
+}
+function markNotificationRead(id)  { return _apiPut('/api/notifications', { id: id }); }
+function markAllNotificationsRead() { return _apiPut('/api/notifications', { all: true }); }
+
+// ── Pending Menus ──
+function loadPendingMenus()  { return _apiGet('/api/menus'); }
+function savePendingMenus()  { /* no-op */ }
+function addMenu(entry)      { return _apiPost('/api/menus', entry); }
+function updateMenu(id, status, reason) {
+  return _apiPut('/api/menus', { id: id, status: status, reject_reason: reason || null });
+}
+
+// ── Chef Accounts ──
+function loadChefAccounts()         { return _apiGet('/api/accounts'); }
+function saveChefAccounts()         { /* no-op */ }
+function upsertChefAccount(acct)    { return _apiPost('/api/accounts', acct); }
+function deleteChefAccount(chef_id) { return _apiDelete('/api/accounts', { chef_id: chef_id }); }
 
 Object.assign(window.ADM, {
   SUBSCRIBER_STATUSES, defaultContent,
-  adminChefs, siteContent, subscribers, applications, notifications,
-  loadChefs, saveChefs, loadContent, saveContent,
-  loadSubscribers, saveSubscribers,
-  loadApplications, saveApplications,
-  loadNotifications, saveNotifications, pushNotification,
+  // live data refs — populated async by AdminApp after login
+  adminChefs: [], siteContent: defaultContent, subscribers: [], applications: [], notifications: [],
+  // API-backed functions
+  loadChefs, saveChefs, updateChef, addChef, deleteChef,
+  loadContent, saveContent,
+  loadSubscribers, saveSubscribers, updateSubscriber, addSubscriberAPI, deleteSubscriber,
+  loadApplications, saveApplications, updateApplication,
+  loadNotifications, saveNotifications, pushNotification, markNotificationRead, markAllNotificationsRead,
+  loadPendingMenus, savePendingMenus, addMenu, updateMenu,
+  loadChefAccounts, saveChefAccounts, upsertChefAccount, deleteChefAccount,
 });

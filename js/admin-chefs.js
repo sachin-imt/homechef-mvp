@@ -7,50 +7,43 @@ var CUISINE_OPTIONS = ['Indian','Mediterranean','Thai','Italian','Japanese','Chi
 // ─────────────────────────────────────────────
 // Chef Applications Page
 // ─────────────────────────────────────────────
-function ApplicationsPage({ onUpdate }) {
-  var [apps, setApps]   = useState(() => window.ADM.loadApplications());
+function ApplicationsPage({ applications: initialApps, onUpdate }) {
+  var [apps, setApps]   = useState(initialApps || []);
   var [detail, setDet]  = useState(null);
   var [note,   setNote] = useState('');
 
-  var persist = (updated) => {
-    setApps(updated);
-    window.ADM.applications = updated;
-    window.ADM.saveApplications(updated);
-    onUpdate && onUpdate();
-  };
+  // Keep in sync if parent reloads
+  React.useEffect(function() { setApps(initialApps || []); }, [initialApps]);
 
   var handleApprove = (app) => {
     if (!confirm(`Approve ${app.full_name} and add them as an active chef?`)) return;
-    // Add to chefs list
-    var chefs = window.ADM.adminChefs;
-    var newId = Math.max(...chefs.map(c=>c.chef_id), 0) + 1;
     var newChef = {
-      chef_id: newId,
-      chef_name: `Chef ${app.full_name.split(' ')[0]}`,
+      chef_name: 'Chef ' + app.full_name.split(' ')[0],
       cuisine_type: app.cuisine_type,
       bio: app.cooking_background,
       highlights: [],
       delivery_postcodes: [],
       price_per_week: 0,
       rating: 5.0,
-      status: 'Active',
-      food_image: '', avatar: '',
-      currentWeek: {}, nextWeek: {},
+      commission_pct: 20,
+      status: 'active',
+      food_image: '', photo_url: '',
+      menus: {},
     };
-    var updatedChefs = [...chefs, newChef];
-    window.ADM.adminChefs = updatedChefs;
-    window.ADM.saveChefs(updatedChefs);
-    // Mark application approved
-    var updated = apps.map(a => a.id===app.id ? { ...a, status:'approved', reviewed_at: new Date().toISOString().slice(0,10), note } : a);
-    persist(updated);
+    window.ADM.addChef(newChef).then(function(createdChef) {
+      return window.ADM.updateApplication({ ...app, status: 'approved', reviewed_at: new Date().toISOString().slice(0,10), note: note });
+    }).then(function() {
+      window.ADM.pushNotification('chef_approved', app.full_name + ' approved and added', app.id);
+      onUpdate && onUpdate();
+    }).catch(function(e) { alert('Error approving application: ' + e.message); });
     setDet(null);
-    window.ADM.pushNotification('chef_approved', `${app.full_name} approved and added as ${newChef.chef_name}`, app.id);
   };
 
   var handleReject = (app) => {
     if (!confirm(`Reject application from ${app.full_name}?`)) return;
-    var updated = apps.map(a => a.id===app.id ? { ...a, status:'rejected', reviewed_at: new Date().toISOString().slice(0,10), note } : a);
-    persist(updated);
+    window.ADM.updateApplication({ ...app, status: 'rejected', reviewed_at: new Date().toISOString().slice(0,10), note: note })
+      .then(function() { onUpdate && onUpdate(); })
+      .catch(function(e) { alert('Error: ' + e.message); });
     setDet(null);
   };
 
@@ -301,33 +294,38 @@ function ChefModal({ chef, onSave, onClose }) {
 // Chef Portal Access (credentials) modal
 // ─────────────────────────────────────────────
 function ChefAccessModal({ chef, onClose }) {
-  var existing = (() => {
-    try { return (JSON.parse(localStorage.getItem('cc_chef_accounts')||'[]')).find(a=>a.chef_id===chef.chef_id); } catch(e) { return null; }
-  })();
-  var [username, setUsername] = useState(existing?.username || '');
-  var [password, setPassword] = useState(existing?.password || '');
-  var [active,   setActive]   = useState(existing?.active !== false);
-  var [showPwd,  setShowPwd]  = useState(false);
-  var [saved,    setSaved]    = useState(false);
+  var [existing,  setExisting]  = useState(null);
+  var [username,  setUsername]  = useState('');
+  var [password,  setPassword]  = useState('');
+  var [active,    setActive]    = useState(true);
+  var [showPwd,   setShowPwd]   = useState(false);
+  var [saved,     setSaved]     = useState(false);
 
-  var persist = (accounts) => { try { localStorage.setItem('cc_chef_accounts', JSON.stringify(accounts)); } catch(e) {} };
+  // Load existing account on mount
+  useState(function() {
+    window.ADM.loadChefAccounts().then(function(accounts) {
+      var found = accounts.find(function(a) { return a.chef_id === chef.chef_id; }) || null;
+      setExisting(found);
+      if (found) { setUsername(found.username || ''); setPassword(found.password || ''); setActive(found.active !== false); }
+    }).catch(function() {});
+  });
 
   var handleSave = () => {
     if (!username.trim()) return alert('Username required');
     if (!password.trim()) return alert('Password required');
-    var others = (() => { try { return (JSON.parse(localStorage.getItem('cc_chef_accounts')||'[]')).filter(a=>a.chef_id!==chef.chef_id); } catch(e) { return []; } })();
-    // Check username uniqueness
-    if (others.find(a => a.username === username.trim())) return alert('This username is already used by another chef. Choose a unique username.');
-    persist([...others, { chef_id: chef.chef_id, chef_name: chef.chef_name, username: username.trim(), password: password.trim(), active, created: existing?.created || new Date().toISOString().slice(0,10) }]);
-    setSaved(true);
-    setTimeout(onClose, 900);
+    window.ADM.upsertChefAccount({
+      chef_id: chef.chef_id, chef_name: chef.chef_name,
+      username: username.trim(), password: password.trim(),
+      active: active, created: existing?.created || new Date().toISOString().slice(0,10),
+    }).then(function() {
+      setSaved(true);
+      setTimeout(onClose, 900);
+    }).catch(function(e) { alert('Error saving credentials: ' + e.message); });
   };
 
   var handleRevoke = () => {
     if (!confirm(`Revoke portal access for ${chef.chef_name}?`)) return;
-    var others = (() => { try { return (JSON.parse(localStorage.getItem('cc_chef_accounts')||'[]')).filter(a=>a.chef_id!==chef.chef_id); } catch(e) { return []; } })();
-    persist(others);
-    onClose();
+    window.ADM.deleteChefAccount(chef.chef_id).then(onClose).catch(function(e) { alert('Error revoking access: ' + e.message); });
   };
 
   var lbl = { display:'block', fontWeight:600, fontSize:'0.8rem', marginBottom:'5px' };
@@ -427,15 +425,25 @@ function ChefsPage({ chefs, setChefs }) {
   );
 
   var handleSave = (form) => {
-    var updated = !form.chef_id
-      ? [...chefs, { ...form, chef_id: Math.max(...chefs.map(c=>c.chef_id),0)+1, currentWeek:{}, nextWeek:{} }]
-      : chefs.map(c => c.chef_id===form.chef_id ? form : c);
-    setChefs(updated); window.ADM.saveChefs(updated); setModal(null);
+    if (!form.chef_id) {
+      // New chef
+      window.ADM.addChef(form).then(function(created) {
+        setChefs(function(prev) { return [...prev, created]; });
+      }).catch(function(e) { alert('Error adding chef: ' + e.message); });
+    } else {
+      // Update existing
+      window.ADM.updateChef(form).then(function(updated) {
+        setChefs(function(prev) { return prev.map(function(c) { return c.chef_id === form.chef_id ? updated : c; }); });
+      }).catch(function(e) { alert('Error saving chef: ' + e.message); });
+    }
+    setModal(null);
   };
 
   var handleDelete = () => {
-    var updated = chefs.filter(c => c.chef_id !== delChef.chef_id);
-    setChefs(updated); window.ADM.saveChefs(updated); setDel(null);
+    window.ADM.deleteChef(delChef.chef_id).then(function() {
+      setChefs(function(prev) { return prev.filter(function(c) { return c.chef_id !== delChef.chef_id; }); });
+    }).catch(function(e) { alert('Error deleting chef: ' + e.message); });
+    setDel(null);
   };
 
   var newChef = { chef_name:'', cuisine_type:'', price_per_week:'', rating:4.8, bio:'', highlights:[], delivery_postcodes:[], status:'Active', food_image:'', avatar:'', currentWeek:{}, nextWeek:{} };
@@ -494,12 +502,14 @@ function ChefsPage({ chefs, setChefs }) {
                     <div style={{ display:'flex', gap:'6px' }}>
                       <button className="btn-icon" title="Edit" onClick={()=>setModal({chef:{...c}})}><i className="ph-bold ph-pencil"/></button>
                       <button className="btn-icon" title="Portal access" onClick={()=>setAccess(c)}
-                        style={{ color: (() => { try { return (JSON.parse(localStorage.getItem('cc_chef_accounts')||'[]')).find(a=>a.chef_id===c.chef_id) ? '#3A813D' : '#9CA3AF'; } catch(e) { return '#9CA3AF'; }})() }}>
+                        style={{ color: '#9CA3AF' }}>
                         <i className="ph-bold ph-key"/>
                       </button>
                       <button className="btn-icon" title="Toggle status" onClick={()=>{
-                        var upd = chefs.map(ch=>ch.chef_id===c.chef_id?{...ch,status:(c.status||'Active')==='Active'?'Paused':'Active'}:ch);
-                        setChefs(upd); window.ADM.saveChefs(upd);
+                        var newStatus = (c.status||'Active')==='Active' ? 'Paused' : 'Active';
+                        window.ADM.updateChef({ ...c, status: newStatus }).then(function(updated) {
+                          setChefs(function(prev) { return prev.map(function(ch) { return ch.chef_id===c.chef_id ? updated : ch; }); });
+                        });
                       }}><i className={`ph-bold ${(c.status||'Active')==='Active'?'ph-pause':'ph-play'}`}/></button>
                       <button className="btn-icon" style={{ color:'#D0342C' }} onClick={()=>setDel(c)}><i className="ph-bold ph-trash"/></button>
                     </div>
@@ -523,15 +533,17 @@ function ChefsPage({ chefs, setChefs }) {
 // ─────────────────────────────────────────────
 var DAY_LABELS_MAP = { monday:'Mon', tuesday:'Tue', wednesday:'Wed', thursday:'Thu', friday:'Fri' };
 
-function MenuApprovalsPage() {
-  var [menus, setMenus] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('cc_pending_menus') || '[]'); } catch(e) { return []; }
-  });
+function MenuApprovalsPage({ menus: initialMenus, onUpdate }) {
+  var [menus, setMenus] = useState(initialMenus || []);
   var [detail, setDetail] = useState(null);
 
-  var persist = (updated) => {
-    setMenus(updated);
-    try { localStorage.setItem('cc_pending_menus', JSON.stringify(updated)); } catch(e) {}
+  // Keep in sync if parent reloads
+  React.useEffect(function() { setMenus(initialMenus || []); }, [initialMenus]);
+
+  var persist = (id, status, reason) => {
+    window.ADM.updateMenu(id, status, reason).then(function() {
+      onUpdate && onUpdate();
+    }).catch(function(e) { alert('Error: ' + e.message); });
   };
 
   // Check if this submission repeats dishes from a different week for the same chef
@@ -553,23 +565,13 @@ function MenuApprovalsPage() {
   };
 
   var handleApprove = (sub) => {
-    // Update chef's menu in cc_chefs
-    try {
-      var chefs = JSON.parse(localStorage.getItem('cc_chefs') || '[]') || (window.CC?.mockChefs || []);
-      var updated = chefs.map(c => {
-        if (c.chef_id !== sub.chef_id) return c;
-        return { ...c, [sub.week_key]: sub.dishes_by_day };
-      });
-      localStorage.setItem('cc_chefs', JSON.stringify(updated));
-      if (window.CC) window.CC.mockChefs = updated;
-      window.ADM.adminChefs = updated;
-    } catch(e) {}
-    persist(menus.map(m => m.id===sub.id ? { ...m, status:'approved', reviewed_at: new Date().toISOString().slice(0,10) } : m));
+    // API handles applying approved menu to chef record server-side
+    persist(sub.id, 'approved', null);
     setDetail(null);
   };
 
   var handleReject = (sub, reason) => {
-    persist(menus.map(m => m.id===sub.id ? { ...m, status:'rejected', reviewed_at: new Date().toISOString().slice(0,10), reject_reason: reason } : m));
+    persist(sub.id, 'rejected', reason);
     setDetail(null);
   };
 

@@ -83,6 +83,7 @@ function ChefCard({ chef, onViewMenu }) {
 }
 
 function HomePage({ chefs, setPage }) {
+  var sc = window.CC.siteContent || {};
   var [selectedCuisine, setSelectedCuisine] = useState("All");
   var [postcodeInput, setPostcodeInput] = useState("");
   var [activePostcode, setActivePostcode] = useState("");
@@ -112,15 +113,15 @@ function HomePage({ chefs, setPage }) {
           {/* Left: headline + CTAs */}
           <div>
             <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "0.75rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.12em", color: "#111", background: "#FACA50", padding: "5px 14px", borderRadius: "20px", marginBottom: "28px" }}>
-              <i className="ph-fill ph-map-pin"></i> Sydney's Home-Cooked Meal Marketplace
+              <i className="ph-fill ph-map-pin"></i> {sc.hero_badge}
             </span>
             <h1 style={{ fontSize: "clamp(2.8rem, 5vw, 4.2rem)", fontWeight: 900, lineHeight: 1.0, letterSpacing: "-0.04em", color: "white", marginBottom: "24px" }}>
-              Authentic<br />
-              <span style={{ color: "#FACA50" }}>Home-Cooked</span><br />
-              Meals, Weekly.
+              {sc.hero_line1}<br />
+              <span style={{ color: "#FACA50" }}>{sc.hero_line2}</span><br />
+              {sc.hero_line3}
             </h1>
             <p style={{ fontSize: "1.1rem", color: "rgba(255,255,255,0.65)", marginBottom: "36px", maxWidth: "440px", lineHeight: 1.7 }}>
-              Subscribe to a local home chef. Get 5 freshly cooked meals delivered Mon–Fri. Support your community.
+              {sc.hero_subtext}
             </p>
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "40px" }}>
               <button
@@ -140,7 +141,7 @@ function HomePage({ chefs, setPage }) {
             </div>
             {/* Stats row */}
             <div style={{ display: "flex", gap: "32px", flexWrap: "wrap" }}>
-              {[["4.8 ⭐", "Avg chef rating"], ["5 meals", "Delivered Mon–Fri"], ["Cancel", "Anytime, no lock-in"]].map(([stat, label]) => (
+              {[[sc.hero_stat1, sc.hero_stat1_label], [sc.hero_stat2, sc.hero_stat2_label], [sc.hero_stat3, sc.hero_stat3_label]].map(([stat, label]) => (
                 <div key={label}>
                   <p style={{ margin: 0, fontWeight: 800, fontSize: "1.2rem", color: "white", letterSpacing: "-0.02em" }}>{stat}</p>
                   <p style={{ margin: 0, fontSize: "0.75rem", color: "rgba(255,255,255,0.45)", marginTop: "2px" }}>{label}</p>

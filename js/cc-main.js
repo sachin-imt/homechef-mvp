@@ -49,4 +49,18 @@ function App() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+// Fetch live chefs and content from API before rendering so the public site
+// always shows data from the database, not static defaults.
+Promise.all([
+  fetch('/api/chefs').then(function(r) { return r.json(); }).catch(function() { return null; }),
+  fetch('/api/content').then(function(r) { return r.json(); }).catch(function() { return null; }),
+]).then(function(results) {
+  var chefsData  = results[0];
+  var contentData = results[1];
+  if (chefsData  && Array.isArray(chefsData))        window.CC.mockChefs   = chefsData;
+  if (contentData && typeof contentData === 'object') window.CC.siteContent = Object.assign({}, window.CC.siteContent, contentData);
+}).catch(function() {
+  // fall through to static defaults
+}).then(function() {
+  ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+});

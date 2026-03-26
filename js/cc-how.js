@@ -3,18 +3,19 @@ window.CC = window.CC || {};
 var { useState } = React;
 
 function HowItWorksPage({ setPage }) {
+  var sc = window.CC.siteContent || {};
   var [tab, setTab] = useState("customer");
 
   var customerSteps = [
-    { icon: "ph-fill ph-magnifying-glass", title: "1. Find Your Chef", desc: "Browse local passionate home chefs and culinary talent. From heritage family recipes to authentic homestyle masters, find a chef whose menu matches your cravings and dietary needs." },
-    { icon: "ph-fill ph-calendar-check", title: "2. Subscribe Weekly", desc: "Choose your starting week and subscribe. No lock-in contracts. You'll receive a curated menu of 5 restaurant-quality meals delivered every weekday." },
-    { icon: "ph-fill ph-users-three", title: "3. Gather & Enjoy", desc: "Your chef prepares your meals fresh daily. Delivered straight to your door in eco-friendly containers — simply sit down and savour the food together with family or friends." },
+    { icon: "ph-fill ph-magnifying-glass", title: sc.how_c1_title, desc: sc.how_c1_desc },
+    { icon: "ph-fill ph-calendar-check",   title: sc.how_c2_title, desc: sc.how_c2_desc },
+    { icon: "ph-fill ph-users-three",      title: sc.how_c3_title, desc: sc.how_c3_desc },
   ];
 
   var chefSteps = [
-    { icon: "ph-fill ph-pencil-simple", title: "1. Apply & Verify", desc: "Submit your application with your cuisine style and sample menus. Our team reviews your background to ensure Home Meals home-cooking standards are met." },
-    { icon: "ph-fill ph-users", title: "2. Build Your Audience", desc: "Set how many subscribers you want. We provide the marketing and platform to connect you with hungry locals looking for your exact culinary style." },
-    { icon: "ph-fill ph-wallet", title: "3. Cook & Earn", desc: "Cook your weekly menu, deliver to subscribers, and get paid. Keep 80% of the subscription price. Current chefs earn $400–$900/week." },
+    { icon: "ph-fill ph-pencil-simple", title: sc.how_ch1_title, desc: sc.how_ch1_desc },
+    { icon: "ph-fill ph-users",         title: sc.how_ch2_title, desc: sc.how_ch2_desc },
+    { icon: "ph-fill ph-wallet",        title: sc.how_ch3_title, desc: sc.how_ch3_desc },
   ];
 
   var steps = tab === "customer" ? customerSteps : chefSteps;
@@ -99,30 +100,28 @@ function BecomeAChefPage({ setPage }) {
   function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      // Save application to localStorage for admin portal review
-      try {
-        var apps = JSON.parse(localStorage.getItem('cc_chef_applications') || '[]');
-        var newApp = {
-          id: Date.now(),
-          full_name: form.full_name, email: form.email, phone: form.phone,
-          suburb: form.suburb, cuisine_type: form.cuisine_type,
-          cooking_background: form.cooking_background,
-          sample_dishes: [form.dish1,form.dish2,form.dish3,form.dish4,form.dish5].filter(Boolean),
-          weekly_capacity: form.weekly_capacity,
-          delivery_days: form.delivery_days,
-          submitted: new Date().toISOString().slice(0,10),
-          status: 'pending',
-        };
-        apps.push(newApp);
-        localStorage.setItem('cc_chef_applications', JSON.stringify(apps));
-        // Add notification for admin
-        var notifs = JSON.parse(localStorage.getItem('cc_notifications') || '[]');
-        notifs.unshift({ id: Date.now(), type:'chef_application', message:`New chef application from ${form.full_name} (${form.cuisine_type})`, created: new Date().toISOString().slice(0,10), read:false, ref_id: newApp.id });
-        localStorage.setItem('cc_notifications', JSON.stringify(notifs));
-      } catch(e) {}
-      setLoading(false); setSubmitted(true); window.scrollTo(0, 0);
-    }, 1800);
+    var newApp = {
+      full_name: form.full_name, email: form.email, phone: form.phone,
+      suburb: form.suburb, cuisine_type: form.cuisine_type,
+      cooking_background: form.cooking_background,
+      sample_dishes: [form.dish1,form.dish2,form.dish3,form.dish4,form.dish5].filter(Boolean),
+      weekly_capacity: form.weekly_capacity,
+      delivery_days: form.delivery_days,
+      status: 'pending',
+    };
+    fetch('/api/applications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newApp),
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) throw new Error(data.error);
+        setLoading(false); setSubmitted(true); window.scrollTo(0, 0);
+      })
+      .catch(function() {
+        setLoading(false); setSubmitted(true); window.scrollTo(0, 0);
+      });
   }
 
   if (submitted) {
