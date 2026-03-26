@@ -39,7 +39,7 @@ function DayCard({ day, dishes }) {
 
 function ChefDetailPage({ chef, setPage }) {
   var [activeWeek, setActiveWeek] = useState("currentWeek");
-  var menu = chef.menus[activeWeek];
+  var menu = (chef.menus && chef.menus[activeWeek]) || {};
 
   var suburbs = chef.delivery_postcodes.map(pc => {
     var name = (window.CC.POSTCODE_SUBURB_MAP || {})[pc] || pc;
