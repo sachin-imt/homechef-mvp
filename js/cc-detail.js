@@ -110,8 +110,8 @@ function ChefDetailPage({ chef, setPage }) {
           </div>
           <div style={{ display: "flex", background: "#F4F4F4", borderRadius: "10px", padding: "4px", gap: "4px" }}>
             {[
-              { key: "currentWeek", label: `This Week (${chef.menus.currentWeek.week_label})` },
-              { key: "nextWeek", label: `Next Week (${chef.menus.nextWeek.week_label})` },
+              { key: "currentWeek", label: `This Week (${chef.menus?.currentWeek?.week_label || '–'})` },
+              { key: "nextWeek", label: `Next Week (${chef.menus?.nextWeek?.week_label || '–'})` },
             ].map(w => (
               <button
                 key={w.key}

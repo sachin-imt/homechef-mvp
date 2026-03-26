@@ -9,7 +9,8 @@ var {
 } = window.CC;
 
 function App() {
-  var [chefs, setChefs] = useState(mockChefs);
+  // Use window.CC.mockChefs so it picks up the API-fetched data (set before render)
+  var [chefs, setChefs] = useState(window.CC.mockChefs || mockChefs);
   var [page, setPage] = useState({ name: "home" });
 
   // Scroll to top on page change

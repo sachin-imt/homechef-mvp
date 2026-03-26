@@ -81,8 +81,8 @@ function SubscribePage({ chef, setPage }) {
   }
 
   var weekLabels = chef ? {
-    this_week: chef.menus.currentWeek.week_label,
-    next_week: chef.menus.nextWeek.week_label,
+    this_week: chef.menus?.currentWeek?.week_label || '',
+    next_week: chef.menus?.nextWeek?.week_label || '',
   } : {};
 
   if (submitted) {
