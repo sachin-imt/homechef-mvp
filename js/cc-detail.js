@@ -40,7 +40,7 @@ function DayCard({ day, dishes }) {
 function computeWeekLabel(weeksAhead) {
   var d = new Date();
   var day = d.getDay();
-  var daysToMon = day === 0 ? 1 : (8 - day) % 7 || 7;
+  var daysToMon = day === 0 ? 8 : (8 - day) % 7 || 7;
   var mon = new Date(d); mon.setDate(d.getDate() + daysToMon + weeksAhead * 7);
   var fri = new Date(mon); fri.setDate(mon.getDate() + 4);
   var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];

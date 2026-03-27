@@ -31,7 +31,7 @@ function SubscribePage({ chef, setPage }) {
     var d = new Date();
     var day = d.getDay();
     // Days until next Monday (always forward — never stays on current Monday)
-    var daysToMon = day === 1 ? 7 : day === 0 ? 1 : (8 - day) % 7;
+    var daysToMon = day === 1 ? 7 : day === 0 ? 8 : (8 - day) % 7;
     d.setDate(d.getDate() + daysToMon + weeksAhead * 7);
     return localIso(d);
   }

@@ -17,7 +17,7 @@ function weekOptions() {
   var today = new Date();
   var day = today.getDay();
   // Always go to next Monday (if today is Monday, go to NEXT Monday)
-  var diff = day === 1 ? 7 : day === 0 ? 1 : (8 - day) % 7;
+  var diff = day === 1 ? 7 : day === 0 ? 8 : (8 - day) % 7;
   var monday = new Date(today); monday.setDate(today.getDate() + diff);
   var opts = [];
   for (var i = 0; i < 8; i++) {
