@@ -1,6 +1,6 @@
 const db = require('./_db');
 const { handle } = require('./_helpers');
-const { sendEmail, subscriberConfirmationEmail } = require('./_email');
+const { sendEmail, subscriberConfirmationEmail, newSubscriberAdminEmail } = require('./_email');
 
 module.exports = handle(async (req, res) => {
   if (req.method === 'GET') {
@@ -54,6 +54,18 @@ module.exports = handle(async (req, res) => {
         amount: req.body.amount,
       });
       await sendEmail({ to: data.email, subject, html }).catch(e => console.error('[email] subscriber confirm:', e));
+    }
+
+    // Send admin notification
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (adminEmail) {
+      const { subject: as, html: ah } = newSubscriberAdminEmail({
+        name: data.name, email: data.email, phone: data.phone,
+        chef_name: data.chef_name, suburb: data.suburb, postcode: data.postcode,
+        starting_week: data.starting_week, amount: req.body.amount,
+        street_address: req.body.street_address,
+      });
+      await sendEmail({ to: adminEmail, subject: as, html: ah }).catch(e => console.error('[email] admin notify:', e));
     }
 
     return res.status(201).json({ ...data, payments: [] });

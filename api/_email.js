@@ -180,10 +180,39 @@ function chefRejectedEmail({ name }) {
   };
 }
 
+// ── 5. Admin: new subscriber notification ──
+function newSubscriberAdminEmail({ name, email, phone, chef_name, suburb, postcode, starting_week, amount, street_address }) {
+  const ref = 'HM-' + (name || 'SUB').replace(/\s+/g, '').toUpperCase().slice(0, 8);
+  const amtStr = amount ? `$${amount}/week` : 'Not specified';
+  return {
+    subject: `New subscriber: ${name} → ${chef_name}`,
+    html: wrapper(`
+      ${h1('New subscriber 🎉')}
+      ${p(`A new subscription has been submitted.`)}
+      ${highlight(`
+        <p style="margin:0 0 12px;font-size:0.8rem;font-weight:700;color:#856404;text-transform:uppercase;letter-spacing:0.5px">Subscriber Details</p>
+        <table cellpadding="0" cellspacing="0" width="100%">
+          ${row('Name', name)}
+          ${row('Email', email)}
+          ${row('Phone', phone || '—')}
+          ${row('Chef', chef_name)}
+          ${row('Starting Week', starting_week)}
+          ${row('Delivery Address', `${street_address || ''}, ${suburb} ${postcode}`)}
+          ${row('Amount', amtStr)}
+          ${row('Pay Reference', `<strong>${ref}</strong>`)}
+        </table>
+      `)}
+      ${p('Log in to the admin panel to manage this subscription.')}
+      ${btn('Go to Admin', SITE_URL + '/admin.html')}
+    `),
+  };
+}
+
 module.exports = {
   sendEmail,
   subscriberConfirmationEmail,
   applicationReceivedEmail,
   chefApprovedEmail,
   chefRejectedEmail,
+  newSubscriberAdminEmail,
 };

@@ -1,6 +1,10 @@
 // ─── SUBSCRIBERS PAGE ───
 window.ADM = window.ADM || {};
 
+function payRef(name) {
+  return 'HM-' + (name || 'SUB').replace(/\s+/g, '').toUpperCase().slice(0, 8);
+}
+
 // Generate a Mon–Fri week label from a YYYY-MM-DD ISO string (local date)
 function generateWeekLabel(mondayIso) {
   var parts = mondayIso.split('-').map(Number);
@@ -194,6 +198,7 @@ function SubscriberDetail({ sub, chefs, onUpdate, onClose }) {
               ['Dietary', sub.dietary||'None'],
               ['Joined',  sub.created],
               ['Chef',    sub.chef_name],
+              ['Pay Ref', payRef(sub.name)],
             ].map(([l,v])=>(
               <div key={l} style={{ fontSize:'0.8rem' }}>
                 <div style={{ color:'#9CA3AF', marginBottom:'2px' }}>{l}</div>
@@ -628,6 +633,7 @@ function SubscribersPage({ chefs, subscribers: initialSubs, onUpdate: notifyPare
                 <th style={{ cursor:'pointer', userSelect:'none' }} onClick={()=>toggleSort('status')}>Status <SortIcon field="status"/></th>
                 <th style={{ cursor:'pointer', userSelect:'none' }} onClick={()=>toggleSort('dietary')}>Dietary <SortIcon field="dietary"/></th>
                 <th style={{ cursor:'pointer', userSelect:'none' }} onClick={()=>toggleSort('starting_week')}>Starting Week <SortIcon field="starting_week"/></th>
+                <th>Pay Ref</th>
                 <th style={{ cursor:'pointer', userSelect:'none' }} onClick={()=>toggleSort('payments')}>Payments <SortIcon field="payments"/></th>
                 <th></th>
               </tr>
@@ -649,6 +655,7 @@ function SubscribersPage({ chefs, subscribers: initialSubs, onUpdate: notifyPare
                     <td>{statusBadgeFor(s.status)}</td>
                     <td style={{ fontSize:'0.8rem', color: s.dietary?'#111':'#CCC' }}>{s.dietary||'—'}</td>
                     <td style={{ fontSize:'0.82rem', whiteSpace:'nowrap', fontWeight:600 }}>{s.starting_week}</td>
+                    <td style={{ fontSize:'0.78rem', color:'#5A5D66', fontFamily:'monospace' }}>{payRef(s.name)}</td>
                     <td>
                       <div style={{ display:'flex', flexDirection:'column', gap:'3px' }}>
                         {conf > 0 && <span className="badge badge-green" style={{ fontSize:'0.68rem' }}>{conf} confirmed</span>}
