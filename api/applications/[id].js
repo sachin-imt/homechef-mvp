@@ -26,7 +26,7 @@ module.exports = handle(async (req, res) => {
     // Send rejection email if flagged
     if (action === 'rejected' && email) {
       const { subject, html } = chefRejectedEmail({ name: name || 'there' });
-      sendEmail({ to: email, subject, html }).catch(e => console.error('[email] chef rejected:', e));
+      await sendEmail({ to: email, subject, html }).catch(e => console.error('[email] chef rejected:', e));
     }
 
     return res.json({ success: true });

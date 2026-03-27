@@ -45,7 +45,7 @@ module.exports = handle(async (req, res) => {
       ref_id: String(data.id),
     });
 
-    // Send confirmation email to subscriber (fire-and-forget)
+    // Send confirmation email to subscriber
     if (data.email) {
       const { subject, html } = subscriberConfirmationEmail({
         name: data.name,
@@ -53,7 +53,7 @@ module.exports = handle(async (req, res) => {
         starting_week: data.starting_week,
         amount: req.body.amount,
       });
-      sendEmail({ to: data.email, subject, html }).catch(e => console.error('[email] subscriber confirm:', e));
+      await sendEmail({ to: data.email, subject, html }).catch(e => console.error('[email] subscriber confirm:', e));
     }
 
     return res.status(201).json({ ...data, payments: [] });

@@ -40,7 +40,7 @@ module.exports = handle(async (req, res) => {
         name: applicantName || data.chef_name,
         chef_name: data.chef_name,
       });
-      sendEmail({ to: applicantEmail, subject, html }).catch(e => console.error('[email] chef approved:', e));
+      await sendEmail({ to: applicantEmail, subject, html }).catch(e => console.error('[email] chef approved:', e));
     }
 
     return res.status(201).json(data);

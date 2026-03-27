@@ -33,7 +33,7 @@ module.exports = handle(async (req, res) => {
         name: data.full_name,
         cuisine_type: data.cuisine_type,
       });
-      sendEmail({ to: data.email, subject, html }).catch(e => console.error('[email] app received:', e));
+      await sendEmail({ to: data.email, subject, html }).catch(e => console.error('[email] app received:', e));
     }
 
     return res.status(201).json(data);
