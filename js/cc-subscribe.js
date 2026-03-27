@@ -99,6 +99,7 @@ function SubscribePage({ chef, setPage }) {
       delivery_notes: form.delivery_notes.trim(),
       dietary: form.dietary_restrictions.trim(),
       starting_week: weekLabel || '',
+      amount: chef?.price_per_week,
       status: 'Interested',
       status_notes: '',
       payments: [],
