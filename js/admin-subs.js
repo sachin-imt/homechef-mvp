@@ -1,26 +1,29 @@
 // ─── SUBSCRIBERS PAGE ───
 window.ADM = window.ADM || {};
 
-// Generate a list of week labels (Mon–Fri) starting from a given date
-function generateWeekLabel(mondayDate) {
-  var d = new Date(mondayDate);
+// Generate a Mon–Fri week label from a YYYY-MM-DD ISO string (local date)
+function generateWeekLabel(mondayIso) {
+  var parts = mondayIso.split('-').map(Number);
+  var d = new Date(parts[0], parts[1]-1, parts[2]); // parse as local date
   var end = new Date(d); end.setDate(d.getDate() + 4);
   var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var s = `${months[d.getMonth()]} ${d.getDate()}`;
-  var e = `${d.getMonth()!==end.getMonth()?months[end.getMonth()]+' ':''}${end.getDate()}`;
-  return `${s}–${e}`;
+  var s = months[d.getMonth()] + ' ' + d.getDate();
+  var e = (d.getMonth() !== end.getMonth() ? months[end.getMonth()] + ' ' : '') + end.getDate();
+  return s + '–' + e;
 }
 
-// Next 8 Mon–Fri week options from today
+// Next 8 Mon–Fri week options starting from next Monday
 function weekOptions() {
   var today = new Date();
   var day = today.getDay();
-  var diff = day <= 1 ? 1 - day : 8 - day; // next Monday
+  // Always go to next Monday (if today is Monday, go to NEXT Monday)
+  var diff = day === 1 ? 7 : day === 0 ? 1 : (8 - day) % 7;
   var monday = new Date(today); monday.setDate(today.getDate() + diff);
   var opts = [];
   for (var i = 0; i < 8; i++) {
     var m = new Date(monday); m.setDate(monday.getDate() + i * 7);
-    var iso = m.toISOString().slice(0,10);
+    // Use local date parts to avoid UTC offset issues
+    var iso = m.getFullYear() + '-' + String(m.getMonth()+1).padStart(2,'0') + '-' + String(m.getDate()).padStart(2,'0');
     opts.push({ value: iso, label: generateWeekLabel(iso) });
   }
   return opts;

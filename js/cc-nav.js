@@ -32,7 +32,14 @@ function Nav({ page, setPage }) {
           <div className="cc-nav-right">
             <button
               className="btn btn-primary btn-sm"
-              onClick={() => setPage({ name: "home" })}
+              onClick={() => {
+                if (page.name === "home") {
+                  document.getElementById("chef-grid")?.scrollIntoView({ behavior: "smooth" });
+                } else {
+                  setPage({ name: "home" });
+                  setTimeout(() => document.getElementById("chef-grid")?.scrollIntoView({ behavior: "smooth" }), 100);
+                }
+              }}
             >
               Order Now
             </button>
@@ -61,7 +68,15 @@ function Nav({ page, setPage }) {
         <button
           className="btn btn-primary"
           style={{ marginTop: "8px", borderRadius: "8px" }}
-          onClick={() => { setPage({ name: "home" }); setMobileOpen(false); }}
+          onClick={() => {
+            setMobileOpen(false);
+            if (page.name === "home") {
+              document.getElementById("chef-grid")?.scrollIntoView({ behavior: "smooth" });
+            } else {
+              setPage({ name: "home" });
+              setTimeout(() => document.getElementById("chef-grid")?.scrollIntoView({ behavior: "smooth" }), 100);
+            }
+          }}
         >
           Order Now
         </button>

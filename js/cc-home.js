@@ -50,7 +50,7 @@ function ChefCard({ chef, onViewMenu }) {
 
         {/* Tags */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginBottom: "12px" }}>
-          {chef.tags.slice(0, 3).map((t, i) => (
+          {(chef.tags || []).slice(0, 3).map((t, i) => (
             <span key={i} style={{ fontSize: "0.72rem", background: "#F4F4F4", color: "#5A5D66", padding: "2px 8px", borderRadius: "20px", border: "1px solid #E5E5E5" }}>{t}</span>
           ))}
         </div>

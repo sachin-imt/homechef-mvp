@@ -54,7 +54,7 @@ function ChefDetailPage({ chef, setPage }) {
   var currentWeekLabel = (chef.menus && chef.menus.currentWeek && chef.menus.currentWeek.week_label) || computeWeekLabel(0);
   var nextWeekLabel    = (chef.menus && chef.menus.nextWeek    && chef.menus.nextWeek.week_label)    || computeWeekLabel(1);
 
-  var suburbs = chef.delivery_postcodes.map(pc => {
+  var suburbs = (chef.delivery_postcodes || []).map(pc => {
     var name = (window.CC.POSTCODE_SUBURB_MAP || {})[pc] || pc;
     return name;
   });
@@ -90,7 +90,7 @@ function ChefDetailPage({ chef, setPage }) {
             </div>
             <p style={{ color: "#5A5D66", margin: "8px 0 16px", maxWidth: "600px", lineHeight: 1.6, fontSize: "0.95rem" }}>{chef.bio}</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "12px" }}>
-              {chef.tags.map((t, i) => (
+              {(chef.tags || []).map((t, i) => (
                 <span key={i} className="tag"><i className="ph-fill ph-check-circle" style={{ color: "#3A813D", fontSize: "0.85rem" }}></i>{t}</span>
               ))}
             </div>

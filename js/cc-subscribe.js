@@ -22,28 +22,31 @@ function SubscribePage({ chef, setPage }) {
     ? chef.delivery_postcodes.map(pc => ({ postcode: pc, suburb: postcodeMap[pc] || pc }))
     : [];
 
-  // ── Week options: Sunday cutoff + unavailable weeks ──
+  // ── Week options: always Mon–Fri, always starting from next Monday ──
+  function localIso(d) {
+    // Use local date parts to avoid UTC offset shifting the date
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
   function getMonIso(weeksAhead) {
     var d = new Date();
-    var daysToMon = d.getDay() === 0 ? 1 : (8 - d.getDay()) % 7 || 7;
+    var day = d.getDay();
+    // Days until next Monday (always forward — never stays on current Monday)
+    var daysToMon = day === 1 ? 7 : day === 0 ? 1 : (8 - day) % 7;
     d.setDate(d.getDate() + daysToMon + weeksAhead * 7);
-    d.setHours(0, 0, 0, 0);
-    return d.toISOString().slice(0, 10);
+    return localIso(d);
   }
   function fmtIso(iso) {
-    var mon = new Date(iso + 'T00:00:00');
+    var parts = iso.split('-').map(Number);
+    var mon = new Date(parts[0], parts[1]-1, parts[2]); // parse as local date
     var fri = new Date(mon); fri.setDate(mon.getDate() + 4);
     var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     return mon.getDate() + ' ' + M[mon.getMonth()] + ' – ' + fri.getDate() + ' ' + M[fri.getMonth()];
   }
-  var isSunday = new Date().getDay() === 0;
   var unavailableWeeks = chef?.menus?.unavailable_weeks || [];
-  var rawWeekOpts = isSunday ? [
-    { val: 'this_week', iso: getMonIso(1), label: chef?.menus?.nextWeek?.week_label || fmtIso(getMonIso(1)) },
-    { val: 'next_week', iso: getMonIso(2), label: fmtIso(getMonIso(2)) },
-  ] : [
-    { val: 'this_week', iso: getMonIso(0), label: chef?.menus?.currentWeek?.week_label || fmtIso(getMonIso(0)) },
-    { val: 'next_week', iso: getMonIso(1), label: chef?.menus?.nextWeek?.week_label || fmtIso(getMonIso(1)) },
+  // Always show next two Mon–Fri weeks
+  var rawWeekOpts = [
+    { val: 'this_week', iso: getMonIso(0), label: chef?.menus?.nextWeek?.week_label    || fmtIso(getMonIso(0)) },
+    { val: 'next_week', iso: getMonIso(1), label: fmtIso(getMonIso(1)) },
   ];
   var weekOptions = rawWeekOpts.filter(function(o) { return !unavailableWeeks.includes(o.iso); });
   var defaultWeek = weekOptions.length > 0 ? weekOptions[0].val : 'this_week';

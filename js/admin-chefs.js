@@ -34,6 +34,8 @@ function ApplicationsPage({ applications: initialApps, onUpdate, onClearBadge })
       applicant_email: app.email,
       applicant_name: app.full_name,
     };
+    setApps(prev => prev.filter(a => a.id !== app.id));
+    setDet(null);
     window.ADM.addChef(newChef).then(function(createdChef) {
       if (!createdChef || createdChef.error) {
         alert('Error creating chef: ' + (createdChef?.error || 'Unknown error'));
@@ -44,15 +46,15 @@ function ApplicationsPage({ applications: initialApps, onUpdate, onClearBadge })
       window.ADM.pushNotification('chef_approved', app.full_name + ' approved and added', app.id);
       onUpdate && onUpdate();
     }).catch(function(e) { alert('Error approving application: ' + e.message); });
-    setDet(null);
   };
 
   var handleReject = (app) => {
     if (!confirm(`Reject application from ${app.full_name}?`)) return;
+    setApps(prev => prev.filter(a => a.id !== app.id));
+    setDet(null);
     window.ADM.deleteApplication(app.id, { action: 'rejected', email: app.email, name: app.full_name })
       .then(function() { onUpdate && onUpdate(); })
       .catch(function(e) { alert('Error: ' + e.message); });
-    setDet(null);
   };
 
   var statusBadge = s => ({
@@ -273,6 +275,10 @@ function ChefModal({ chef, onSave, onClose }) {
           </div>
           <div className="form-group"><label style={lbl}>Highlight Tags (comma-separated)</label>
             <input className="form-input" value={(form.highlights||[]).join(', ')} onChange={e=>set('highlights',e.target.value.split(',').map(s=>s.trim()).filter(Boolean))}/></div>
+          <div className="form-group"><label style={lbl}>Dietary / Style Tags (shown on public profile)</label>
+            <input className="form-input" value={(form.tags||[]).join(', ')} onChange={e=>set('tags',e.target.value.split(',').map(s=>s.trim()).filter(Boolean))} placeholder="e.g. Gluten-Free Options, Dairy-Free, Halal, Vegetarian"/>
+            <div style={{ fontSize:'0.72rem', color:'#9CA3AF', marginTop:'3px' }}>Shown as pills under the chef name on the Browse &amp; Detail pages</div>
+          </div>
           <div className="form-group">
             <label style={lbl}>Delivery Postcodes</label>
             <div style={{ display:'flex', gap:'8px', marginBottom:'8px' }}>
