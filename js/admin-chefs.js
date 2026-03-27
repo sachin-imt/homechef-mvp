@@ -308,19 +308,21 @@ function ChefModal({ chef, onSave, onClose }) {
 // Chef Portal Access (credentials) modal
 // ─────────────────────────────────────────────
 function ChefAccessModal({ chef, onClose }) {
-  var [existing,  setExisting]  = useState(null);
-  var [username,  setUsername]  = useState('');
-  var [password,  setPassword]  = useState('');
-  var [active,    setActive]    = useState(true);
-  var [showPwd,   setShowPwd]   = useState(false);
-  var [saved,     setSaved]     = useState(false);
+  var [existing,   setExisting]   = useState(null);
+  var [username,   setUsername]   = useState('');
+  var [password,   setPassword]   = useState('');
+  var [chefEmail,  setChefEmail]  = useState('');
+  var [sendEmail,  setSendEmail]  = useState(true);
+  var [active,     setActive]     = useState(true);
+  var [showPwd,    setShowPwd]    = useState(false);
+  var [saved,      setSaved]      = useState(false);
 
   // Load existing account on mount
   React.useEffect(function() {
     window.ADM.loadChefAccounts().then(function(accounts) {
       var found = accounts.find(function(a) { return a.chef_id === chef.chef_id; }) || null;
       setExisting(found);
-      if (found) { setUsername(found.username || ''); setPassword(found.password || ''); setActive(found.active !== false); }
+      if (found) { setUsername(found.username || ''); setPassword(found.password || ''); setChefEmail(found.chef_email || ''); setActive(found.active !== false); }
     }).catch(function() {});
   }, []);
 
@@ -330,7 +332,9 @@ function ChefAccessModal({ chef, onClose }) {
     window.ADM.upsertChefAccount({
       chef_id: chef.chef_id, chef_name: chef.chef_name,
       username: username.trim(), password: password.trim(),
+      chef_email: chefEmail.trim() || null,
       active: active,
+      send_credentials_email: sendEmail && !!chefEmail.trim(),
     }).then(function(result) {
       if (result && result.error) { alert('Error saving credentials: ' + result.error); return; }
       setSaved(true);
@@ -384,14 +388,17 @@ function ChefAccessModal({ chef, onClose }) {
               </button>
             </div>
           </div>
-          <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 0' }}>
+          <div className="form-group">
+            <label style={lbl}>Chef's Email <span style={{ fontWeight:400, color:'#9CA3AF' }}>(to send credentials)</span></label>
+            <input className="form-input" type="email" value={chefEmail} onChange={e=>setChefEmail(e.target.value)} placeholder="chef@example.com"/>
+          </div>
+          <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'4px 0 10px' }}>
+            <input type="checkbox" id="send-email" checked={sendEmail} onChange={e=>setSendEmail(e.target.checked)} style={{ accentColor:'#111', width:'16px', height:'16px' }}/>
+            <label htmlFor="send-email" style={{ fontSize:'0.875rem', fontWeight:500, cursor:'pointer' }}>Email credentials to chef on save</label>
+          </div>
+          <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'4px 0 10px' }}>
             <input type="checkbox" id="acc-active" checked={active} onChange={e=>setActive(e.target.checked)} style={{ accentColor:'#111', width:'16px', height:'16px' }}/>
             <label htmlFor="acc-active" style={{ fontSize:'0.875rem', fontWeight:500, cursor:'pointer' }}>Account active (chef can log in)</label>
-          </div>
-          <div style={{ background:'#F8F8F8', borderRadius:'8px', padding:'12px', fontSize:'0.8rem', color:'#5A5D66', marginTop:'4px' }}>
-            <strong>Share these credentials with the chef:</strong><br/>
-            Portal URL: <code style={{ background:'#E5E5E5', padding:'1px 6px', borderRadius:'4px' }}>admin.html</code><br/>
-            Select <strong>Chef Portal</strong> tab on the login screen.
           </div>
         </div>
         <div className="modal-footer">

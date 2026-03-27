@@ -1,5 +1,6 @@
 const db = require('./_db');
 const { handle } = require('./_helpers');
+const { sendEmail, chefPortalCredentialsEmail } = require('./_email');
 
 module.exports = handle(async (req, res) => {
   if (req.method === 'GET') {
@@ -13,12 +14,24 @@ module.exports = handle(async (req, res) => {
 
   // POST — upsert a chef account (create or update)
   if (req.method === 'POST') {
+    const { send_credentials_email, ...body } = req.body;
     const { data, error } = await db
       .from('chef_accounts')
-      .upsert(req.body, { onConflict: 'chef_id' })
+      .upsert(body, { onConflict: 'chef_id' })
       .select()
       .single();
     if (error) return res.status(500).json({ error: error.message });
+
+    // Email credentials to chef if requested
+    if (send_credentials_email && body.chef_email) {
+      const { subject, html } = chefPortalCredentialsEmail({
+        chef_name: body.chef_name,
+        username: body.username,
+        password: body.password,
+      });
+      await sendEmail({ to: body.chef_email, subject, html }).catch(e => console.error('[email] chef credentials:', e));
+    }
+
     return res.status(201).json(data);
   }
 

@@ -180,7 +180,33 @@ function chefRejectedEmail({ name }) {
   };
 }
 
-// ── 5. Admin: new subscriber notification ──
+// ── 5. Chef portal credentials ──
+function chefPortalCredentialsEmail({ chef_name, username, password }) {
+  const portalUrl = SITE_URL + '/admin.html';
+  return {
+    subject: `Your Home Meals chef portal is ready`,
+    html: wrapper(`
+      ${h1('Your chef portal is ready 🍳')}
+      ${p(`Hi ${chef_name},`)}
+      ${p(`Your Home Meals chef portal account has been set up. You can now log in to manage your menus and view your subscribers.`)}
+      ${highlight(`
+        <p style="margin:0 0 12px;font-size:0.8rem;font-weight:700;color:#856404;text-transform:uppercase;letter-spacing:0.5px">Your Login Details</p>
+        <table cellpadding="0" cellspacing="0" width="100%">
+          ${row('Portal URL', `<a href="${portalUrl}" style="color:#1A1A1A">${portalUrl}</a>`)}
+          ${row('Username', `<strong>${username}</strong>`)}
+          ${row('Password', `<strong>${password}</strong>`)}
+        </table>
+        <p style="margin:12px 0 0;font-size:0.78rem;color:#856404">Select the <strong>Chef Portal</strong> tab on the login screen.</p>
+      `)}
+      ${p('We recommend changing your password after your first login.')}
+      ${btn('Go to Chef Portal', portalUrl)}
+      ${p('If you have any questions, just reply to this email.')}
+      ${p('Cheers,<br>The Home Meals team')}
+    `),
+  };
+}
+
+// ── 6. Admin: new subscriber notification ──
 function newSubscriberAdminEmail({ name, email, phone, chef_name, suburb, postcode, starting_week, amount, street_address }) {
   const ref = 'HM-' + (name || 'SUB').replace(/\s+/g, '').toUpperCase().slice(0, 8);
   const amtStr = amount ? `$${amount}/week` : 'Not specified';
@@ -214,5 +240,6 @@ module.exports = {
   applicationReceivedEmail,
   chefApprovedEmail,
   chefRejectedEmail,
+  chefPortalCredentialsEmail,
   newSubscriberAdminEmail,
 };
