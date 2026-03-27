@@ -45,7 +45,7 @@ function SubscribePage({ chef, setPage }) {
   var unavailableWeeks = chef?.menus?.unavailable_weeks || [];
   // Always show next two Mon–Fri weeks
   var rawWeekOpts = [
-    { val: 'this_week', iso: getMonIso(0), label: chef?.menus?.nextWeek?.week_label    || fmtIso(getMonIso(0)) },
+    { val: 'this_week', iso: getMonIso(0), label: fmtIso(getMonIso(0)) },
     { val: 'next_week', iso: getMonIso(1), label: fmtIso(getMonIso(1)) },
   ];
   var weekOptions = rawWeekOpts.filter(function(o) { return !unavailableWeeks.includes(o.iso); });
