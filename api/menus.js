@@ -39,11 +39,24 @@ module.exports = handle(async (req, res) => {
       .single();
     if (error) return res.status(500).json({ error: error.message });
 
-    // If approved, apply the stored menu_data to the chef record
+    // If approved, nest menu_data under the correct week key inside chef.menus
+    // so cc-detail.js can read chef.menus.currentWeek / chef.menus.nextWeek
     if (status === 'approved' && data.chef_id && data.menu_data) {
+      const weekKey = data.week || 'currentWeek';
+
+      // Fetch the chef's existing menus so we can merge rather than overwrite
+      const { data: chefRec } = await db
+        .from('chefs')
+        .select('menus')
+        .eq('chef_id', data.chef_id)
+        .single();
+
+      const existingMenus = (chefRec && chefRec.menus) || {};
+      const updatedMenus = { ...existingMenus, [weekKey]: data.menu_data };
+
       await db
         .from('chefs')
-        .update({ menus: data.menu_data, updated_at: new Date().toISOString() })
+        .update({ menus: updatedMenus, updated_at: new Date().toISOString() })
         .eq('chef_id', data.chef_id);
     }
 
