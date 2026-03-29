@@ -127,7 +127,7 @@ function ChefPortalPage({ session }) {
       chef_cuisine: profile.cuisine,
       week_key: weekTab,
       week_label: weekTab === "currentWeek" ? "This Week" : "Next Week",
-      dishes_by_day: menus[weekTab],
+      days: menus[weekTab],
       status: "pending",
     };
     fetch('/api/menus', {
@@ -135,13 +135,16 @@ function ChefPortalPage({ session }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(entry),
     })
-      .then(function(r) { return r.json(); })
+      .then(function(r) {
+        if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || 'Server error'); });
+        return r.json();
+      })
       .then(function() {
         setSubmitMsg("Menu submitted for admin approval!");
         setTimeout(function() { setSubmitMsg(""); }, 4000);
       })
-      .catch(function() {
-        setSubmitMsg("Submission failed — please try again.");
+      .catch(function(e) {
+        setSubmitMsg("Submission failed — " + (e.message || "please try again."));
         setTimeout(function() { setSubmitMsg(""); }, 4000);
       });
   }

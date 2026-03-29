@@ -549,14 +549,15 @@ function ChefsPage({ chefs, setChefs }) {
       // New chef
       window.ADM.addChef(form).then(function(created) {
         setChefs(function(prev) { return [...prev, created]; });
+        setModal(null);
       }).catch(function(e) { alert('Error adding chef: ' + e.message); });
     } else {
       // Update existing
       window.ADM.updateChef(form).then(function(updated) {
         setChefs(function(prev) { return prev.map(function(c) { return c.chef_id === form.chef_id ? updated : c; }); });
+        setModal(null);
       }).catch(function(e) { alert('Error saving chef: ' + e.message); });
     }
-    setModal(null);
   };
 
   var handleDelete = () => {
@@ -680,12 +681,12 @@ function MenuApprovalsPage({ menus: initialMenus, onUpdate, onClearBadge }) {
     var others = menus.filter(m => m.chef_id === submission.chef_id && m.id !== submission.id && m.status === 'approved');
     var allOtherDishes = new Set();
     others.forEach(m => {
-      Object.values(m.dishes_by_day||{}).forEach(dishes => {
+      Object.values(m.days||{}).forEach(dishes => {
         (dishes||[]).forEach(d => { if(d.dish_name) allOtherDishes.add(d.dish_name.toLowerCase().trim()); });
       });
     });
     var repeats = [];
-    Object.values(submission.dishes_by_day||{}).forEach(dishes => {
+    Object.values(submission.days||{}).forEach(dishes => {
       (dishes||[]).forEach(d => {
         if (d.dish_name && allOtherDishes.has(d.dish_name.toLowerCase().trim())) repeats.push(d.dish_name);
       });
@@ -745,7 +746,7 @@ function MenuApprovalsPage({ menus: initialMenus, onUpdate, onClearBadge }) {
               <thead><tr><th>Chef</th><th>Week</th><th>Submitted</th><th>Dishes</th><th>Repeat?</th><th>Actions</th></tr></thead>
               <tbody>
                 {pending.map(sub => {
-                  var totalDishes = Object.values(sub.dishes_by_day||{}).reduce((t,d)=>t+(d||[]).filter(x=>x.dish_name).length,0);
+                  var totalDishes = Object.values(sub.days||{}).reduce((t,d)=>t+(d||[]).filter(x=>x.dish_name).length,0);
                   var repeats = findRepeats(sub);
                   return (
                     <tr key={sub.id}>
@@ -810,7 +811,7 @@ function MenuApprovalsPage({ menus: initialMenus, onUpdate, onClearBadge }) {
             <div className="modal-body">
               {(() => {
                 var repeats = new Set(findRepeats(detail).map(r=>r.toLowerCase().trim()));
-                return Object.entries(detail.dishes_by_day||{}).map(([day, dishes]) => {
+                return Object.entries(detail.days||{}).map(([day, dishes]) => {
                   var named = (dishes||[]).filter(d=>d.dish_name);
                   if (!named.length) return null;
                   return (
