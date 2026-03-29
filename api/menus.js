@@ -12,12 +12,13 @@ module.exports = handle(async (req, res) => {
   }
 
   if (req.method === 'POST') {
-    const { chef_id, chef_name, week_key, week_label, dishes_by_day, days: daysField } = req.body;
+    const { chef_id, chef_name, week, menu_data } = req.body;
     const { data, error } = await db
       .from('pending_menus')
       .insert({
-        chef_id, chef_name, week_key, week_label,
-        days: daysField || dishes_by_day,
+        chef_id, chef_name,
+        week: week || '',
+        menu_data: menu_data || {},
         status: 'pending',
         submitted_at: new Date().toISOString(),
       })
@@ -29,7 +30,7 @@ module.exports = handle(async (req, res) => {
 
   // PUT — update status (approve/reject), optionally apply approved menu to chef
   if (req.method === 'PUT') {
-    const { id, status, chef_id, menu_data } = req.body;
+    const { id, status } = req.body;
     const { data, error } = await db
       .from('pending_menus')
       .update({ status, reviewed_at: new Date().toISOString() })
@@ -38,12 +39,12 @@ module.exports = handle(async (req, res) => {
       .single();
     if (error) return res.status(500).json({ error: error.message });
 
-    // If approved, apply the new menus to the chef record
-    if (status === 'approved' && chef_id && menu_data) {
+    // If approved, apply the stored menu_data to the chef record
+    if (status === 'approved' && data.chef_id && data.menu_data) {
       await db
         .from('chefs')
-        .update({ menus: menu_data, updated_at: new Date().toISOString() })
-        .eq('chef_id', chef_id);
+        .update({ menus: data.menu_data, updated_at: new Date().toISOString() })
+        .eq('chef_id', data.chef_id);
     }
 
     return res.json(data);

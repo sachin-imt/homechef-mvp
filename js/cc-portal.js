@@ -124,11 +124,8 @@ function ChefPortalPage({ session }) {
     var entry = {
       chef_id: session?.chef_id || null,
       chef_name: profile.name || session?.chef_name || "Chef",
-      chef_cuisine: profile.cuisine,
-      week_key: weekTab,
-      week_label: weekTab === "currentWeek" ? "This Week" : "Next Week",
-      days: menus[weekTab],
-      status: "pending",
+      week: weekTab,
+      menu_data: menus[weekTab],
     };
     fetch('/api/menus', {
       method: 'POST',

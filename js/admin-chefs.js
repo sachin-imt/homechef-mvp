@@ -681,12 +681,12 @@ function MenuApprovalsPage({ menus: initialMenus, onUpdate, onClearBadge }) {
     var others = menus.filter(m => m.chef_id === submission.chef_id && m.id !== submission.id && m.status === 'approved');
     var allOtherDishes = new Set();
     others.forEach(m => {
-      Object.values(m.days||{}).forEach(dishes => {
+      Object.values(m.menu_data||{}).forEach(dishes => {
         (dishes||[]).forEach(d => { if(d.dish_name) allOtherDishes.add(d.dish_name.toLowerCase().trim()); });
       });
     });
     var repeats = [];
-    Object.values(submission.days||{}).forEach(dishes => {
+    Object.values(submission.menu_data||{}).forEach(dishes => {
       (dishes||[]).forEach(d => {
         if (d.dish_name && allOtherDishes.has(d.dish_name.toLowerCase().trim())) repeats.push(d.dish_name);
       });
@@ -746,12 +746,12 @@ function MenuApprovalsPage({ menus: initialMenus, onUpdate, onClearBadge }) {
               <thead><tr><th>Chef</th><th>Week</th><th>Submitted</th><th>Dishes</th><th>Repeat?</th><th>Actions</th></tr></thead>
               <tbody>
                 {pending.map(sub => {
-                  var totalDishes = Object.values(sub.days||{}).reduce((t,d)=>t+(d||[]).filter(x=>x.dish_name).length,0);
+                  var totalDishes = Object.values(sub.menu_data||{}).reduce((t,d)=>t+(d||[]).filter(x=>x.dish_name).length,0);
                   var repeats = findRepeats(sub);
                   return (
                     <tr key={sub.id}>
                       <td><div style={{ fontWeight:600 }}>{sub.chef_name}</div></td>
-                      <td style={{ fontSize:'0.82rem' }}>{sub.week_key==='currentWeek'?'This Week':'Next Week'}<br/><span style={{ color:'#9CA3AF', fontSize:'0.75rem' }}>{sub.week_label||''}</span></td>
+                      <td style={{ fontSize:'0.82rem' }}>{sub.week==='currentWeek'?'This Week':'Next Week'}</td>
                       <td style={{ color:'#9CA3AF', fontSize:'0.82rem' }}>{sub.submitted_at ? new Date(sub.submitted_at).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—'}</td>
                       <td><span className="badge badge-blue">{totalDishes} dishes</span></td>
                       <td>
@@ -785,7 +785,7 @@ function MenuApprovalsPage({ menus: initialMenus, onUpdate, onClearBadge }) {
                 {reviewed.map(sub => (
                   <tr key={sub.id}>
                     <td style={{ fontWeight:600 }}>{sub.chef_name}</td>
-                    <td style={{ fontSize:'0.82rem' }}>{sub.week_key==='currentWeek'?'This Week':'Next Week'}</td>
+                    <td style={{ fontSize:'0.82rem' }}>{sub.week==='currentWeek'?'This Week':'Next Week'}</td>
                     <td>{statusBadge(sub.status)}</td>
                     <td style={{ color:'#9CA3AF', fontSize:'0.82rem' }}>{sub.reviewed_at||'—'}</td>
                     <td><button className="btn btn-outline btn-sm" onClick={()=>setDetail(sub)}>View</button></td>
@@ -803,15 +803,15 @@ function MenuApprovalsPage({ menus: initialMenus, onUpdate, onClearBadge }) {
           <div className="modal" style={{ maxWidth:'600px' }}>
             <div className="modal-header">
               <div>
-                <h2 style={{ fontSize:'1rem', fontWeight:800, margin:0 }}>{detail.chef_name} — {detail.week_key==='currentWeek'?'This Week':'Next Week'}</h2>
-                <p style={{ fontSize:'0.78rem', color:'#9CA3AF', margin:0 }}>Submitted {detail.submitted_at ? new Date(detail.submitted_at).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—'} · {detail.chef_cuisine}</p>
+                <h2 style={{ fontSize:'1rem', fontWeight:800, margin:0 }}>{detail.chef_name} — {detail.week==='currentWeek'?'This Week':'Next Week'}</h2>
+                <p style={{ fontSize:'0.78rem', color:'#9CA3AF', margin:0 }}>Submitted {detail.submitted_at ? new Date(detail.submitted_at).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—'}</p>
               </div>
               <button className="btn-icon" onClick={()=>setDetail(null)}><i className="ph-bold ph-x"/></button>
             </div>
             <div className="modal-body">
               {(() => {
                 var repeats = new Set(findRepeats(detail).map(r=>r.toLowerCase().trim()));
-                return Object.entries(detail.days||{}).map(([day, dishes]) => {
+                return Object.entries(detail.menu_data||{}).map(([day, dishes]) => {
                   var named = (dishes||[]).filter(d=>d.dish_name);
                   if (!named.length) return null;
                   return (
