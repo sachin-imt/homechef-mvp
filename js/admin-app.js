@@ -36,6 +36,7 @@ function LoginGate({ onAdminAuth, onChefAuth }) {
   };
 
   var handleChefLogin = () => {
+    if (!username.trim() || !chefPwd) { setErr('Please enter your username and password.'); return; }
     setBusy(true); setErr('');
     fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'chef', username: username.trim(), chef_password: chefPwd }) })
       .then(function(r) { return r.json(); })
@@ -93,7 +94,6 @@ function LoginGate({ onAdminAuth, onChefAuth }) {
             <button className="btn btn-primary" style={{ width:'100%' }} onClick={handleAdminLogin} disabled={busy||!pwd}>
               {busy ? <><i className="ph-bold ph-spinner spin"/> Signing in…</> : 'Sign In →'}
             </button>
-            <p style={{ fontSize:'0.72rem', color:'#9CA3AF', textAlign:'center', marginTop:'12px' }}>Default: admin123</p>
           </>
         ) : (
           <>
@@ -122,7 +122,7 @@ function LoginGate({ onAdminAuth, onChefAuth }) {
               </div>
             </div>
             {err && <p style={{ color:'#D0342C', fontSize:'0.8rem', margin:'-8px 0 12px' }}>{err}</p>}
-            <button className="btn btn-primary" style={{ width:'100%' }} onClick={handleChefLogin} disabled={busy||!username||!chefPwd}>
+            <button className="btn btn-primary" style={{ width:'100%' }} onClick={handleChefLogin} disabled={busy}>
               {busy ? <><i className="ph-bold ph-spinner spin"/> Signing in…</> : 'Sign In →'}
             </button>
           </>
@@ -310,7 +310,7 @@ function AdminApp() {
   // Badges: count items added since admin last visited that section
   var newSubsCount  = subscribers.filter(function(s)  { return new Date(s.created_at).getTime()  > subsBadgeSeen;  }).length;
   var newAppsCount  = applications.filter(function(a)  { return new Date(a.created_at || a.submitted || 0).getTime() > appsBadgeSeen;  }).length;
-  var newMenusCount = pendingMenus.filter(function(m)  { return m.status === 'pending' && new Date(m.created_at || 0).getTime() > menusBadgeSeen; }).length;
+  var newMenusCount = pendingMenus.filter(function(m)  { return m.status === 'pending' && new Date(m.submitted_at || m.created_at || 0).getTime() > menusBadgeSeen; }).length;
   var badges = {
     applications:   newAppsCount,
     newSubscribers: newSubsCount,

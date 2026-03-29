@@ -49,7 +49,7 @@ function ApplicationsPage({ applications: initialApps, onUpdate, onClearBadge })
   };
 
   var handleReject = (app) => {
-    if (!confirm(`Reject application from ${app.full_name}?`)) return;
+    if (window.confirm(`Reject application from ${app.full_name}?`) === false) return;
     setApps(prev => prev.filter(a => a.id !== app.id));
     setDet(null);
     window.ADM.deleteApplication(app.id, { action: 'rejected', email: app.email, name: app.full_name })
@@ -107,7 +107,7 @@ function ApplicationsPage({ applications: initialApps, onUpdate, onClearBadge })
                     <td>{a.cuisine_type}</td>
                     <td>{a.suburb}</td>
                     <td>{a.weekly_capacity} meals/wk</td>
-                    <td style={{ color:'#9CA3AF', fontSize:'0.82rem' }}>{a.submitted}</td>
+                    <td style={{ color:'#9CA3AF', fontSize:'0.82rem' }}>{a.submitted_at ? new Date(a.submitted_at).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—'}</td>
                     <td>
                       <div style={{ display:'flex', gap:'6px' }}>
                         <button className="btn btn-outline btn-sm" onClick={()=>{ setDet(a); setNote(''); }}>
@@ -140,7 +140,7 @@ function ApplicationsPage({ applications: initialApps, onUpdate, onClearBadge })
                   <tr key={a.id}>
                     <td><div style={{ fontWeight:600 }}>{a.full_name}</div><div style={{ fontSize:'0.78rem', color:'#9CA3AF' }}>{a.email}</div></td>
                     <td>{a.cuisine_type}</td>
-                    <td style={{ color:'#9CA3AF', fontSize:'0.82rem' }}>{a.submitted}</td>
+                    <td style={{ color:'#9CA3AF', fontSize:'0.82rem' }}>{a.submitted_at ? new Date(a.submitted_at).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—'}</td>
                     <td>{statusBadge(a.status)}</td>
                     <td style={{ color:'#9CA3AF', fontSize:'0.82rem' }}>{a.reviewed_at||'—'}</td>
                   </tr>
@@ -158,7 +158,7 @@ function ApplicationsPage({ applications: initialApps, onUpdate, onClearBadge })
             <div className="modal-header">
               <div>
                 <h2 style={{ fontSize:'1.05rem', fontWeight:800, margin:0 }}>{detail.full_name}</h2>
-                <p style={{ fontSize:'0.78rem', color:'#9CA3AF', margin:0 }}>{detail.cuisine_type} · Applied {detail.submitted}</p>
+                <p style={{ fontSize:'0.78rem', color:'#9CA3AF', margin:0 }}>{detail.cuisine_type} · Applied {detail.submitted_at ? new Date(detail.submitted_at).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—'}</p>
               </div>
               <button className="btn-icon" onClick={()=>setDet(null)}><i className="ph-bold ph-x"/></button>
             </div>
@@ -226,6 +226,9 @@ function ChefModal({ chef, onSave, onClose }) {
     if (!form.chef_name?.trim()) return alert('Chef name required');
     if (!form.cuisine_type) return alert('Select a cuisine');
     if (!form.price_per_week || form.price_per_week < 1) return alert('Price required');
+    if ((form.status || 'Active').toLowerCase() === 'active' && !(form.delivery_postcodes || []).length) {
+      return alert('Add at least one delivery postcode before setting this chef to Active.');
+    }
     setSaving(true);
     setTimeout(() => { setSaving(false); onSave(form); }, 600);
   };
@@ -748,7 +751,7 @@ function MenuApprovalsPage({ menus: initialMenus, onUpdate, onClearBadge }) {
                     <tr key={sub.id}>
                       <td><div style={{ fontWeight:600 }}>{sub.chef_name}</div></td>
                       <td style={{ fontSize:'0.82rem' }}>{sub.week_key==='currentWeek'?'This Week':'Next Week'}<br/><span style={{ color:'#9CA3AF', fontSize:'0.75rem' }}>{sub.week_label||''}</span></td>
-                      <td style={{ color:'#9CA3AF', fontSize:'0.82rem' }}>{sub.submitted}</td>
+                      <td style={{ color:'#9CA3AF', fontSize:'0.82rem' }}>{sub.submitted_at ? new Date(sub.submitted_at).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—'}</td>
                       <td><span className="badge badge-blue">{totalDishes} dishes</span></td>
                       <td>
                         {repeats.length > 0
@@ -800,7 +803,7 @@ function MenuApprovalsPage({ menus: initialMenus, onUpdate, onClearBadge }) {
             <div className="modal-header">
               <div>
                 <h2 style={{ fontSize:'1rem', fontWeight:800, margin:0 }}>{detail.chef_name} — {detail.week_key==='currentWeek'?'This Week':'Next Week'}</h2>
-                <p style={{ fontSize:'0.78rem', color:'#9CA3AF', margin:0 }}>Submitted {detail.submitted} · {detail.chef_cuisine}</p>
+                <p style={{ fontSize:'0.78rem', color:'#9CA3AF', margin:0 }}>Submitted {detail.submitted_at ? new Date(detail.submitted_at).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—'} · {detail.chef_cuisine}</p>
               </div>
               <button className="btn-icon" onClick={()=>setDetail(null)}><i className="ph-bold ph-x"/></button>
             </div>

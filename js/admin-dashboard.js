@@ -95,7 +95,7 @@ function EmptyState({ icon, text }) {
 }
 
 function DashboardPage({ chefs, subscribers }) {
-  var activeChefs = chefs.filter(c => (c.status || 'Active') === 'Active').length;
+  var activeChefs = chefs.filter(c => (c.status || 'Active').toLowerCase() === 'active').length;
   var totalSubs   = subscribers.length;
 
   // Payments: each subscriber has a payments[] array with { week, confirmed }
@@ -182,10 +182,17 @@ function DashboardPage({ chefs, subscribers }) {
         {/* Cuisine distribution */}
         <div className="card">
           <h3 style={{ fontSize:'0.95rem', fontWeight:700, margin:'0 0 16px' }}>Subscribers by Cuisine</h3>
-          {totalSubs > 0 ? chefs.map(c => {
-            var count = subscribers.filter(s => s.chef_id === c.chef_id).length;
-            return <RatioBar key={c.chef_id} label={c.cuisine_type} value={count} total={totalSubs} color="#FACA50"/>;
-          }) : (
+          {totalSubs > 0 ? (() => {
+            var byCuisine = {};
+            chefs.forEach(c => {
+              var key = c.cuisine_type || 'Other';
+              var count = subscribers.filter(s => s.chef_id === c.chef_id).length;
+              byCuisine[key] = (byCuisine[key] || 0) + count;
+            });
+            return Object.entries(byCuisine).map(([cuisine, count]) => (
+              <RatioBar key={cuisine} label={cuisine} value={count} total={totalSubs} color="#FACA50"/>
+            ));
+          })() : (
             <EmptyState icon="ph-fill ph-bowl-food" text="No subscribers yet"/>
           )}
         </div>

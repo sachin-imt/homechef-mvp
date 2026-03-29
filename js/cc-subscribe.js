@@ -279,7 +279,7 @@ function SubscribePage({ chef, setPage }) {
         {/* Terms */}
         <div className="form-group" style={{ marginBottom: "24px" }}>
           <div className="checkbox-row">
-            <input type="checkbox" id="terms" checked={form.terms_accepted} onChange={e => setForm(f => ({ ...f, terms_accepted: e.target.checked }))} />
+            <input type="checkbox" id="terms" checked={form.terms_accepted} onChange={e => { setForm(f => ({ ...f, terms_accepted: e.target.checked })); if (e.target.checked) setErrors(err => { var { terms_accepted, ...rest } = err; return rest; }); }} />
             <label htmlFor="terms" style={{ cursor: "pointer", fontSize: "0.9rem", fontWeight: 600, color: "#111" }}>
               I agree to weekly payments via Bank Transfer until I cancel. No lock-in — cancel anytime.
             </label>

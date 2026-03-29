@@ -116,8 +116,7 @@ function ChefPortalPage({ session }) {
         setTimeout(function() { setSaved(false); }, 2000);
       })
       .catch(function() {
-        setSaved(true);
-        setTimeout(function() { setSaved(false); }, 2000);
+        alert('Failed to save profile. Please try again.');
       });
   }
 

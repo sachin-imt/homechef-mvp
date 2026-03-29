@@ -187,7 +187,7 @@ var mockChefs = [
           { dish_name: "Tandoori Roti", dish_type: "Bread", photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80" },
         ],
         wednesday: [
-          { dish_name: "Vegetable Biryani", dish_type: "Main", photo_url: "https://images.unsplash.com/photo-1589302168068-964664d93cb0?w=400&q=80" },
+          { dish_name: "Vegetable Biryani", dish_type: "Main", photo_url: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80" },
           { dish_name: "Baingan Bharta", dish_type: "Side", photo_url: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&q=80" },
           { dish_name: "Mint Raita", dish_type: "Accompaniment", photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80" },
           { dish_name: "Roasted Papad", dish_type: "Snack", photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80" },
@@ -226,13 +226,13 @@ var mockChefs = [
           { dish_name: "Onion Kulcha", dish_type: "Bread", photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80" },
         ],
         thursday: [
-          { dish_name: "Saag Chicken", dish_type: "Main", photo_url: "https://images.unsplash.com/photo-1589302168068-964664d93cb0?w=400&q=80" },
+          { dish_name: "Saag Chicken", dish_type: "Main", photo_url: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&q=80" },
           { dish_name: "Tadka Dal", dish_type: "Side", photo_url: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&q=80" },
           { dish_name: "Steamed Rice", dish_type: "Side", photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80" },
           { dish_name: "Phulka Roti", dish_type: "Bread", photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80" },
         ],
         friday: [
-          { dish_name: "Hyderabadi Biryani", dish_type: "Main", photo_url: "https://images.unsplash.com/photo-1589302168068-964664d93cb0?w=400&q=80" },
+          { dish_name: "Hyderabadi Biryani", dish_type: "Main", photo_url: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&q=80" },
           { dish_name: "Shorba", dish_type: "Side", photo_url: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&q=80" },
           { dish_name: "Mirchi Ka Salan", dish_type: "Side", photo_url: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&q=80" },
           { dish_name: "Shahi Tukda", dish_type: "Dessert", photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80" },

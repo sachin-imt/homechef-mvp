@@ -196,7 +196,7 @@ function SubscriberDetail({ sub, chefs, onUpdate, onClose }) {
               ['Phone',   sub.phone],
               ['Suburb',  `${sub.suburb} ${sub.postcode}`],
               ['Dietary', sub.dietary||'None'],
-              ['Joined',  sub.created],
+              ['Joined',  sub.created_at ? new Date(sub.created_at).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—'],
               ['Chef',    sub.chef_name],
               ['Pay Ref', payRef(sub.name)],
             ].map(([l,v])=>(
@@ -570,7 +570,7 @@ function SubscribersPage({ chefs, subscribers: initialSubs, onUpdate: notifyPare
             ...subs.map(s => {
               var conf = s.payments.filter(p=>p.confirmed).length;
               var pend = s.payments.filter(p=>!p.confirmed).length;
-              return [s.id,s.name,s.email,s.phone,s.chef_name,s.suburb,s.postcode,s.dietary||'',s.created,s.starting_week,conf,pend].join(',');
+              return [s.id,s.name,s.email,s.phone,s.chef_name,s.suburb,s.postcode,s.dietary||'',s.created_at||'',s.starting_week,conf,pend].join(',');
             })
           ].join('\n');
           var a = document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='subscribers.csv'; a.click();
