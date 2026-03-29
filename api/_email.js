@@ -108,6 +108,7 @@ function subscriberConfirmationEmail({ name, chef_name, starting_week, amount })
           ${row('Reference', ref)}
           ${row('Amount', amtStr)}
         </table>
+        <p style="margin:12px 0 0;font-size:0.82rem;color:#856404"><strong>⚠️ Payment deadline:</strong> Please ensure your transfer is received <strong>at least 1 day before your start week</strong> (${starting_week}) so your chef can prepare your meals on time.</p>
       `)}
       ${p('Your chef will contact you <strong>24 hours before your first delivery</strong> to confirm the drop-off time and address.')}
       ${p('Have any questions? Just reply to this email — we\'re here to help.')}
@@ -206,7 +207,78 @@ function chefPortalCredentialsEmail({ chef_name, username, password }) {
   };
 }
 
-// ── 6. Admin: new subscriber notification ──
+// ── 6. Chef: new subscriber pending payment ──
+function chefNewSubscriberEmail({ chef_name, subscriber_name, suburb, starting_week, dietary }) {
+  return {
+    subject: `New subscriber: ${subscriber_name} is joining your meal plan`,
+    html: wrapper(`
+      ${h1('You have a new subscriber! 🎉')}
+      ${p(`Hi ${chef_name},`)}
+      ${p(`Great news — <strong>${subscriber_name}</strong> has signed up for your meal plan. Their subscription is pending payment confirmation, so no action is needed from you just yet.`)}
+      ${highlight(`
+        <p style="margin:0 0 12px;font-size:0.8rem;font-weight:700;color:#856404;text-transform:uppercase;letter-spacing:0.5px">Subscriber Details</p>
+        <table cellpadding="0" cellspacing="0" width="100%">
+          ${row('Name', subscriber_name)}
+          ${row('Suburb', suburb || '—')}
+          ${row('Starting Week', starting_week || '—')}
+          ${row('Dietary Notes', dietary || 'None')}
+        </table>
+        <p style="margin:12px 0 0;font-size:0.82rem;color:#856404">⏳ <strong>Status: Pending payment.</strong> You'll receive another email once their payment has been confirmed and you're cleared to begin delivery.</p>
+      `)}
+      ${p('Cheers,<br>The Home Meals team')}
+    `),
+  };
+}
+
+// ── 7. Subscriber: payment received confirmation ──
+function paymentReceivedEmail({ name, chef_name, week, amount }) {
+  const amtStr = amount ? `$${amount}` : 'your weekly amount';
+  return {
+    subject: `Payment confirmed — your meals are on the way! ✅`,
+    html: wrapper(`
+      ${h1('Payment confirmed ✅')}
+      ${p(`Hi ${name},`)}
+      ${p(`We've received your payment for the week of <strong>${week}</strong>. Your meal plan with <strong>${chef_name}</strong> is confirmed and your chef is preparing your meals.`)}
+      ${highlight(`
+        <p style="margin:0 0 12px;font-size:0.8rem;font-weight:700;color:#856404;text-transform:uppercase;letter-spacing:0.5px">Payment Summary</p>
+        <table cellpadding="0" cellspacing="0" width="100%">
+          ${row('Week', week)}
+          ${row('Chef', chef_name)}
+          ${row('Amount', amtStr)}
+          ${row('Status', '<span style="color:#3A813D;font-weight:700">✓ Confirmed</span>')}
+        </table>
+      `)}
+      ${p('Your chef will be in touch <strong>24 hours before delivery</strong> to confirm the drop-off time.')}
+      ${p('Have any questions? Just reply to this email.')}
+      ${p('Cheers,<br>The Home Meals team')}
+    `),
+  };
+}
+
+// ── 8. Chef: payment confirmed — begin delivery ──
+function chefPaymentConfirmedEmail({ chef_name, subscriber_name, suburb, street_address, starting_week, dietary, week }) {
+  return {
+    subject: `Payment confirmed — begin delivery for ${subscriber_name}`,
+    html: wrapper(`
+      ${h1('Payment received — you\'re good to go! 🚀')}
+      ${p(`Hi ${chef_name},`)}
+      ${p(`<strong>${subscriber_name}</strong>'s payment has been confirmed. You're cleared to begin their meal delivery.`)}
+      ${highlight(`
+        <p style="margin:0 0 12px;font-size:0.8rem;font-weight:700;color:#856404;text-transform:uppercase;letter-spacing:0.5px">Delivery Details</p>
+        <table cellpadding="0" cellspacing="0" width="100%">
+          ${row('Subscriber', subscriber_name)}
+          ${row('Delivery Address', street_address ? `${street_address}, ${suburb || ''}` : suburb || '—')}
+          ${row('Week', week || starting_week || '—')}
+          ${row('Dietary Notes', dietary || 'None')}
+        </table>
+        <p style="margin:12px 0 0;font-size:0.82rem;color:#856404">📞 Please contact ${subscriber_name} <strong>24 hours before your first delivery</strong> to confirm the drop-off time.</p>
+      `)}
+      ${p('Cheers,<br>The Home Meals team')}
+    `),
+  };
+}
+
+// ── 9. Admin: new subscriber notification ──
 function newSubscriberAdminEmail({ name, email, phone, chef_name, suburb, postcode, starting_week, amount, street_address }) {
   const ref = 'HM-' + (name || 'SUB').replace(/\s+/g, '').toUpperCase().slice(0, 8);
   const amtStr = amount ? `$${amount}/week` : 'Not specified';
@@ -241,5 +313,8 @@ module.exports = {
   chefApprovedEmail,
   chefRejectedEmail,
   chefPortalCredentialsEmail,
+  chefNewSubscriberEmail,
+  paymentReceivedEmail,
+  chefPaymentConfirmedEmail,
   newSubscriberAdminEmail,
 };

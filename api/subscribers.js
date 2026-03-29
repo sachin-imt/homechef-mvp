@@ -1,6 +1,6 @@
 const db = require('./_db');
 const { handle } = require('./_helpers');
-const { sendEmail, subscriberConfirmationEmail, newSubscriberAdminEmail } = require('./_email');
+const { sendEmail, subscriberConfirmationEmail, chefNewSubscriberEmail, newSubscriberAdminEmail } = require('./_email');
 
 module.exports = handle(async (req, res) => {
   if (req.method === 'GET') {
@@ -54,6 +54,21 @@ module.exports = handle(async (req, res) => {
         amount: req.body.amount,
       });
       await sendEmail({ to: data.email, subject, html }).catch(e => console.error('[email] subscriber confirm:', e));
+    }
+
+    // Send chef heads-up (new subscriber, pending payment)
+    if (data.chef_id) {
+      const { data: chefAccount } = await db.from('chef_accounts').select('chef_email').eq('chef_id', data.chef_id).single();
+      if (chefAccount?.chef_email) {
+        const { subject: cs, html: ch } = chefNewSubscriberEmail({
+          chef_name: data.chef_name,
+          subscriber_name: data.name,
+          suburb: data.suburb,
+          starting_week: data.starting_week,
+          dietary: req.body.dietary,
+        });
+        await sendEmail({ to: chefAccount.chef_email, subject: cs, html: ch }).catch(e => console.error('[email] chef new sub:', e));
+      }
     }
 
     // Send admin notification
