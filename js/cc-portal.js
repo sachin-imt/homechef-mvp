@@ -98,13 +98,28 @@ function ChefPortalPage({ session }) {
     if (file.size > 2 * 1024 * 1024) { alert('Image must be under 2 MB.'); return; }
     var key = day + '-' + idx;
     setUploading(function(u) { return { ...u, [key]: true }; });
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      var base64 = e.target.result.split(',')[1];
+
+    // Resize + compress via canvas before uploading
+    var img = new Image();
+    var objectUrl = URL.createObjectURL(file);
+    img.onload = function() {
+      URL.revokeObjectURL(objectUrl);
+      // Normalise to max 600 px on the longest side
+      var MAX = 600;
+      var w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
+        else        { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      // Export as JPEG @ 85 % quality — keeps file tiny and consistent
+      var base64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
       fetch('/api/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: file.name, contentType: file.type, base64: base64 }),
+        body: JSON.stringify({ filename: file.name.replace(/\.[^.]+$/, '.jpg'), contentType: 'image/jpeg', base64: base64 }),
       })
         .then(function(r) { return r.json(); })
         .then(function(d) {
@@ -114,7 +129,12 @@ function ChefPortalPage({ session }) {
         .catch(function() { alert('Upload failed. Please try again.'); })
         .finally(function() { setUploading(function(u) { var n = Object.assign({}, u); delete n[key]; return n; }); });
     };
-    reader.readAsDataURL(file);
+    img.onerror = function() {
+      URL.revokeObjectURL(objectUrl);
+      alert('Could not read image. Please try a different file.');
+      setUploading(function(u) { var n = Object.assign({}, u); delete n[key]; return n; });
+    };
+    img.src = objectUrl;
   }
 
   function handleSave() {
