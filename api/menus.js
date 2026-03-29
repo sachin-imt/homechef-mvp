@@ -12,11 +12,11 @@ module.exports = handle(async (req, res) => {
   }
 
   if (req.method === 'POST') {
-    const { chef_id, chef_name, chef_cuisine, week_key, week_label, dishes_by_day, days: daysField } = req.body;
+    const { chef_id, chef_name, week_key, week_label, dishes_by_day, days: daysField } = req.body;
     const { data, error } = await db
       .from('pending_menus')
       .insert({
-        chef_id, chef_name, chef_cuisine, week_key, week_label,
+        chef_id, chef_name, week_key, week_label,
         days: daysField || dishes_by_day,
         status: 'pending',
         submitted_at: new Date().toISOString(),
