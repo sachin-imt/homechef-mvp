@@ -11,7 +11,10 @@ function DishItem({ dish }) {
         src={dish.photo_url || dish.dish_image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&q=80"}
         alt={dish.dish_name}
         style={{ width: "52px", height: "52px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }}
-        onError={e => { e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&q=80"; }}
+        onError={e => {
+          var fallback = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&q=80";
+          if (e.target.src !== fallback) { e.target.src = fallback; } else { e.target.style.display = "none"; }
+        }}
       />
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{ margin: 0, fontWeight: 600, fontSize: "0.9rem", color: "#111", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{dish.dish_name}</p>

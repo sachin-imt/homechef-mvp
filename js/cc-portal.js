@@ -90,7 +90,32 @@ function ChefPortalPage({ session }) {
     });
   }
 
-  var [submitMsg, setSubmitMsg] = useState("");
+  var [submitMsg,  setSubmitMsg]  = useState("");
+  var [uploading,  setUploading]  = useState({});
+
+  function uploadImage(day, idx, file) {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { alert('Image must be under 2 MB.'); return; }
+    var key = day + '-' + idx;
+    setUploading(function(u) { return { ...u, [key]: true }; });
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var base64 = e.target.result.split(',')[1];
+      fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: file.name, contentType: file.type, base64: base64 }),
+      })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (d.url) updateDish(day, idx, 'dish_image', d.url);
+          else alert('Upload failed: ' + (d.error || 'unknown error'));
+        })
+        .catch(function() { alert('Upload failed. Please try again.'); })
+        .finally(function() { setUploading(function(u) { var n = Object.assign({}, u); delete n[key]; return n; }); });
+    };
+    reader.readAsDataURL(file);
+  }
 
   function handleSave() {
     if (!session || !session.chef_id) return;
@@ -342,15 +367,34 @@ function ChefPortalPage({ session }) {
                               style={{ background:"none", border:"1px solid #EBEBEB", borderRadius:"8px", cursor:"pointer", padding:"8px 10px", color:"#C0C0C0", fontSize:"1rem", lineHeight:1, flexShrink:0 }}
                               title="Remove dish">×</button>
                           </div>
-                          {/* Photo URL row */}
-                          <div style={{ background:"#F8F8F8", borderRadius:"8px", padding:"10px 12px", display:"flex", alignItems:"center", gap:"8px" }}>
-                            <i className="ph-bold ph-image" style={{ color:"#C0C0C0", fontSize:"0.9rem", flexShrink:0 }}/>
-                            <input className="form-input" type="url" placeholder="Paste dish photo URL…"
+                          {/* Photo upload row */}
+                          <div style={{ background:"#F8F8F8", borderRadius:"8px", padding:"10px 12px", display:"flex", alignItems:"center", gap:"8px", flexWrap:"wrap" }}>
+                            <input type="file" accept="image/jpeg,image/png,image/webp"
+                              id={'img-' + day + '-' + idx} style={{ display:"none" }}
+                              onChange={e => { uploadImage(day, idx, e.target.files[0]); e.target.value = ""; }}/>
+                            {uploading[day + '-' + idx] ? (
+                              <span style={{ fontSize:"0.82rem", color:"#9CA3AF", display:"flex", alignItems:"center", gap:"6px" }}>
+                                <i className="ph-bold ph-spinner spin"/> Uploading…
+                              </span>
+                            ) : (
+                              <label htmlFor={'img-' + day + '-' + idx}
+                                style={{ display:"flex", alignItems:"center", gap:"5px", cursor:"pointer", fontSize:"0.82rem", fontWeight:600, color:"#111", background:"white", border:"1px solid #D0D0D0", borderRadius:"6px", padding:"4px 10px", flexShrink:0 }}>
+                                <i className="ph-bold ph-upload-simple" style={{ fontSize:"0.85rem" }}/>
+                                {dish.dish_image ? "Replace" : "Upload Photo"}
+                              </label>
+                            )}
+                            <span style={{ color:"#C0C0C0", fontSize:"0.75rem", flexShrink:0 }}>or paste URL</span>
+                            <input className="form-input" type="url" placeholder="https://…"
                               value={dish.dish_image||""} onChange={e => updateDish(day, idx, "dish_image", e.target.value)}
-                              style={{ flex:1, fontSize:"0.82rem", background:"transparent", border:"none", padding:"0", boxShadow:"none" }}/>
+                              style={{ flex:1, minWidth:"120px", fontSize:"0.82rem", background:"transparent", border:"none", padding:"0", boxShadow:"none" }}/>
+                            {dish.dish_image && (
+                              <button type="button" title="Clear image"
+                                onClick={() => updateDish(day, idx, "dish_image", "")}
+                                style={{ background:"none", border:"none", cursor:"pointer", color:"#C0C0C0", fontSize:"1rem", lineHeight:1, padding:"0 2px", flexShrink:0 }}>×</button>
+                            )}
                           </div>
                           <div style={{ fontSize:"0.7rem", color:"#C0C0C0", marginTop:"6px", paddingLeft:"2px" }}>
-                            Required: <strong>800 × 500 px</strong> · JPG/PNG · max <strong>1.5 MB</strong> · landscape
+                            JPG/PNG/WebP · max <strong>2 MB</strong>
                           </div>
                         </div>
                       ))}
