@@ -280,7 +280,7 @@ function SettingsPage() {
         <div className="card">
           <h3 style={{ fontSize:'1rem', fontWeight:700, marginBottom:'16px' }}>Site Information</h3>
           {[
-            ['Platform', 'Home Meals Marketplace'],
+            ['Platform', 'Home Meal Marketplace'],
             ['Version',  '1.0.0 MVP'],
             ['Region',   'Sydney, NSW, Australia'],
             ['Currency', 'AUD ($)'],

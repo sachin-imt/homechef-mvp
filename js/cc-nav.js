@@ -121,7 +121,7 @@ function Footer({ setPage }) {
           </div>
         </div>
         <div style={{ borderTop: "1px solid #333", paddingTop: "24px", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
-          <p style={{ color: "#666", fontSize: "0.82rem", margin: 0 }}>© 2026 Home Meals. All rights reserved. Sydney, Australia.</p>
+          <p style={{ color: "#666", fontSize: "0.82rem", margin: 0 }}>© 2026 Home Meal. All rights reserved. Sydney, Australia.</p>
           <p style={{ color: "#666", fontSize: "0.82rem", margin: 0 }}>ABN: 00 000 000 000 (placeholder)</p>
         </div>
       </div>

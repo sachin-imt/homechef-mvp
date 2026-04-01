@@ -46,7 +46,7 @@ function LoginGate({ onAdminAuth, onChefAuth }) {
           sessionStorage.setItem('cc_chef_session', JSON.stringify(sess));
           onChefAuth(sess);
         } else {
-          setErr(data.error || 'Invalid username or password. Contact Home Meals for access.');
+          setErr(data.error || 'Invalid username or password. Contact Home Meal for access.');
         }
         setBusy(false);
       })
@@ -99,7 +99,7 @@ function LoginGate({ onAdminAuth, onChefAuth }) {
           <>
             <div style={{ background:'#F0F9FF', border:'1px solid #BAE6FD', borderRadius:'8px', padding:'10px 14px', marginBottom:'16px', fontSize:'0.8rem', color:'#0369A1' }}>
               <i className="ph-fill ph-info" style={{ marginRight:'6px' }}/>
-              Credentials are provided by Home Meals. You cannot self-register.
+              Credentials are provided by Home Meal. You cannot self-register.
             </div>
             <div className="form-group">
               <label style={lbl}>Username</label>

@@ -2,14 +2,14 @@
 // All emails go through this module. Underscore prefix → Vercel skips as a helper.
 // Required env vars:
 //   RESEND_API_KEY        — from resend.com
-//   RESEND_FROM           — verified sender, e.g. "Home Meals <hello@yourdomain.com>"
+//   RESEND_FROM           — verified sender, e.g. "Home Meal <hello@yourdomain.com>"
 //   SITE_URL              — e.g. "https://homemeals.app"
-//   BANK_ACCOUNT_NAME     — e.g. "Home Meals Pty Ltd"
+//   BANK_ACCOUNT_NAME     — e.g. "Home Meal Pty Ltd"
 //   BANK_BSB              — e.g. "062-000"
 //   BANK_ACCOUNT_NUMBER   — e.g. "12345678"
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM = process.env.RESEND_FROM || 'Home Meals <onboarding@resend.dev>';
+const FROM = process.env.RESEND_FROM || 'Home Meal <onboarding@resend.dev>';
 const SITE_URL = process.env.SITE_URL || 'https://homemeals.app';
 
 async function sendEmail({ to, subject, html }) {
@@ -46,7 +46,7 @@ function wrapper(content) {
       <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08)">
         <!-- Header -->
         <tr><td style="background:#1A1A1A;padding:24px 32px;text-align:center">
-          <span style="font-size:1.4rem;font-weight:800;color:#FACA50;letter-spacing:-0.5px">Home Meals</span>
+          <span style="font-size:1.4rem;font-weight:800;color:#FACA50;letter-spacing:-0.5px">Home Meal</span>
         </td></tr>
         <!-- Body -->
         <tr><td style="padding:32px">
@@ -88,7 +88,7 @@ function btn(text, href) {
 function subscriberConfirmationEmail({ name, chef_name, starting_week, amount }) {
   const bsb      = process.env.BANK_BSB            || 'XXX-XXX';
   const acctNo   = process.env.BANK_ACCOUNT_NUMBER  || 'XXXXXXXXXX';
-  const acctName = process.env.BANK_ACCOUNT_NAME    || 'Home Meals Pty Ltd';
+  const acctName = process.env.BANK_ACCOUNT_NAME    || 'Home Meal Pty Ltd';
   const ref      = 'HM-' + (name || 'subscriber').replace(/\s+/g, '').toUpperCase().slice(0, 8);
   const amtStr   = amount ? `$${amount}` : 'the agreed weekly rate';
 
@@ -112,7 +112,7 @@ function subscriberConfirmationEmail({ name, chef_name, starting_week, amount })
       `)}
       ${p('Your chef will contact you <strong>24 hours before your first delivery</strong> to confirm the drop-off time and address.')}
       ${p('Have any questions? Just reply to this email — we\'re here to help.')}
-      ${p('Cheers,<br>The Home Meals team')}
+      ${p('Cheers,<br>The Home Meal team')}
     `),
   };
 }
@@ -124,7 +124,7 @@ function applicationReceivedEmail({ name, cuisine_type }) {
     html: wrapper(`
       ${h1('Application received 👨‍🍳')}
       ${p(`Hi ${name},`)}
-      ${p(`Thanks for applying to become a Home Meals chef! We've received your ${cuisine_type ? `<strong>${cuisine_type}</strong> cuisine ` : ''}application and our team will review it shortly.`)}
+      ${p(`Thanks for applying to become a Home Meal chef! We've received your ${cuisine_type ? `<strong>${cuisine_type}</strong> cuisine ` : ''}application and our team will review it shortly.`)}
       ${highlight(`
         <p style="margin:0 0 8px;font-size:0.85rem;font-weight:700;color:#856404">What happens next?</p>
         <ul style="margin:0;padding-left:18px;font-size:0.85rem;color:#374151;line-height:1.8">
@@ -134,8 +134,8 @@ function applicationReceivedEmail({ name, cuisine_type }) {
         </ul>
       `)}
       ${p('In the meantime, feel free to browse our platform at the link below.')}
-      ${btn('Visit Home Meals', SITE_URL)}
-      ${p('Cheers,<br>The Home Meals team')}
+      ${btn('Visit Home Meal', SITE_URL)}
+      ${p('Cheers,<br>The Home Meal team')}
     `),
   };
 }
@@ -146,9 +146,9 @@ function chefApprovedEmail({ name, chef_name, portal_url }) {
   return {
     subject: `Congratulations ${name} — you've been approved! 🎉`,
     html: wrapper(`
-      ${h1('Welcome to Home Meals! 🎉')}
+      ${h1('Welcome to Home Meal! 🎉')}
       ${p(`Hi ${name},`)}
-      ${p(`Great news — your application has been approved! You're now an official Home Meals chef as <strong>${chef_name || ('Chef ' + name.split(' ')[0])}</strong>.`)}
+      ${p(`Great news — your application has been approved! You're now an official Home Meal chef as <strong>${chef_name || ('Chef ' + name.split(' ')[0])}</strong>.`)}
       ${highlight(`
         <p style="margin:0 0 8px;font-size:0.85rem;font-weight:700;color:#856404">Your next steps:</p>
         <ol style="margin:0;padding-left:18px;font-size:0.85rem;color:#374151;line-height:1.8">
@@ -160,7 +160,7 @@ function chefApprovedEmail({ name, chef_name, portal_url }) {
       `)}
       ${btn('Go to Chef Portal', loginUrl)}
       ${p('If you have any questions, just reply to this email. We\'re excited to have you on board!')}
-      ${p('Cheers,<br>The Home Meals team')}
+      ${p('Cheers,<br>The Home Meal team')}
     `),
   };
 }
@@ -168,15 +168,15 @@ function chefApprovedEmail({ name, chef_name, portal_url }) {
 // ── 4. Chef application rejected ──
 function chefRejectedEmail({ name }) {
   return {
-    subject: `Update on your Home Meals chef application`,
+    subject: `Update on your Home Meal chef application`,
     html: wrapper(`
       ${h1('Thanks for your interest')}
       ${p(`Hi ${name},`)}
-      ${p('Thank you for taking the time to apply to become a Home Meals chef. After careful review, we\'re unable to move forward with your application at this time.')}
+      ${p('Thank you for taking the time to apply to become a Home Meal chef. After careful review, we\'re unable to move forward with your application at this time.')}
       ${p('This is often due to capacity in your area or a temporary pause in onboarding new chefs — it doesn\'t reflect on your cooking skills!')}
       ${p('We encourage you to apply again in the future as we continue to grow. We\'ll keep your details on file and may reach out if a spot opens up in your area.')}
-      ${p('Thanks again for your interest in Home Meals.')}
-      ${p('Kind regards,<br>The Home Meals team')}
+      ${p('Thanks again for your interest in Home Meal.')}
+      ${p('Kind regards,<br>The Home Meal team')}
     `),
   };
 }
@@ -185,11 +185,11 @@ function chefRejectedEmail({ name }) {
 function chefPortalCredentialsEmail({ chef_name, username, password }) {
   const portalUrl = SITE_URL + '/admin.html';
   return {
-    subject: `Your Home Meals chef portal is ready`,
+    subject: `Your Home Meal chef portal is ready`,
     html: wrapper(`
       ${h1('Your chef portal is ready 🍳')}
       ${p(`Hi ${chef_name},`)}
-      ${p(`Your Home Meals chef portal account has been set up. You can now log in to manage your menus and view your subscribers.`)}
+      ${p(`Your Home Meal chef portal account has been set up. You can now log in to manage your menus and view your subscribers.`)}
       ${highlight(`
         <p style="margin:0 0 12px;font-size:0.8rem;font-weight:700;color:#856404;text-transform:uppercase;letter-spacing:0.5px">Your Login Details</p>
         <table cellpadding="0" cellspacing="0" width="100%">
@@ -202,7 +202,7 @@ function chefPortalCredentialsEmail({ chef_name, username, password }) {
       ${p('We recommend changing your password after your first login.')}
       ${btn('Go to Chef Portal', portalUrl)}
       ${p('If you have any questions, just reply to this email.')}
-      ${p('Cheers,<br>The Home Meals team')}
+      ${p('Cheers,<br>The Home Meal team')}
     `),
   };
 }
@@ -225,7 +225,7 @@ function chefNewSubscriberEmail({ chef_name, subscriber_name, suburb, starting_w
         </table>
         <p style="margin:12px 0 0;font-size:0.82rem;color:#856404">⏳ <strong>Status: Pending payment.</strong> You'll receive another email once their payment has been confirmed and you're cleared to begin delivery.</p>
       `)}
-      ${p('Cheers,<br>The Home Meals team')}
+      ${p('Cheers,<br>The Home Meal team')}
     `),
   };
 }
@@ -250,7 +250,7 @@ function paymentReceivedEmail({ name, chef_name, week, amount }) {
       `)}
       ${p('Your chef will be in touch <strong>24 hours before delivery</strong> to confirm the drop-off time.')}
       ${p('Have any questions? Just reply to this email.')}
-      ${p('Cheers,<br>The Home Meals team')}
+      ${p('Cheers,<br>The Home Meal team')}
     `),
   };
 }
@@ -273,7 +273,7 @@ function chefPaymentConfirmedEmail({ chef_name, subscriber_name, suburb, street_
         </table>
         <p style="margin:12px 0 0;font-size:0.82rem;color:#856404">📞 Please contact ${subscriber_name} <strong>24 hours before your first delivery</strong> to confirm the drop-off time.</p>
       `)}
-      ${p('Cheers,<br>The Home Meals team')}
+      ${p('Cheers,<br>The Home Meal team')}
     `),
   };
 }

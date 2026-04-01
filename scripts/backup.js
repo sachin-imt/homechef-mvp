@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ══════════════════════════════════════════════════════════════
-// Home Meals Daily Backup Script
+// Home Meal Daily Backup Script
 //
 // Extracts source data from cc-data.js and any exported
 // localStorage snapshots, then writes date-stamped CSV files
@@ -85,7 +85,7 @@ function parsePostcodes() {
 // ── Main ─────────────────────────────────────────────────────
 function runBackup(lsData) {
   if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR, { recursive: true });
-  console.log(`\n📦  Home Meals Backup — ${TODAY}`);
+  console.log(`\n📦  Home Meal Backup — ${TODAY}`);
   console.log('='.repeat(40));
   console.log(`Output: ${OUT_DIR}\n`);
 

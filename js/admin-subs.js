@@ -87,7 +87,7 @@ function AddPaymentForm({ sub, chefs, onAdd, onClose }) {
       </div>
       {amount > 0 && (
         <div style={{ display:'flex', gap:'16px', marginBottom:'10px', background:'#FFFBEB', borderRadius:'8px', padding:'8px 12px', fontSize:'0.78rem' }}>
-          <span>Home Meals ({commPct}%): <strong>${celebShare}</strong></span>
+          <span>Home Meal ({commPct}%): <strong>${celebShare}</strong></span>
           <span>Chef keeps: <strong>${chefShare}</strong></span>
         </div>
       )}
