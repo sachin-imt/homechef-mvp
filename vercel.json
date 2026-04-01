@@ -1,4 +1,5 @@
 {
+  "buildCommand": "npm run build",
   "redirects": [
     { "source": "/",      "destination": "/app.html",   "permanent": false },
     { "source": "/admin", "destination": "/admin.html", "permanent": false }

@@ -1,0 +1,1012 @@
+// ─── GLOBAL NAMESPACE ───
+window.CC = window.CC || {};
+
+// ─── POSTCODE → SUBURB MAP (editable via Admin portal) ───
+var POSTCODE_SUBURB_MAP = {
+  "2000": "Sydney CBD",
+  "2007": "Ultimo",
+  "2008": "Chippendale",
+  "2009": "Pyrmont",
+  "2010": "Darlinghurst",
+  "2011": "Potts Point",
+  "2015": "Alexandria",
+  "2016": "Redfern",
+  "2017": "Waterloo",
+  "2018": "Rosebery",
+  "2019": "Botany",
+  "2020": "Mascot",
+  "2021": "Paddington",
+  "2022": "Bondi Junction",
+  "2024": "Bronte",
+  "2026": "Bondi",
+  "2027": "Double Bay",
+  "2031": "Coogee",
+  "2032": "Kingsford",
+  "2033": "Kensington",
+  "2034": "Randwick",
+  "2037": "Forest Lodge",
+  "2038": "Annandale",
+  "2039": "Rozelle",
+  "2041": "Balmain",
+  "2042": "Newtown",
+  "2043": "Erskineville",
+  "2044": "St Peters",
+  "2045": "Leichhardt",
+  "2046": "Burwood",
+  "2047": "Drummoyne",
+  "2048": "Stanmore",
+  "2049": "Petersham",
+  "2050": "Glebe",
+  "2060": "North Sydney",
+  "2065": "St Leonards",
+  "2067": "Chatswood",
+  "2203": "Dulwich Hill",
+  "2204": "Marrickville",
+  "2205": "Arncliffe",
+  "2206": "Earlwood",
+  // Inner West
+  "2130": "Homebush",
+  "2131": "Strathfield",
+  "2132": "Burwood",
+  "2135": "Flemington",
+  "2137": "Concord",
+  "2138": "Rhodes",
+  "2141": "Lidcombe",
+  "2142": "Granville",
+  "2143": "Merrylands",
+  "2145": "Wentworthville",
+  "2150": "Parramatta",
+  "2151": "North Rocks",
+  "2152": "Pendle Hill",
+  "2153": "Baulkham Hills",
+  "2154": "Castle Hill",
+  "2155": "Kellyville",
+  "2156": "Kenthurst",
+  "2157": "Galston",
+  "2158": "Middle Dural",
+  "2159": "Glenorie",
+  "2160": "Merrylands West",
+  "2161": "Woodville",
+  "2162": "Villawood",
+  "2163": "Lansdowne",
+  "2164": "Wetherill Park",
+  "2165": "Fairfield",
+  "2166": "Cabramatta",
+  "2167": "Warwick Farm",
+  "2168": "Moorebank",
+  "2170": "Liverpool",
+  "2171": "Cecil Hills",
+  "2172": "Pleasure Point",
+  "2173": "Pleasure Point",
+  "2174": "Holsworthy",
+  "2175": "Abbotsbury",
+  "2176": "Bossley Park",
+  "2177": "Edensor Park",
+  "2178": "Horningsea Park",
+  "2179": "Leppington",
+  "2190": "Greenacre",
+  "2191": "Narwee",
+  "2192": "Kingsgrove",
+  "2193": "Hurlstone Park",
+  "2194": "Campsie",
+  "2195": "Lakemba",
+  "2196": "Belmore",
+  "2197": "Yagoona",
+  "2198": "Chester Hill",
+  "2199": "Sefton",
+  "2200": "Bankstown",
+  "2207": "Rockdale",
+  "2208": "Kingsgrove",
+  "2209": "Beverly Hills",
+  "2210": "Lugarno",
+  "2211": "Padstow",
+  "2212": "Revesby",
+  "2213": "East Hills",
+  "2214": "Panania",
+  "2216": "Rockdale",
+  "2217": "Kogarah",
+  "2218": "Allawah",
+  "2219": "Sylvania",
+  "2220": "Hurstville",
+  "2221": "Blakehurst",
+  "2222": "Penshurst",
+  "2223": "Peakhurst",
+  "2224": "Gymea",
+  "2225": "Sutherland",
+  "2226": "Cronulla",
+  "2227": "Miranda",
+  "2228": "Caringbah",
+  "2229": "Sylvania Waters",
+  "2230": "Lilli Pilli",
+  "2232": "Engadine",
+  "2233": "Heathcote",
+  "2234": "Menai",
+  // Northern Suburbs
+  "2062": "Northbridge",
+  "2063": "Cammeray",
+  "2064": "Artarmon",
+  "2066": "Lane Cove",
+  "2068": "Willoughby",
+  "2069": "Roseville",
+  "2070": "Lindfield",
+  "2071": "Killara",
+  "2072": "Gordon",
+  "2073": "Pymble",
+  "2074": "Turramurra",
+  "2075": "St Ives",
+  "2076": "Wahroonga",
+  "2077": "Asquith",
+  "2079": "Hornsby Heights",
+  "2080": "Thornleigh",
+  "2081": "Berowra",
+  "2099": "Dee Why",
+  "2100": "Manly",
+  "2101": "Collaroy",
+  "2102": "Narrabeen",
+  "2103": "Mona Vale",
+  "2104": "Pittwater",
+  "2107": "Avalon Beach",
+  "2108": "Palm Beach",
+  // Eastern Suburbs
+  "2025": "Queens Park",
+  "2028": "Edgecliff",
+  "2029": "Rose Bay",
+  "2030": "Vaucluse",
+  "2035": "Maroubra",
+  "2036": "Matraville"
+};
+
+// ─── MOCK CHEF DATA ───
+var mockChefs = [{
+  chef_id: 1,
+  chef_name: "Chef Priya",
+  cuisine_type: "Indian",
+  bio: "I learned to cook from my grandmother in Punjab. Every dish is made with love using traditional recipes passed down through generations. I specialise in home-style North Indian cuisine with rich, authentic spices.",
+  photo_url: "https://images.unsplash.com/photo-1556910103-1c02745a8731?w=200&q=80",
+  price_per_week: 75,
+  delivery_postcodes: ["2042", "2203", "2204", "2048"],
+  rating: 4.8,
+  review_count: 24,
+  tags: ["North Indian", "Vegetarian Options", "Halal", "Authentic Recipes"],
+  highlights: ["🍛 Butter Chicken", "🥘 Dal Makhani", "🍚 Veg Biryani", "🫓 Garlic Naan"],
+  food_image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=600&q=85",
+  menus: {
+    currentWeek: {
+      week_label: "Mar 24–28",
+      monday: [{
+        dish_name: "Butter Chicken",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=400&q=80"
+      }, {
+        dish_name: "Jeera Rice",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Garlic Naan",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }, {
+        dish_name: "Cucumber Raita",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }],
+      tuesday: [{
+        dish_name: "Palak Paneer",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&q=80"
+      }, {
+        dish_name: "Dal Makhani",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&q=80"
+      }, {
+        dish_name: "Basmati Rice",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Tandoori Roti",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }],
+      wednesday: [{
+        dish_name: "Vegetable Biryani",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80"
+      }, {
+        dish_name: "Baingan Bharta",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&q=80"
+      }, {
+        dish_name: "Mint Raita",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Roasted Papad",
+        dish_type: "Snack",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }],
+      thursday: [{
+        dish_name: "Chole Masala",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&q=80"
+      }, {
+        dish_name: "Bhature",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }, {
+        dish_name: "Pickled Onions",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Fresh Salad",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }],
+      friday: [{
+        dish_name: "Paneer Tikka Masala",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=400&q=80"
+      }, {
+        dish_name: "Pulao Rice",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Butter Naan",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }, {
+        dish_name: "Gulab Jamun",
+        dish_type: "Dessert",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }]
+    },
+    nextWeek: {
+      week_label: "Mar 31–Apr 4",
+      monday: [{
+        dish_name: "Chicken Korma",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=400&q=80"
+      }, {
+        dish_name: "Saffron Rice",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Garlic Naan",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }, {
+        dish_name: "Mango Lassi",
+        dish_type: "Drink",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }],
+      tuesday: [{
+        dish_name: "Malai Kofta",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&q=80"
+      }, {
+        dish_name: "Chana Dal",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&q=80"
+      }, {
+        dish_name: "Jeera Rice",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Paratha",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }],
+      wednesday: [{
+        dish_name: "Lamb Rogan Josh",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=400&q=80"
+      }, {
+        dish_name: "Aloo Gobi",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&q=80"
+      }, {
+        dish_name: "Pulao",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Onion Kulcha",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }],
+      thursday: [{
+        dish_name: "Saag Chicken",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&q=80"
+      }, {
+        dish_name: "Tadka Dal",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&q=80"
+      }, {
+        dish_name: "Steamed Rice",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Phulka Roti",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }],
+      friday: [{
+        dish_name: "Hyderabadi Biryani",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&q=80"
+      }, {
+        dish_name: "Shorba",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&q=80"
+      }, {
+        dish_name: "Mirchi Ka Salan",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&q=80"
+      }, {
+        dish_name: "Shahi Tukda",
+        dish_type: "Dessert",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }]
+    }
+  }
+}, {
+  chef_id: 2,
+  chef_name: "Chef Asa",
+  cuisine_type: "Mediterranean",
+  bio: "Born in Lebanon, raised between Beirut and Sydney. I bring the vibrant flavours of the Eastern Mediterranean—fresh herbs, olive oil, slow-cooked meats, and fragrant spices—to your table every week.",
+  photo_url: "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=200&q=80",
+  price_per_week: 72,
+  delivery_postcodes: ["2016", "2017", "2008", "2010"],
+  rating: 4.9,
+  review_count: 31,
+  tags: ["Mediterranean", "Lebanese", "Halal", "Dairy-Free Options"],
+  highlights: ["🥙 Falafel Platter", "🥗 Tabbouleh", "🫔 Shawarma Bowl", "🧆 Hummus & Pita"],
+  food_image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=80",
+  menus: {
+    currentWeek: {
+      week_label: "Mar 24–28",
+      monday: [{
+        dish_name: "Chicken Shawarma Bowl",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80"
+      }, {
+        dish_name: "Fattoush Salad",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }, {
+        dish_name: "Garlic Toum",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Warm Pita",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }],
+      tuesday: [{
+        dish_name: "Falafel & Hummus Platter",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400&q=80"
+      }, {
+        dish_name: "Tabbouleh",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }, {
+        dish_name: "Pickled Vegetables",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Sesame Flatbread",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }],
+      wednesday: [{
+        dish_name: "Slow-Cooked Lamb Kafta",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80"
+      }, {
+        dish_name: "Lebanese Rice",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Tzatziki",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Pita Bread",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }],
+      thursday: [{
+        dish_name: "Baked Spiced Salmon",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&q=80"
+      }, {
+        dish_name: "Roasted Cauliflower",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }, {
+        dish_name: "Chermoula Sauce",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Couscous",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }],
+      friday: [{
+        dish_name: "Moussaka",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400&q=80"
+      }, {
+        dish_name: "Greek Salad",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }, {
+        dish_name: "Pita Bread",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }, {
+        dish_name: "Baklava",
+        dish_type: "Dessert",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }]
+    },
+    nextWeek: {
+      week_label: "Mar 31–Apr 4",
+      monday: [{
+        dish_name: "Mezze Platter",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400&q=80"
+      }, {
+        dish_name: "Stuffed Vine Leaves",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }, {
+        dish_name: "Hummus",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Pita Bread",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }],
+      tuesday: [{
+        dish_name: "Grilled Halloumi & Veg",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80"
+      }, {
+        dish_name: "Quinoa Tabbouleh",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }, {
+        dish_name: "Tahini Dressing",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Za'atar Flatbread",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }],
+      wednesday: [{
+        dish_name: "Lamb Tagine",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=400&q=80"
+      }, {
+        dish_name: "Couscous",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Harissa",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Moroccan Bread",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }],
+      thursday: [{
+        dish_name: "Chicken Bastilla",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80"
+      }, {
+        dish_name: "Roasted Root Vegetables",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }, {
+        dish_name: "Preserved Lemon Sauce",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Semolina Roll",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }],
+      friday: [{
+        dish_name: "Stuffed Capsicum",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400&q=80"
+      }, {
+        dish_name: "Bulgur Pilaf",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Labneh",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Semolina Cake",
+        dish_type: "Dessert",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }]
+    }
+  }
+}, {
+  chef_id: 3,
+  chef_name: "Chef Som",
+  cuisine_type: "Thai",
+  bio: "I grew up in Chiang Mai and moved to Sydney 8 years ago. Thai cooking is all about balance—sweet, sour, salty, spicy. My family recipes have been perfected over three generations of street-food cooks.",
+  photo_url: "https://images.unsplash.com/photo-1607532941433-304659e8198a?w=200&q=80",
+  price_per_week: 68,
+  delivery_postcodes: ["2042", "2050", "2049", "2045"],
+  rating: 4.7,
+  review_count: 18,
+  tags: ["Thai", "Gluten-Free Options", "Spicy", "Street Food Style"],
+  highlights: ["🍜 Pad Thai", "🍛 Green Curry", "🥟 Spring Rolls", "🍚 Jasmine Rice"],
+  food_image: "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=600&q=80",
+  menus: {
+    currentWeek: {
+      week_label: "Mar 24–28",
+      monday: [{
+        dish_name: "Pad Thai",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=400&q=80"
+      }, {
+        dish_name: "Tom Yum Soup",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&q=80"
+      }, {
+        dish_name: "Spring Rolls",
+        dish_type: "Snack",
+        photo_url: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&q=80"
+      }, {
+        dish_name: "Jasmine Rice",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }],
+      tuesday: [{
+        dish_name: "Green Curry Chicken",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=400&q=80"
+      }, {
+        dish_name: "Steamed Jasmine Rice",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Thai Cucumber Salad",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }, {
+        dish_name: "Mango Sticky Rice",
+        dish_type: "Dessert",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }],
+      wednesday: [{
+        dish_name: "Massaman Beef Curry",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&q=80"
+      }, {
+        dish_name: "Roti Bread",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }, {
+        dish_name: "Steamed Rice",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Satay Sauce",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }],
+      thursday: [{
+        dish_name: "Larb Gai",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }, {
+        dish_name: "Sticky Rice",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Som Tum Salad",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=400&q=80"
+      }, {
+        dish_name: "Nam Jim Dipping Sauce",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }],
+      friday: [{
+        dish_name: "Pad Krapow Moo",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=400&q=80"
+      }, {
+        dish_name: "Fried Egg",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }, {
+        dish_name: "Jasmine Rice",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Thai Iced Tea",
+        dish_type: "Drink",
+        photo_url: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&q=80"
+      }]
+    },
+    nextWeek: {
+      week_label: "Mar 31–Apr 4",
+      monday: [{
+        dish_name: "Drunken Noodles",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=400&q=80"
+      }, {
+        dish_name: "Thai Fish Cakes",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&q=80"
+      }, {
+        dish_name: "Sweet Chilli Sauce",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Jasmine Rice",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }],
+      tuesday: [{
+        dish_name: "Red Curry Prawns",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=400&q=80"
+      }, {
+        dish_name: "Thai Basil Rice",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Prawn Crackers",
+        dish_type: "Snack",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }, {
+        dish_name: "Coconut Milk Pudding",
+        dish_type: "Dessert",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }],
+      wednesday: [{
+        dish_name: "Tom Kha Gai Soup",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&q=80"
+      }, {
+        dish_name: "Steamed Rice",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Fresh Herbs & Chilli",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Crispy Shallots",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&q=80"
+      }],
+      thursday: [{
+        dish_name: "Crying Tiger Beef",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }, {
+        dish_name: "Sticky Rice",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Jaew Dipping Sauce",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Green Papaya Salad",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=400&q=80"
+      }],
+      friday: [{
+        dish_name: "Khao Mun Gai",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=400&q=80"
+      }, {
+        dish_name: "Ginger Broth",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&q=80"
+      }, {
+        dish_name: "Fermented Soybean Sauce",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Tub Tim Krob",
+        dish_type: "Dessert",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }]
+    }
+  }
+}, {
+  chef_id: 4,
+  chef_name: "Chef Marco",
+  cuisine_type: "Italian",
+  bio: "Born in Naples, trained in Rome, cooking in Sydney. I use my nonna's handwritten recipe book every single week. Everything is made from scratch—pasta, sauces, even the bread. Real Italian, no shortcuts.",
+  photo_url: "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=200&q=80",
+  price_per_week: 80,
+  delivery_postcodes: ["2010", "2011", "2000", "2009"],
+  rating: 4.9,
+  review_count: 42,
+  tags: ["Italian", "Pasta", "Gluten-Free Options", "Made from Scratch"],
+  highlights: ["🍝 Handmade Tagliatelle", "🥩 Osso Buco", "🍕 Focaccia", "🍮 Tiramisu"],
+  food_image: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&q=80",
+  menus: {
+    currentWeek: {
+      week_label: "Mar 24–28",
+      monday: [{
+        dish_name: "Tagliatelle al Ragù",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400&q=80"
+      }, {
+        dish_name: "Mixed Salad",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }, {
+        dish_name: "Rosemary Focaccia",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }, {
+        dish_name: "Tiramisu",
+        dish_type: "Dessert",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }],
+      tuesday: [{
+        dish_name: "Risotto ai Funghi",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&q=80"
+      }, {
+        dish_name: "Insalata Caprese",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }, {
+        dish_name: "Ciabatta",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }, {
+        dish_name: "Panna Cotta",
+        dish_type: "Dessert",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }],
+      wednesday: [{
+        dish_name: "Osso Buco alla Milanese",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400&q=80"
+      }, {
+        dish_name: "Saffron Risotto",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&q=80"
+      }, {
+        dish_name: "Gremolata",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Focaccia",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }],
+      thursday: [{
+        dish_name: "Pappardelle al Cinghiale",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400&q=80"
+      }, {
+        dish_name: "Roasted Broccolini",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }, {
+        dish_name: "Grissini",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }, {
+        dish_name: "Cannoli",
+        dish_type: "Dessert",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }],
+      friday: [{
+        dish_name: "Branzino al Forno",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&q=80"
+      }, {
+        dish_name: "Roasted Potatoes",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&q=80"
+      }, {
+        dish_name: "Lemon & Caper Sauce",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Sfogliatelle",
+        dish_type: "Dessert",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }]
+    },
+    nextWeek: {
+      week_label: "Mar 31–Apr 4",
+      monday: [{
+        dish_name: "Lasagna Bolognese",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400&q=80"
+      }, {
+        dish_name: "Mixed Green Salad",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }, {
+        dish_name: "Garlic Bread",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }, {
+        dish_name: "Affogato",
+        dish_type: "Dessert",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }],
+      tuesday: [{
+        dish_name: "Pollo alla Cacciatora",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&q=80"
+      }, {
+        dish_name: "Polenta",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=400&q=80"
+      }, {
+        dish_name: "Olive Ciabatta",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }, {
+        dish_name: "Zabaglione",
+        dish_type: "Dessert",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }],
+      wednesday: [{
+        dish_name: "Gnocchi al Pesto",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400&q=80"
+      }, {
+        dish_name: "Cherry Tomato Salad",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }, {
+        dish_name: "Focaccia",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }, {
+        dish_name: "Ricotta Tart",
+        dish_type: "Dessert",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }],
+      thursday: [{
+        dish_name: "Veal Milanese",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400&q=80"
+      }, {
+        dish_name: "Arugula & Parmesan Salad",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }, {
+        dish_name: "Ciabatta",
+        dish_type: "Bread",
+        photo_url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80"
+      }, {
+        dish_name: "Gelato",
+        dish_type: "Dessert",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }],
+      friday: [{
+        dish_name: "Seafood Risotto",
+        dish_type: "Main",
+        photo_url: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&q=80"
+      }, {
+        dish_name: "Insalata Mista",
+        dish_type: "Side",
+        photo_url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"
+      }, {
+        dish_name: "Lemon Butter Sauce",
+        dish_type: "Accompaniment",
+        photo_url: "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b4?w=400&q=80"
+      }, {
+        dish_name: "Torta Caprese",
+        dish_type: "Dessert",
+        photo_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"
+      }]
+    }
+  }
+}];
+
+// ─── CONSTANTS ───
+var CUISINES = ["All", "Indian", "Mediterranean", "Thai", "Italian", "Chinese", "Lebanese", "Vietnamese"];
+var DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday"];
+var DAY_LABELS = {
+  monday: "MONDAY",
+  tuesday: "TUESDAY",
+  wednesday: "WEDNESDAY",
+  thursday: "THURSDAY",
+  friday: "FRIDAY"
+};
+var DISH_TYPE_COLORS = {
+  Main: {
+    bg: "#FFF3CD",
+    color: "#856404"
+  },
+  Side: {
+    bg: "#D1ECF1",
+    color: "#0C5460"
+  },
+  Bread: {
+    bg: "#FDEBD0",
+    color: "#784212"
+  },
+  Accompaniment: {
+    bg: "#D4EDDA",
+    color: "#155724"
+  },
+  Dessert: {
+    bg: "#FCE4EC",
+    color: "#880E4F"
+  },
+  Snack: {
+    bg: "#FFE0B2",
+    color: "#BF360C"
+  },
+  Drink: {
+    bg: "#E3F2FD",
+    color: "#0D47A1"
+  }
+};
+var CUISINE_OPTIONS = ["North Indian", "South Indian", "Thai", "Italian", "Mediterranean", "Chinese", "Lebanese", "Vietnamese", "Japanese", "Korean", "Mexican"];
+var DISH_TYPES = ["Main", "Side", "Bread", "Accompaniment", "Dessert", "Snack", "Drink"];
+
+// ─── EXPORT TO NAMESPACE ───
+Object.assign(window.CC, {
+  POSTCODE_SUBURB_MAP,
+  mockChefs,
+  CUISINES,
+  DAYS,
+  DAY_LABELS,
+  DISH_TYPE_COLORS,
+  CUISINE_OPTIONS,
+  DISH_TYPES
+});
+
+// ─── SITE CONTENT DEFAULTS ───
+// Overridden at runtime by /api/content (fetched in cc-main.js before React renders).
+window.CC.siteContent = {
+  hero_badge: "Sydney's Home-Cooked Meal Marketplace",
+  hero_line1: "Authentic",
+  hero_line2: "Home-Cooked",
+  hero_line3: "Meals, Weekly.",
+  hero_subtext: "Subscribe to a local home chef. Get 5 freshly cooked meals delivered Mon–Fri. Support your community.",
+  hero_stat1: "4.8 ⭐",
+  hero_stat1_label: "Avg chef rating",
+  hero_stat2: "5 meals",
+  hero_stat2_label: "Delivered Mon–Fri",
+  hero_stat3: "Cancel",
+  hero_stat3_label: "Anytime, no lock-in",
+  how_c1_title: "1. Find Your Chef",
+  how_c1_desc: "Browse local passionate home chefs and culinary talent. From heritage family recipes to authentic homestyle masters, find a chef whose menu matches your cravings and dietary needs.",
+  how_c2_title: "2. Subscribe Weekly",
+  how_c2_desc: "Choose your starting week and subscribe. No lock-in contracts. You'll receive a curated menu of 5 restaurant-quality meals delivered every weekday.",
+  how_c3_title: "3. Gather & Enjoy",
+  how_c3_desc: "Your chef prepares your meals fresh daily. Delivered straight to your door in eco-friendly containers — simply sit down and savour the food together with family or friends.",
+  how_ch1_title: "1. Apply & Verify",
+  how_ch1_desc: "Submit your application with your cuisine style and sample menus. Our team reviews your background to ensure Home Meal home-cooking standards are met.",
+  how_ch2_title: "2. Build Your Audience",
+  how_ch2_desc: "Set how many subscribers you want. We provide the marketing and platform to connect you with hungry locals looking for your exact culinary style.",
+  how_ch3_title: "3. Cook & Earn",
+  how_ch3_desc: "Cook your weekly menu, deliver to subscribers, and get paid. Keep 80% of the subscription price. Current chefs earn $400–$900/week.",
+  become_headline: "Become a Home Meal Partner",
+  become_subtext: "Turn your home cooking into income. Set your own menu. Set your own pace.",
+  become_earnings: "Current chefs earn $400–$900/week",
+  footer_tagline: "Authentic home-cooked meals from Sydney's best home chefs. Delivered weekly.",
+  contact_email: "hello@homemeals.com.au"
+};
