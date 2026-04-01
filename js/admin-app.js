@@ -28,7 +28,7 @@ function LoginGate({ onAdminAuth, onChefAuth }) {
     fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'admin', password: pwd }) })
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        if (data.ok) { onAdminAuth(); }
+        if (data.ok) { onAdminAuth(data.token); }
         else { setErr(data.error || 'Incorrect password.'); }
         setBusy(false);
       })
@@ -42,7 +42,7 @@ function LoginGate({ onAdminAuth, onChefAuth }) {
       .then(function(r) { return r.json(); })
       .then(function(data) {
         if (data.ok) {
-          var sess = { chef_id: data.chef_id, chef_name: data.chef_name, username: data.username };
+          var sess = { chef_id: data.chef_id, chef_name: data.chef_name, username: data.username, token: data.token };
           sessionStorage.setItem('cc_chef_session', JSON.stringify(sess));
           onChefAuth(sess);
         } else {
@@ -198,7 +198,7 @@ function Sidebar({ page, setPage, badges }) {
         <div style={{ marginTop:'8px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
           <span style={{ fontSize:'0.72rem', color:'#333' }}>v1.0 MVP</span>
           <button style={{ background:'none', border:'none', cursor:'pointer', color:'#555', fontSize:'0.75rem', fontFamily:'inherit' }}
-            onClick={()=>{ sessionStorage.removeItem('cc_admin_auth'); window.location.reload(); }}>
+            onClick={()=>{ sessionStorage.removeItem('cc_admin_token'); window.location.reload(); }}>
             <i className="ph-bold ph-sign-out"/> Log out
           </button>
         </div>
@@ -211,7 +211,7 @@ function Sidebar({ page, setPage, badges }) {
 // Root App
 // ─────────────────────────────────────────────
 function AdminApp() {
-  var [authed,      setAuthed]      = useState(() => !!sessionStorage.getItem('cc_admin_auth'));
+  var [authed,      setAuthed]      = useState(() => !!sessionStorage.getItem('cc_admin_token'));
   var [chefSession, setChefSession] = useState(() => {
     try { return JSON.parse(sessionStorage.getItem('cc_chef_session')); } catch(e) { return null; }
   });
@@ -230,7 +230,7 @@ function AdminApp() {
   var clearAppsBadge  = function() { var n=Date.now(); sessionStorage.setItem('cc_apps_seen',n);  setAppsBadgeSeen(n);  };
   var clearMenusBadge = function() { var n=Date.now(); sessionStorage.setItem('cc_menus_seen',n); setMenusBadgeSeen(n); };
 
-  var handleAdminAuth = () => { sessionStorage.setItem('cc_admin_auth','1'); setAuthed(true); };
+  var handleAdminAuth = (token) => { sessionStorage.setItem('cc_admin_token', token || ''); setAuthed(true); };
 
   useEffect(() => { window.scrollTo(0,0); }, [page]);
 

@@ -1,11 +1,12 @@
 const db = require('../_db');
-const { handle } = require('../_helpers');
+const { handle, requireAdmin } = require('../_helpers');
 const { sendEmail, chefRejectedEmail } = require('../_email');
 
 module.exports = handle(async (req, res) => {
   const { id } = req.query;
 
   if (req.method === 'PUT') {
+    if (!requireAdmin(req, res)) return;
     // Only update known columns — strip frontend-only fields like reviewed_at, note
     const { status } = req.body;
     const { data, error } = await db
@@ -19,6 +20,7 @@ module.exports = handle(async (req, res) => {
   }
 
   if (req.method === 'DELETE') {
+    if (!requireAdmin(req, res)) return;
     const { action, email, name } = req.body || {};
     const { error } = await db.from('chef_applications').delete().eq('id', id);
     if (error) return res.status(500).json({ error: error.message });

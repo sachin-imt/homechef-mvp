@@ -67,17 +67,25 @@ var defaultContent = {
 };
 
 // ── HTTP helpers ──
+function _authHeader() {
+  var token = sessionStorage.getItem('cc_admin_token');
+  return token ? {
+    'Authorization': 'Bearer ' + token
+  } : {};
+}
 function _apiGet(path) {
-  return fetch(path).then(function (r) {
+  return fetch(path, {
+    headers: _authHeader()
+  }).then(function (r) {
     return r.json();
   });
 }
 function _apiPost(path, body) {
   return fetch(path, {
     method: 'POST',
-    headers: {
+    headers: Object.assign({
       'Content-Type': 'application/json'
-    },
+    }, _authHeader()),
     body: JSON.stringify(body)
   }).then(function (r) {
     return r.json().then(function (d) {
@@ -89,9 +97,9 @@ function _apiPost(path, body) {
 function _apiPut(path, body) {
   return fetch(path, {
     method: 'PUT',
-    headers: {
+    headers: Object.assign({
       'Content-Type': 'application/json'
-    },
+    }, _authHeader()),
     body: JSON.stringify(body)
   }).then(function (r) {
     return r.json().then(function (d) {
@@ -103,9 +111,9 @@ function _apiPut(path, body) {
 function _apiDelete(path, body) {
   return fetch(path, {
     method: 'DELETE',
-    headers: {
+    headers: Object.assign({
       'Content-Type': 'application/json'
-    },
+    }, _authHeader()),
     body: JSON.stringify(body)
   }).then(function (r) {
     return r.json();

@@ -1,5 +1,5 @@
 const db = require('./_db');
-const { handle } = require('./_helpers');
+const { handle, requireAdmin } = require('./_helpers');
 const { sendEmail, chefApprovedEmail } = require('./_email');
 
 module.exports = handle(async (req, res) => {
@@ -14,6 +14,7 @@ module.exports = handle(async (req, res) => {
   }
 
   if (req.method === 'POST') {
+    if (!requireAdmin(req, res)) return;
     let body = { ...req.body };
     // Pull out email metadata (not a DB column) before insert
     const applicantEmail = body.applicant_email;

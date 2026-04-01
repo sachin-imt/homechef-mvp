@@ -1,9 +1,10 @@
 const db = require('./_db');
-const { handle } = require('./_helpers');
+const { handle, requireAdmin } = require('./_helpers');
 
 module.exports = handle(async (req, res) => {
   if (req.method === 'GET') {
-    const { data, error } = await db
+    if (!requireAdmin(req, res)) return;
+        const { data, error } = await db
       .from('notifications')
       .select('*')
       .order('created_at', { ascending: false })
@@ -15,7 +16,8 @@ module.exports = handle(async (req, res) => {
   // PUT /api/notifications — mark notification(s) read
   // Body: { id } to mark one, or { all: true } to mark all
   if (req.method === 'PUT') {
-    const { id, all } = req.body;
+    if (!requireAdmin(req, res)) return;
+        const { id, all } = req.body;
     if (all) {
       const { error } = await db.from('notifications').update({ read: true }).eq('read', false);
       if (error) return res.status(500).json({ error: error.message });
@@ -28,7 +30,8 @@ module.exports = handle(async (req, res) => {
 
   // POST /api/notifications — create one
   if (req.method === 'POST') {
-    const { data, error } = await db
+    if (!requireAdmin(req, res)) return;
+        const { data, error } = await db
       .from('notifications')
       .insert(req.body)
       .select()

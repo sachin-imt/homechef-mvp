@@ -41,7 +41,8 @@ function ChefPortalPage({ session }) {
   var { useEffect } = React;
   useEffect(function() {
     if (!session || !session.chef_id) { setLoadingChef(false); return; }
-    fetch('/api/chefs/' + session.chef_id)
+    var chefToken = (session && session.token) || '';
+    fetch('/api/chefs/' + session.chef_id, { headers: chefToken ? { 'Authorization': 'Bearer ' + chefToken } : {} })
       .then(function(r) { return r.json(); })
       .then(function(chef) {
         if (chef && !chef.error) {
@@ -116,9 +117,10 @@ function ChefPortalPage({ session }) {
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       // Export as JPEG @ 85 % quality — keeps file tiny and consistent
       var base64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+      var chefTok = (session && session.token) || '';
       fetch('/api/upload', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: Object.assign({ 'Content-Type': 'application/json' }, chefTok ? { 'Authorization': 'Bearer ' + chefTok } : {}),
         body: JSON.stringify({ filename: file.name.replace(/\.[^.]+$/, '.jpg'), contentType: 'image/jpeg', base64: base64 }),
       })
         .then(function(r) { return r.json(); })
@@ -150,9 +152,10 @@ function ChefPortalPage({ session }) {
         nextWeek:    menus.nextWeek,
       },
     };
+    var saveTok = (session && session.token) || '';
     fetch('/api/chefs/' + session.chef_id, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: Object.assign({ 'Content-Type': 'application/json' }, saveTok ? { 'Authorization': 'Bearer ' + saveTok } : {}),
       body: JSON.stringify(updates),
     })
       .then(function(r) { return r.json(); })
@@ -172,9 +175,10 @@ function ChefPortalPage({ session }) {
       week: weekTab,
       menu_data: menus[weekTab],
     };
+    var menuTok = (session && session.token) || '';
     fetch('/api/menus', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: Object.assign({ 'Content-Type': 'application/json' }, menuTok ? { 'Authorization': 'Bearer ' + menuTok } : {}),
       body: JSON.stringify(entry),
     })
       .then(function(r) {

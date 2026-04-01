@@ -40,21 +40,25 @@ var defaultContent = {
 };
 
 // ── HTTP helpers ──
+function _authHeader() {
+  var token = sessionStorage.getItem('cc_admin_token');
+  return token ? { 'Authorization': 'Bearer ' + token } : {};
+}
 function _apiGet(path) {
-  return fetch(path).then(function(r) { return r.json(); });
+  return fetch(path, { headers: _authHeader() }).then(function(r) { return r.json(); });
 }
 function _apiPost(path, body) {
-  return fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function(r) {
+  return fetch(path, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, _authHeader()), body: JSON.stringify(body) }).then(function(r) {
     return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'Request failed'); return d; });
   });
 }
 function _apiPut(path, body) {
-  return fetch(path, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function(r) {
+  return fetch(path, { method: 'PUT', headers: Object.assign({ 'Content-Type': 'application/json' }, _authHeader()), body: JSON.stringify(body) }).then(function(r) {
     return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'Request failed'); return d; });
   });
 }
 function _apiDelete(path, body) {
-  return fetch(path, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function(r) { return r.json(); });
+  return fetch(path, { method: 'DELETE', headers: Object.assign({ 'Content-Type': 'application/json' }, _authHeader()), body: JSON.stringify(body) }).then(function(r) { return r.json(); });
 }
 
 // ── Chefs ──

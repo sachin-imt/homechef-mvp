@@ -53,7 +53,7 @@ function LoginGate({
       return r.json();
     }).then(function (data) {
       if (data.ok) {
-        onAdminAuth();
+        onAdminAuth(data.token);
       } else {
         setErr(data.error || 'Incorrect password.');
       }
@@ -87,7 +87,8 @@ function LoginGate({
         var sess = {
           chef_id: data.chef_id,
           chef_name: data.chef_name,
-          username: data.username
+          username: data.username,
+          token: data.token
         };
         sessionStorage.setItem('cc_chef_session', JSON.stringify(sess));
         onChefAuth(sess);
@@ -466,7 +467,7 @@ function Sidebar({
       fontFamily: 'inherit'
     },
     onClick: () => {
-      sessionStorage.removeItem('cc_admin_auth');
+      sessionStorage.removeItem('cc_admin_token');
       window.location.reload();
     }
   }, /*#__PURE__*/React.createElement("i", {
@@ -478,7 +479,7 @@ function Sidebar({
 // Root App
 // ─────────────────────────────────────────────
 function AdminApp() {
-  var [authed, setAuthed] = useState(() => !!sessionStorage.getItem('cc_admin_auth'));
+  var [authed, setAuthed] = useState(() => !!sessionStorage.getItem('cc_admin_token'));
   var [chefSession, setChefSession] = useState(() => {
     try {
       return JSON.parse(sessionStorage.getItem('cc_chef_session'));
@@ -518,8 +519,8 @@ function AdminApp() {
     sessionStorage.setItem('cc_menus_seen', n);
     setMenusBadgeSeen(n);
   };
-  var handleAdminAuth = () => {
-    sessionStorage.setItem('cc_admin_auth', '1');
+  var handleAdminAuth = token => {
+    sessionStorage.setItem('cc_admin_token', token || '');
     setAuthed(true);
   };
   useEffect(() => {

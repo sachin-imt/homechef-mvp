@@ -1,10 +1,11 @@
 const db = require('./_db');
-const { handle } = require('./_helpers');
+const { handle, requireAdmin } = require('./_helpers');
 const { sendEmail, subscriberConfirmationEmail, chefNewSubscriberEmail, newSubscriberAdminEmail } = require('./_email');
 
 module.exports = handle(async (req, res) => {
   if (req.method === 'GET') {
-    // Load subscribers with their payments joined
+    if (!requireAdmin(req, res)) return;
+        // Load subscribers with their payments joined
     const { data: subs, error: subErr } = await db
       .from('subscribers')
       .select('*')

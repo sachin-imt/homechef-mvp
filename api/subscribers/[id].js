@@ -1,11 +1,12 @@
 const db = require('../_db');
-const { handle } = require('../_helpers');
+const { handle, requireAdmin } = require('../_helpers');
 const { sendEmail, paymentReceivedEmail, chefPaymentConfirmedEmail } = require('../_email');
 
 module.exports = handle(async (req, res) => {
   const { id } = req.query;
 
   if (req.method === 'PUT') {
+    if (!requireAdmin(req, res)) return;
     const { payments, ...subData } = req.body;
     delete subData.id;
 
@@ -84,6 +85,7 @@ module.exports = handle(async (req, res) => {
   }
 
   if (req.method === 'DELETE') {
+    if (!requireAdmin(req, res)) return;
     await db.from('payments').delete().eq('subscriber_id', id);
     const { error } = await db.from('subscribers').delete().eq('id', id);
     if (error) return res.status(500).json({ error: error.message });

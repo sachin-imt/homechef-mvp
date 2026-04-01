@@ -1,5 +1,5 @@
 const db = require('./_db');
-const { handle } = require('./_helpers');
+const { handle, requireAdmin } = require('./_helpers');
 
 module.exports = handle(async (req, res) => {
   if (req.method === 'GET') {
@@ -13,7 +13,8 @@ module.exports = handle(async (req, res) => {
 
   // PUT — upsert all content key-value pairs
   if (req.method === 'PUT') {
-    const content = req.body; // { hero_badge: "...", ... }
+    if (!requireAdmin(req, res)) return;
+        const content = req.body; // { hero_badge: "...", ... }
     const rows = Object.entries(content).map(([key, value]) => ({
       key,
       value: String(value),

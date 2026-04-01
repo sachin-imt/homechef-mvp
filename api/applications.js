@@ -1,10 +1,11 @@
 const db = require('./_db');
-const { handle } = require('./_helpers');
+const { handle, requireAdmin } = require('./_helpers');
 const { sendEmail, applicationReceivedEmail } = require('./_email');
 
 module.exports = handle(async (req, res) => {
   if (req.method === 'GET') {
-    const { data, error } = await db
+    if (!requireAdmin(req, res)) return;
+        const { data, error } = await db
       .from('chef_applications')
       .select('*')
       .order('submitted_at', { ascending: false });

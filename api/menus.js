@@ -1,9 +1,10 @@
 const db = require('./_db');
-const { handle } = require('./_helpers');
+const { handle, requireAdmin, requireAuth } = require('./_helpers');
 
 module.exports = handle(async (req, res) => {
   if (req.method === 'GET') {
-    const { data, error } = await db
+    if (!requireAdmin(req, res)) return;
+        const { data, error } = await db
       .from('pending_menus')
       .select('*')
       .order('submitted_at', { ascending: false });
@@ -12,6 +13,7 @@ module.exports = handle(async (req, res) => {
   }
 
   if (req.method === 'POST') {
+    if (!requireAuth(req, res)) return;
     const { chef_id, chef_name, week, menu_data } = req.body;
     const { data, error } = await db
       .from('pending_menus')
@@ -30,7 +32,8 @@ module.exports = handle(async (req, res) => {
 
   // PUT — update status (approve/reject), optionally apply approved menu to chef
   if (req.method === 'PUT') {
-    const { id, status } = req.body;
+    if (!requireAdmin(req, res)) return;
+        const { id, status } = req.body;
     const { data, error } = await db
       .from('pending_menus')
       .update({ status, reviewed_at: new Date().toISOString() })

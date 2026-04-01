@@ -1,10 +1,11 @@
 const db = require('./_db');
-const { handle } = require('./_helpers');
+const { handle, requireAdmin } = require('./_helpers');
 const { sendEmail, chefPortalCredentialsEmail } = require('./_email');
 
 module.exports = handle(async (req, res) => {
   if (req.method === 'GET') {
-    const { data, error } = await db
+    if (!requireAdmin(req, res)) return;
+        const { data, error } = await db
       .from('chef_accounts')
       .select('*')
       .order('chef_id');
@@ -14,7 +15,8 @@ module.exports = handle(async (req, res) => {
 
   // POST — upsert a chef account (create or update)
   if (req.method === 'POST') {
-    const { send_credentials_email, ...body } = req.body;
+    if (!requireAdmin(req, res)) return;
+        const { send_credentials_email, ...body } = req.body;
     const { data, error } = await db
       .from('chef_accounts')
       .upsert(body, { onConflict: 'chef_id' })
@@ -37,7 +39,8 @@ module.exports = handle(async (req, res) => {
 
   // DELETE — revoke access for a chef_id
   if (req.method === 'DELETE') {
-    const { chef_id } = req.body;
+    if (!requireAdmin(req, res)) return;
+        const { chef_id } = req.body;
     const { error } = await db
       .from('chef_accounts')
       .delete()
