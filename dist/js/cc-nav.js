@@ -34,7 +34,7 @@ function Nav({
     }
   }, "HOME", /*#__PURE__*/React.createElement("i", {
     className: "ph-fill ph-bowl-food"
-  }), "MEALS"), /*#__PURE__*/React.createElement("nav", {
+  }), "MEAL"), /*#__PURE__*/React.createElement("nav", {
     className: "cc-nav-links"
   }, navItems.map(item => /*#__PURE__*/React.createElement("button", {
     key: item.target,
@@ -135,7 +135,7 @@ function Footer({
     }
   }, "HOME", /*#__PURE__*/React.createElement("i", {
     className: "ph-fill ph-bowl-food"
-  }), "MEALS"), /*#__PURE__*/React.createElement("p", {
+  }), "MEAL"), /*#__PURE__*/React.createElement("p", {
     style: {
       color: "#aaa",
       fontSize: "0.9rem",

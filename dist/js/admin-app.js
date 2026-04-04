@@ -137,7 +137,7 @@ function LoginGate({
       fontSize: '1.1rem',
       margin: '0 1px'
     }
-  }), "MEALS"), /*#__PURE__*/React.createElement("p", {
+  }), "MEAL"), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: '0.85rem',
       color: '#5A5D66'
@@ -319,7 +319,7 @@ function ChefView({
       color: '#FACA50',
       margin: '0 1px'
     }
-  }), "MEALS", /*#__PURE__*/React.createElement("span", {
+  }), "MEAL", /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: '0.65rem',
       fontWeight: 700,
@@ -422,7 +422,7 @@ function Sidebar({
     className: "logo"
   }, "HOME", /*#__PURE__*/React.createElement("i", {
     className: "ph-fill ph-bowl-food"
-  }), "MEALS", /*#__PURE__*/React.createElement("span", {
+  }), "MEAL", /*#__PURE__*/React.createElement("span", {
     className: "badge"
   }, "ADMIN"))), /*#__PURE__*/React.createElement("nav", {
     className: "sidebar-nav"
