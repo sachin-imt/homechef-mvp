@@ -62,7 +62,7 @@ function LoginGate({ onAdminAuth, onChefAuth }) {
         {/* Logo */}
         <div style={{ textAlign:'center', marginBottom:'24px' }}>
           <div style={{ fontWeight:900, fontSize:'1.6rem', letterSpacing:'-0.05em', color:'#111', marginBottom:'6px' }}>
-            HOME<i className="ph-fill ph-bowl-food" style={{ color:'#FACA50', fontSize:'1.1rem', margin:'0 1px' }}/>MEALS
+            HOME<i className="ph-fill ph-bowl-food" style={{ color:'#FACA50', fontSize:'1.1rem', margin:'0 1px' }}/>MEAL
           </div>
           <p style={{ fontSize:'0.85rem', color:'#5A5D66' }}>Secure portal — authorised access only</p>
         </div>
@@ -141,7 +141,7 @@ function ChefView({ session, onLogout }) {
       {/* Minimal top bar for chef */}
       <div style={{ background:'#0F0F0F', padding:'12px 24px', display:'flex', alignItems:'center', justifyContent:'space-between', position:'sticky', top:0, zIndex:50 }}>
         <div style={{ fontWeight:900, fontSize:'1.1rem', letterSpacing:'-0.05em', color:'white' }}>
-          HOME<i className="ph-fill ph-bowl-food" style={{ color:'#FACA50', margin:'0 1px' }}/>MEALS
+          HOME<i className="ph-fill ph-bowl-food" style={{ color:'#FACA50', margin:'0 1px' }}/>MEAL
           <span style={{ fontSize:'0.65rem', fontWeight:700, background:'#FACA50', color:'#111', padding:'2px 8px', borderRadius:'20px', marginLeft:'10px' }}>CHEF PORTAL</span>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
@@ -177,7 +177,7 @@ function Sidebar({ page, setPage, badges }) {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
-        <div className="logo">HOME<i className="ph-fill ph-bowl-food"/>MEALS<span className="badge">ADMIN</span></div>
+        <div className="logo">HOME<i className="ph-fill ph-bowl-food"/>MEAL<span className="badge">ADMIN</span></div>
       </div>
       <nav className="sidebar-nav">
         {sections.map(sec => (

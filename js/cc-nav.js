@@ -15,7 +15,7 @@ function Nav({ page, setPage }) {
         <div className="cc-header-inner">
           <div className="cc-nav-left">
             <button className="cc-logo" onClick={() => { setPage({ name: "home" }); setMobileOpen(false); }}>
-              HOME<i className="ph-fill ph-bowl-food"></i>MEALS
+              HOME<i className="ph-fill ph-bowl-food"></i>MEAL
             </button>
             <nav className="cc-nav-links">
               {navItems.map(item => (
@@ -93,7 +93,7 @@ function Footer({ setPage }) {
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: "32px", marginBottom: "40px" }}>
           <div>
             <div className="cc-logo" style={{ marginBottom: "12px" }}>
-              HOME<i className="ph-fill ph-bowl-food"></i>MEALS
+              HOME<i className="ph-fill ph-bowl-food"></i>MEAL
             </div>
             <p style={{ color: "#aaa", fontSize: "0.9rem", maxWidth: "260px", margin: 0 }}>
               {sc.footer_tagline}
